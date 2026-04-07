@@ -178,8 +178,8 @@ npx prettier --write .
 
 | Team | Members | Tasks |
 |------|---------|-------|
-| Team 1 - Core & Structure | Teja, Arrham, Preksha | Layout, Navbar, Footer, Home, About, Admin |
-| Team 2 - Recruitment & Data | Suhith, Vrushabendra, Navyashree | Forms, Supabase, Domain Head Dashboard |
+| Team 1 - Core & Structure | Suhith, Arrham, Preksha | Layout, Navbar, Footer, Home, About, Admin |
+| Team 2 - Recruitment & Data | Teja, Vrushabendra, Navyashree | Forms, Supabase, Domain Head Dashboard |
 | Team 3 - Events, Gallery & UX | Naman, Akhil, Nikita | Events, Gallery, Members, History, Animations |
 
 ---
