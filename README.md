@@ -186,32 +186,52 @@ npx prettier --write .
 
 ## Branching Strategy
 
-- `main` → Production-ready code
-- `dev` → Active development
-- `feature/*` → Individual features
+| Branch | Purpose | Protection |
+|--------|---------|------------|
+| `main` | Production-ready code | Protected |
+| `team/1-core-structure` | Team 1 integration | Protected |
+| `team/2-recruitment-data` | Team 2 integration | Protected |
+| `team/3-events-gallery-ux` | Team 3 integration | Protected |
+| `feature/*` | Individual work | Not protected |
+
+### Workflow
+
+1. Create feature branch from your team branch:
+   ```bash
+   git checkout team/1-core-structure
+   git checkout -b feature/navbar
+   ```
+
+2. Work and commit:
+   ```bash
+   git commit -m "feat: add navbar component"
+   git push origin feature/navbar
+   ```
+
+3. Create PR → your team branch (e.g., `team/1-core-structure`)
+
+4. After review, create PR → `main`
 
 ### Rules
 
-- No direct push to `main` or `dev`
-- All changes via Pull Requests
+- No direct push to protected branches
+- All changes via PRs
 - CI checks must pass before merging
 
 ---
 
 ## CI Pipeline
 
-The CI pipeline runs on every PR to `dev` and `main`:
+The CI pipeline runs on every PR to protected branches:
 
 1. Checkout code
 2. Setup Node.js v24
-3. Install dependencies (`npm ci`)
+3. Install dependencies
 4. Run lint checks
 5. Check formatting (Prettier)
 6. Run unit tests
 7. Build project
-8. Install Playwright
-9. Start app
-10. Run E2E tests
+8. Run E2E tests
 
 ---
 
@@ -245,41 +265,23 @@ npm run dev
 
 ---
 
+## Commit Message Format
+
+```
+type: description
+```
+
+**Types:**
+- `feat` - New features
+- `fix` - Bug fixes
+- `docs` - Documentation
+- `style` - Formatting
+- `refactor` - Code improvements
+- `test` - Tests
+- `ci` - CI changes
+
+---
+
 *A branch of Club IRA*
-
----
-
-## Contributing
-
-1. Create a new branch:
-
-   ```bash
-   git checkout -b feature/your-feature-name
-   ```
-
-2. Make changes and commit using proper commit message conventions:
-
-   ```bash
-   git commit -m "FEAT: added feature description"
-   ```
-
-   Common commit types:
-
-   * `FEAT:` → for new features
-   * `FIX:` → for bug fixes
-   * `DOCS:` → for documentation changes
-   * `STYLE:` → for formatting (no logic change)
-   * `REFACTOR:` → for code improvements without changing behavior
-   * `TEST:` → for adding or updating tests
-
-3. Push to GitHub:
-
-   ```bash
-   git push origin feature/your-feature-name
-   ```
-
-4. Create a Pull Request → `dev`
-
----
 
 *Building tradition through technology.*
