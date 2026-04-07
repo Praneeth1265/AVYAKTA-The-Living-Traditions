@@ -11,10 +11,10 @@ function App() {
       </head>
       <main style={{ textAlign: 'center', marginTop: '50px' }}>
         <h1>Welcome to Avyakta</h1>
-        <p>Edit <code>src/App.jsx</code> to get started.</p>
-        <button onClick={() => setCount(count + 1)}>
-          Count is {count}
-        </button>
+        <p>
+          Edit <code>src/App.jsx</code> to get started.
+        </p>
+        <button onClick={() => setCount(count + 1)}>Count is {count}</button>
       </main>
     </>
   );
