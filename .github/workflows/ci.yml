@@ -2,7 +2,7 @@ name: CI Pipeline
 
 on:
   pull_request:
-    branches: [dev, main]
+    branches: [main, team/1-core-structure, team/2-recruitment-data, team/3-events-gallery-ux]
 
 jobs:
   build:
