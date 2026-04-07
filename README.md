@@ -181,11 +181,4 @@ npm run dev
 
 ---
 
-## 📬 Maintained By
-
-Technical Team – Avyakta
-(Project Lead: Technical Head)
-
----
-
 ✨ *Building tradition through technology.*
