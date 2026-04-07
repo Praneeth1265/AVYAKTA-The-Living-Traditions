@@ -247,4 +247,39 @@ npm run dev
 
 *A branch of Club IRA*
 
+---
+
+## Contributing
+
+1. Create a new branch:
+
+   ```bash
+   git checkout -b feature/your-feature-name
+   ```
+
+2. Make changes and commit using proper commit message conventions:
+
+   ```bash
+   git commit -m "FEAT: added feature description"
+   ```
+
+   Common commit types:
+
+   * `FEAT:` → for new features
+   * `FIX:` → for bug fixes
+   * `DOCS:` → for documentation changes
+   * `STYLE:` → for formatting (no logic change)
+   * `REFACTOR:` → for code improvements without changing behavior
+   * `TEST:` → for adding or updating tests
+
+3. Push to GitHub:
+
+   ```bash
+   git push origin feature/your-feature-name
+   ```
+
+4. Create a Pull Request → `dev`
+
+---
+
 *Building tradition through technology.*
