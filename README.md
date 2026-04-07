@@ -1,127 +1,221 @@
-# 🌿 AVYAKTA – The Living Traditions
+# AVYAKTA – The Living Traditions
 
-Official website for **Avyakta**, designed and developed by the technical team.
-
----
-
-## 🚀 Tech Stack
-
-* **Frontend:** React (Vite)
-* **Backend / DB:** Supabase
-* **CI/CD:** GitHub Actions (CI Pipeline)
-* **Node.js Version:** `v24.x`
+A culturally rooted, vibrant website for Avyakta - a cultural multi-domain club that brings together students passionate about performing arts, design, technology, event management, and more.
 
 ---
 
-## 📁 Project Structure
+## Tech Stack
 
-```bash
+- **Framework**: Next.js 14+ (App Router)
+- **Styling**: Tailwind CSS with custom theme tokens
+- **Animations**: Framer Motion + CSS transitions
+- **Backend/DB**: Supabase (PostgreSQL + Auth + Storage)
+- **Forms**: React Hook Form + Zod
+- **CI/CD**: GitHub Actions
+- **Node.js**: v24.x
+
+---
+
+## Project Structure
+
+```
 AVYAKTA-The-Living-Traditions/
 │
-├── frontend/        # React + Vite application
-├── .github/         # CI workflow
+├── frontend/                      # Next.js application
+│   ├── src/
+│   │   ├── app/                  # Next.js App Router pages
+│   │   │   ├── page.tsx         # Home Page
+│   │   │   ├── about/           # About / What is Avyakta
+│   │   │   ├── about-ira/       # About Club IRA (parent)
+│   │   │   ├── recruitment/     # Recruitment form
+│   │   │   ├── events/
+│   │   │   │   ├── page.tsx     # Events listing
+│   │   │   │   └── [slug]/      # Event detail pages
+│   │   │   ├── gallery/         # Photo gallery
+│   │   │   ├── members/         # Team members
+│   │   │   ├── registrations/   # Volunteer/participant
+│   │   │   ├── history/         # Timeline page
+│   │   │   └── avyakta-control-[hash]/
+│   │   │       ├── page.tsx     # Admin login
+│   │   │       └── dashboard/    # Admin dashboard
+│   │   │           ├── announcements/
+│   │   │           ├── recruitment/
+│   │   │           ├── events/
+│   │   │           ├── gallery/
+│   │   │           ├── members/
+│   │   │           └── users/
+│   │   │
+│   │   ├── components/
+│   │   │   ├── layout/          # Navbar, Footer, MobileMenu
+│   │   │   ├── home/            # Hero, Announcements, Domains, etc.
+│   │   │   ├── events/          # EventCard, EventFilter
+│   │   │   ├── gallery/         # ImageGrid, Lightbox
+│   │   │   ├── members/         # MemberCard, MemberModal
+│   │   │   ├── forms/           # RecruitmentForm, RegistrationForm
+│   │   │   ├── ui/              # Button, Card, Modal, Input, etc.
+│   │   │   └── shared/          # RangoliDivider, MandalaLoader, etc.
+│   │   │
+│   │   ├── lib/
+│   │   │   ├── supabase/        # Supabase client & types
+│   │   │   └── utils/           # Helper functions
+│   │   │
+│   │   ├── hooks/               # Custom React hooks
+│   │   ├── types/               # TypeScript definitions
+│   │   ├── styles/              # Global styles
+│   │   └── assets/
+│   │       ├── icons/            # Custom SVG icons (diya, rangoli)
+│   │       └── patterns/         # SVG patterns (paisley, jaali)
+│   │
+│   ├── public/
+│   │   └── images/
+│   │
+│   ├── .env.local               # Environment variables
+│   ├── tailwind.config.ts
+│   ├── next.config.js
+│   └── package.json
+│
+├── frontend-vite/                # Old Vite project (reference)
+├── .github/
+│   └── workflows/
+│       └── ci.yml              # CI Pipeline
+│
 └── README.md
 ```
 
 ---
 
-## 👥 Team Structure & Responsibilities
+## Pages Overview
 
-### 🧩 Team 1 – Core Pages & Structure
-
-**Suhith, Arrham, Preksha**
-
-* Layout (Navbar, Footer, Routing)
-* Home Page
-* About Page
-* Admin Dashboard
-* Base Styling
-
----
-
-### 📊 Team 2 – Recruitment + Data Flow
-
-**Teja, Vrushabendra, Navyashree**
-
-* Recruitment Form UI (Page)
-* Form Validation
-* Supabase Integration
-* Data Storage & Structure
+| Route | Page | Description |
+|-------|------|-------------|
+| `/` | Home | Hero, Announcements, About, Timeline, Domains, Events |
+| `/about` | About | Mission, Vision, Domains, Why Join |
+| `/about-ira` | About IRA | Parent club information |
+| `/recruitment` | Recruitment | Application form with domain selection |
+| `/events` | Events | Horizontal scroll carousel with filters |
+| `/events/[slug]` | Event Detail | Full event information |
+| `/gallery` | Gallery | Masonry layout with lightbox |
+| `/members` | Members | Team grid with modal popups |
+| `/registrations` | Registrations | Volunteer/participant signup |
+| `/history` | History | Animated timeline page |
+| `/avyakta-control-[hash]` | Admin | Hidden admin dashboard |
 
 ---
 
-### 🎨 Team 3 – Events, Gallery & UI Enhancement
+## Color Palette
 
-**Naman, Akhil, Nikita**
-
-* Events Page
-* Event Details Page
-* Gallery
-* Animations & Responsiveness
-* Members Page
-* Registrations
-
----
-
-## 🌐 Development Workflow
-
-### 🔹 Branching Strategy
-
-* `main` → Production-ready code
-* `dev` → Active development branch
-* `feature/*` → Individual feature branches
+| Name | Hex | Usage |
+|------|-----|-------|
+| Bronze Gold | #92791B | Headings, CTAs, borders |
+| Emerald Green | #1B5E3B | Nav highlights, success states |
+| Charcoal Black | #1C1C1C | Body text, footer |
+| Dull Olive Yellow | #737955 | Subheadings, captions |
+| Deep Crimson | #8B1A1A | Alerts, tags, accents |
+| Muted Warm White | #F5F0E8 | Backgrounds, cards |
+| Gold Light | #C9A84C | Hover glows, icon highlights |
 
 ---
 
-### 🔹 Rules
+## Typography
 
-* ❌ No direct push to `main`
-* ❌ No direct push to `dev` (recommended)
-* ✅ All changes via Pull Requests (PRs)
-* ✅ At least 1 approval before merge
-* ✅ CI checks must pass before merging
+- **Display**: Cormorant Garamond (serif) - headings, titles
+- **Body**: Inter / DM Sans (sans-serif) - paragraphs, labels
+- **Accent**: Playfair Display Italic - quotes, bios
 
 ---
 
-## ⚙️ CI Pipeline (GitHub Actions)
+## Indian Design Elements
 
-The project uses a **CI pipeline** to ensure code quality and prevent breaking changes.
-
-### 🔄 Trigger:
-
-* Runs on every **Pull Request** to `dev` and `main`
-
-### 🛠 Steps:
-
-1. Checkout repository
-2. Setup Node.js (v24)
-3. Install dependencies
-4. Run lint checks
-5. Build project
-
-### ✅ Purpose:
-
-* Catch errors early
-* Enforce coding standards
-* Ensure build stability
+- **Rangoli Dividers**: SVG geometric star/petal dividers between sections
+- **Mandala Loader**: Full-screen rotating mandala on page load
+- **Paisley Backgrounds**: Tiled patterns at 4-6% opacity
+- **Jaali Overlays**: Geometric lattice on images
+- **Diya Icons**: Custom lamp icons for domains
+- **Kolam Border**: Animated border on hero section
 
 ---
 
-## 🧹 Code Quality
+## Supabase Schema
 
-* ESLint → Code linting
-* Prettier → Code formatting
+| Table | Purpose |
+|-------|---------|
+| `announcements` | Home popup content |
+| `events` | Event listings |
+| `recruitment_applications` | Applicant data |
+| `registrations` | Event participation |
+| `gallery_images` | Gallery photos |
+| `members` | Team profiles |
+| `history_milestones` | Timeline entries |
+| `domain_heads` | Domain head accounts |
 
-Run locally:
+---
+
+## Development
 
 ```bash
+# Navigate to frontend
+cd frontend
+
+# Install dependencies
+npm install
+
+# Run development server
+npm run dev
+
+# Build for production
+npm run build
+
+# Lint
 npm run lint
-npm run format
+
+# Format
+npx prettier --write .
 ```
 
 ---
 
-## 🛠 Setup Instructions
+## Team Responsibilities
+
+| Team | Members | Tasks |
+|------|---------|-------|
+| Team 1 - Core & Structure | Teja, Arrham, Preksha | Layout, Navbar, Footer, Home, About, Admin |
+| Team 2 - Recruitment & Data | Suhith, Vrushabendra, Navyashree | Forms, Supabase, Domain Head Dashboard |
+| Team 3 - Events, Gallery & UX | Naman, Akhil, Nikita | Events, Gallery, Members, History, Animations |
+
+---
+
+## Branching Strategy
+
+- `main` → Production-ready code
+- `dev` → Active development
+- `feature/*` → Individual features
+
+### Rules
+
+- No direct push to `main` or `dev`
+- All changes via Pull Requests
+- CI checks must pass before merging
+
+---
+
+## CI Pipeline
+
+The CI pipeline runs on every PR to `dev` and `main`:
+
+1. Checkout code
+2. Setup Node.js v24
+3. Install dependencies (`npm ci`)
+4. Run lint checks
+5. Check formatting (Prettier)
+6. Run unit tests
+7. Build project
+8. Install Playwright
+9. Start app
+10. Run E2E tests
+
+---
+
+## Setup Instructions
 
 ```bash
 # Clone the repository
@@ -133,59 +227,24 @@ cd frontend
 # Install dependencies
 npm install
 
+# Create environment file
+cp .env.example .env.local
+
 # Run development server
 npm run dev
 ```
 
 ---
 
-## 📌 Important Notes
+## Important Notes
 
-* Ensure Node.js version `v24.x` is installed
-* Do NOT commit `node_modules/`
-* Follow folder structure and team boundaries
-* Write clean, modular, and reusable code
-
----
-
-## 🤝 Contribution Guidelines
-
-1. Create a new branch:
-
-   ```bash
-   git checkout -b feature/your-feature-name
-   ```
-
-2. Make changes and commit using proper commit message conventions:
-
-   ```bash
-   git commit -m "FEAT: added feature description"
-   ```
-
-   Common commit types:
-
-   * `FEAT:` → for new features
-   * `FIX:` → for bug fixes
-   * `DOCS:` → for documentation changes
-   * `STYLE:` → for formatting (no logic change)
-   * `REFACTOR:` → for code improvements without changing behavior
-   * `TEST:` → for adding or updating tests
-
-3. Push to GitHub:
-
-   ```bash
-   git push origin feature/your-feature-name
-   ```
-
-4. Create a Pull Request → `dev`
+- Node.js v24.x required
+- Do NOT commit `node_modules/`
+- Follow the project structure
+- Write clean, modular code
 
 ---
 
-## 📬 Maintained By
+*A branch of Club IRA*
 
-Technical Team – Avyakta
-(Project Lead: Technical Head)
-
----
-
-✨ *Building tradition through technology.*
+*Building tradition through technology.*
