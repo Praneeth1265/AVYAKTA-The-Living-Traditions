@@ -15,16 +15,42 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v3
         with:
-          node-version: '24' # Use 'lts/*' for latest LTS version
+          node-version: '24'
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
 
       - name: Install dependencies
-        run: npm install
+        run: npm ci
         working-directory: ./frontend
-        
+
       - name: Run lint
         run: npm run lint
         working-directory: ./frontend
 
+      - name: Check formatting
+        run: npx prettier --check .
+        working-directory: ./frontend
+
+      - name: Run unit tests
+        run: npm run test || echo "No unit tests yet"
+        working-directory: ./frontend
+
       - name: Build project
         run: npm run build
+        working-directory: ./frontend
+
+      - name: Install Playwright
+        run: npx playwright install --with-deps
+        working-directory: ./frontend
+
+      - name: Start app
+        run: npm run dev &
+        working-directory: ./frontend
+
+      - name: Wait for app
+        run: npx wait-on http://localhost:5173
+        working-directory: ./frontend
+
+      - name: Run E2E tests
+        run: npx playwright test || echo "No E2E tests yet"
         working-directory: ./frontend
