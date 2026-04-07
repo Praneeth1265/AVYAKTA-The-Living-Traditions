@@ -19,6 +19,7 @@
     "@eslint/css": "^1.1.0",
     "@eslint/js": "^9.39.4",
     "@eslint/json": "^1.2.0",
+    "@playwright/test": "^1.59.1",
     "@rolldown/plugin-babel": "^0.2.2",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
@@ -30,6 +31,7 @@
     "eslint-plugin-react-refresh": "^0.5.2",
     "globals": "^17.4.0",
     "prettier": "^3.8.1",
-    "vite": "^8.0.4"
+    "vite": "^8.0.4",
+    "wait-on": "^9.0.4"
   }
 }
