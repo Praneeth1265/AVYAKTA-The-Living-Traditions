@@ -16,41 +16,30 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: '24'
-          cache: 'npm'
-          cache-dependency-path: frontend/package-lock.json
 
       - name: Install dependencies
-        run: npm ci
-        working-directory: ./frontend
+        run: cd frontend && npm ci
 
       - name: Run lint
-        run: npm run lint
-        working-directory: ./frontend
+        run: cd frontend && npm run lint
 
       - name: Check formatting
-        run: npx prettier --check .
-        working-directory: ./frontend
+        run: cd frontend && npx prettier --check .
 
       - name: Run unit tests
-        run: npm run test || echo "No unit tests yet"
-        working-directory: ./frontend
+        run: cd frontend && npm run test || echo "No unit tests yet"
 
       - name: Build project
-        run: npm run build
-        working-directory: ./frontend
+        run: cd frontend && npm run build
 
       - name: Install Playwright
-        run: npx playwright install --with-deps
-        working-directory: ./frontend
+        run: cd frontend && npx playwright install --with-deps
 
       - name: Start app
-        run: npm run dev &
-        working-directory: ./frontend
+        run: cd frontend && npm run dev &
 
       - name: Wait for app
-        run: npx wait-on http://localhost:5173
-        working-directory: ./frontend
+        run: cd frontend && npx wait-on http://localhost:5173
 
       - name: Run E2E tests
-        run: npx playwright test || echo "No E2E tests yet"
-        working-directory: ./frontend
+        run: cd frontend && npx playwright test || echo "No E2E tests yet"
