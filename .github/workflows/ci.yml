@@ -22,7 +22,7 @@ jobs:
 
       # 3. Install dependencies
       - name: Install dependencies
-        run: npm ci
+        run: npm install
         working-directory: ./frontend
 
       # 4. Lint check
@@ -62,5 +62,5 @@ jobs:
 
       # 11. Run E2E tests
       - name: Run E2E tests
-        run: npx playwright test || echo "No E2E tests yet"
+        run: npx playwright test --reporter=github
         working-directory: ./frontend
