@@ -39,7 +39,7 @@ jobs:
         run: cd frontend && npm run dev &
 
       - name: Wait for app
-        run: cd frontend && npx wait-on http://localhost:5173
+        run: cd frontend && npx wait-on http://localhost:3000
 
       - name: Run E2E tests
         run: cd frontend && npx playwright test || echo "No E2E tests yet"
