@@ -19,4 +19,4 @@ yarn-error.log*
 Thumbs.db
 
 # IDE
-.vscode/
+.vscode/.temp_env/
