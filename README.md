@@ -24,19 +24,19 @@ AVYAKTA-The-Living-Traditions/
 ├── frontend/                      # Next.js application
 │   ├── src/
 │   │   ├── app/                  # Next.js App Router pages
-│   │   │   ├── page.tsx         # Home Page
+│   │   │   ├── page.jsx         # Home Page
 │   │   │   ├── about/           # About / What is Avyakta
 │   │   │   ├── about-ira/       # About Club IRA (parent)
 │   │   │   ├── recruitment/     # Recruitment form
 │   │   │   ├── events/
-│   │   │   │   ├── page.tsx     # Events listing
+│   │   │   │   ├── page.jsx     # Events listing
 │   │   │   │   └── [slug]/      # Event detail pages
 │   │   │   ├── gallery/         # Photo gallery
 │   │   │   ├── members/         # Team members
 │   │   │   ├── registrations/   # Volunteer/participant
 │   │   │   ├── history/         # Timeline page
 │   │   │   └── avyakta-control-[hash]/
-│   │   │       ├── page.tsx     # Admin login
+│   │   │       ├── page.jsx     # Admin login
 │   │   │       └── dashboard/    # Admin dashboard
 │   │   │           ├── announcements/
 │   │   │           ├── recruitment/
@@ -60,7 +60,6 @@ AVYAKTA-The-Living-Traditions/
 │   │   │   └── utils/           # Helper functions
 │   │   │
 │   │   ├── hooks/               # Custom React hooks
-│   │   ├── types/               # TypeScript definitions
 │   │   ├── styles/              # Global styles
 │   │   └── assets/
 │   │       ├── icons/            # Custom SVG icons (diya, rangoli)
@@ -70,11 +69,10 @@ AVYAKTA-The-Living-Traditions/
 │   │   └── images/
 │   │
 │   ├── .env.local               # Environment variables
-│   ├── tailwind.config.ts
+│   ├── tailwind.config.js
 │   ├── next.config.js
 │   └── package.json
 │
-├── frontend-vite/                # Old Vite project (reference)
 ├── .github/
 │   └── workflows/
 │       └── ci.yml              # CI Pipeline
