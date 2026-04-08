@@ -187,9 +187,10 @@ npx prettier --write .
 | Branch | Purpose | Protection |
 |--------|---------|------------|
 | `main` | Production-ready code | Protected |
-| `team/1-core-structure` | Team 1 integration | Protected |
-| `team/2-recruitment-data` | Team 2 integration | Protected |
-| `team/3-events-gallery-ux` | Team 3 integration | Protected |
+| `dev` | Integration layer | Protected |
+| `team/1-core-structure` | Team 1 integration | Protected (min approvals=2)|
+| `team/2-recruitment-data` | Team 2 integration | Protected (min approvals=2)|
+| `team/3-events-gallery-ux` | Team 3 integration | Protected (min approvals=2)|
 | `feature/*` | Individual work | Not protected |
 
 ### Workflow
@@ -208,13 +209,14 @@ npx prettier --write .
 
 3. Create PR → your team branch (e.g., `team/1-core-structure`)
 
-4. After review, create PR → `main`
+4. After review, create PR → `dev`
 
 ### Rules
 
 - No direct push to protected branches
 - All changes via PRs
 - CI checks must pass before merging
+- Strictly don't make changes in CI Pipeline
 
 ---
 
