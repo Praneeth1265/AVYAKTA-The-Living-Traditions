@@ -18,7 +18,7 @@ jobs:
           node-version: '24'
 
       - name: Install dependencies
-        run: cd frontend && npm ci
+        run: cd frontend && npm install
 
       - name: Run lint
         run: cd frontend && npm run lint
