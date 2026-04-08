@@ -1,10 +1,10 @@
 import React from 'react';
 
-const PaisleyBackground = ({ children, opacity = "0.05", className = "" }) => {
+const PaisleyBackground = ({ children, opacity = '0.05', className = '' }) => {
   return (
     <div className={`relative w-full overflow-hidden ${className}`}>
       {/* Background Pattern Layer */}
-      <div 
+      <div
         className="absolute inset-0 pointer-events-none"
         style={{
           opacity: opacity,
@@ -13,11 +13,9 @@ const PaisleyBackground = ({ children, opacity = "0.05", className = "" }) => {
         }}
         aria-hidden="true"
       />
-      
+
       {/* Content Layer */}
-      <div className="relative z-10">
-        {children}
-      </div>
+      <div className="relative z-10">{children}</div>
     </div>
   );
 };

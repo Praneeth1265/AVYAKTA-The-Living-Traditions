@@ -6,8 +6,8 @@ const RangoliDivider = () => {
     <motion.div
       initial={{ opacity: 0, scale: 0.8 }}
       whileInView={{ opacity: 1, scale: 1 }}
-      viewport={{ once: true, margin: "-50px" }}
-      transition={{ duration: 0.8, ease: "easeOut" }}
+      viewport={{ once: true, margin: '-50px' }}
+      transition={{ duration: 0.8, ease: 'easeOut' }}
       className="w-full flex justify-center py-6"
     >
       <svg
