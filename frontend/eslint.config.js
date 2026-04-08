@@ -6,6 +6,7 @@ import css from '@eslint/css';
 import { defineConfig } from 'eslint/config';
 
 export default defineConfig([
+  { ignores: ['dist/**', 'node_modules/**', 'package-lock.json'] },
   {
     files: ['**/*.{js,mjs,cjs,jsx}'],
     plugins: { js },
@@ -35,6 +36,6 @@ export default defineConfig([
     plugins: { css },
     language: 'css/css',
     extends: ['css/recommended'],
-    rules: { 'css/no-invalid-properties': 'off', 'css/use-baseline': 'off' },
+    rules: { 'css/no-invalid-properties': 'off', 'css/use-baseline': 'off', 'css/no-invalid-at-rules': 'off' },
   },
 ]);
