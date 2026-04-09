@@ -53,7 +53,7 @@ const AboutAvyakta = () => {
             transition={{ delay: 0.3, duration: 0.8 }}
             className="text-muted-white font-playfair italic text-xl max-w-2xl mx-auto"
           >
-            "Crafting a Digital Space Where Culture Comes Alive"
+            &quot;Crafting a Digital Space Where Culture Comes Alive&quot;
           </motion.p>
         </div>
       </section>
@@ -209,7 +209,7 @@ const AboutAvyakta = () => {
             </h2>
             <p className="text-muted-white max-w-xl mx-auto mb-8 font-inter">
               Join the cultural phenomenon. Apply now to become a part of
-              Avyakta's next generation.
+              Avyakta&apos;s next generation.
             </p>
             <Link
               href="/recruitment"

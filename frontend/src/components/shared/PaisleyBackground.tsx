@@ -1,6 +1,12 @@
 import React from 'react';
 
-const PaisleyBackground = ({ children, opacity = '0.05', className = '' }: any) => {
+interface PaisleyBackgroundProps {
+  children?: React.ReactNode;
+  opacity?: string;
+  className?: string;
+}
+
+const PaisleyBackground = ({ children, opacity = '0.05', className = '' }: PaisleyBackgroundProps) => {
   return (
     <div className={`relative w-full overflow-hidden ${className}`}>
       {/* Background Pattern Layer */}
