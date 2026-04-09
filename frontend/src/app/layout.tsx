@@ -33,9 +33,7 @@ export default function RootLayout({
       <body className="min-h-full flex flex-col">
         <MandalaLoader />
         <Navbar />
-        <main className="flex-grow w-full">
-          {children}
-        </main>
+        <main className="flex-grow w-full">{children}</main>
         <Footer />
       </body>
     </html>

@@ -1,6 +1,6 @@
-import React from 'react';
+import React from "react";
 
-const DiyaIcon = ({ className = 'w-6 h-6', glow = false }) => {
+const DiyaIcon = ({ className = "w-6 h-6", glow = false }) => {
   return (
     <svg
       viewBox="0 0 24 24"

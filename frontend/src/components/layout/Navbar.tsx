@@ -1,24 +1,24 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import Link from 'next/link';
-import { usePathname } from 'next/navigation';
-import { Menu, X } from 'lucide-react';
+import React, { useState, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { Menu, X } from "lucide-react";
 
 const navLinks = [
-  { name: 'Gallery', path: '/gallery' },
-  { name: 'Events', path: '/events' },
-  { name: 'Registrations / Volunteer', path: '/registrations' },
-  { name: 'Recruitment', path: '/recruitment' },
-  { name: 'Members', path: '/members' },
+  { name: "Gallery", path: "/gallery" },
+  { name: "Events", path: "/events" },
+  { name: "Registrations / Volunteer", path: "/registrations" },
+  { name: "Recruitment", path: "/recruitment" },
+  { name: "Members", path: "/members" },
 ];
 
 const Navbar = () => {
   const [scrolled, setScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const pathname = usePathname();
-  const isHome = pathname === '/';
+  const isHome = pathname === "/";
 
   useEffect(() => {
     const handleScroll = () => {
@@ -26,14 +26,14 @@ const Navbar = () => {
       else setScrolled(false);
     };
 
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => window.removeEventListener('scroll', handleScroll);
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
   const navbarBg =
     scrolled || !isHome || mobileMenuOpen
-      ? 'bg-charcoal-black border-b border-bronze-gold'
-      : 'bg-transparent border-transparent';
+      ? "bg-charcoal-black border-b border-bronze-gold"
+      : "bg-transparent border-transparent";
 
   return (
     <>
@@ -64,8 +64,8 @@ const Navbar = () => {
                   href={link.path}
                   className={`text-[13px] uppercase tracking-[0.1em] transition-colors duration-200 hover:text-gold-light ${
                     pathname === link.path
-                      ? 'text-bronze-gold border-b border-bronze-gold pb-1'
-                      : 'text-muted-white'
+                      ? "text-bronze-gold border-b border-bronze-gold pb-1"
+                      : "text-muted-white"
                   }`}
                 >
                   {link.name}
@@ -111,8 +111,8 @@ const Navbar = () => {
                   onClick={() => setMobileMenuOpen(false)}
                   className={`text-lg uppercase tracking-[0.1em] transition-colors duration-200 ${
                     pathname === link.path
-                      ? 'text-bronze-gold'
-                      : 'text-muted-white hover:text-gold-light'
+                      ? "text-bronze-gold"
+                      : "text-muted-white hover:text-gold-light"
                   }`}
                 >
                   {link.name}

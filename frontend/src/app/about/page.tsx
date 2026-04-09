@@ -1,32 +1,32 @@
 "use client";
 
-import React from 'react';
-import { motion } from 'framer-motion';
-import Link from 'next/link';
-import PaisleyBackground from '@/components/shared/PaisleyBackground';
-import RangoliDivider from '@/components/shared/RangoliDivider';
-import DiyaIcon from '@/components/shared/DiyaIcon';
+import React from "react";
+import { motion } from "framer-motion";
+import Link from "next/link";
+import PaisleyBackground from "@/components/shared/PaisleyBackground";
+import RangoliDivider from "@/components/shared/RangoliDivider";
+import DiyaIcon from "@/components/shared/DiyaIcon";
 
 const domains = [
   {
-    name: 'Technology',
-    desc: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
+    name: "Technology",
+    desc: "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
   },
   {
-    name: 'Design',
-    desc: 'Sed do eiusmod tempor incididunt ut labore et dolore magna.',
+    name: "Design",
+    desc: "Sed do eiusmod tempor incididunt ut labore et dolore magna.",
   },
   {
-    name: 'Event Management',
-    desc: 'Ut enim ad minim veniam, quis nostrud exercitation ullamco.',
+    name: "Event Management",
+    desc: "Ut enim ad minim veniam, quis nostrud exercitation ullamco.",
   },
   {
-    name: 'Performing Arts',
-    desc: 'Duis aute irure dolor in reprehenderit in voluptate velit.',
+    name: "Performing Arts",
+    desc: "Duis aute irure dolor in reprehenderit in voluptate velit.",
   },
   {
-    name: 'Media & Outreach',
-    desc: 'Excepteur sint occaecat cupidatat non proident, sunt in culpa.',
+    name: "Media & Outreach",
+    desc: "Excepteur sint occaecat cupidatat non proident, sunt in culpa.",
   },
 ];
 
@@ -159,16 +159,16 @@ const AboutAvyakta = () => {
         <div className="grid md:grid-cols-3 gap-8 text-center">
           {[
             {
-              title: 'Grow',
-              text: 'Curabitur blandit tempus porttitor. Nullam quis risus eget urna mollis ornare vel eu leo.',
+              title: "Grow",
+              text: "Curabitur blandit tempus porttitor. Nullam quis risus eget urna mollis ornare vel eu leo.",
             },
             {
-              title: 'Create',
-              text: ' Aenean lacinia bibendum nulla sed consectetur. Fusce dapibus, tellus ac cursus commodo.',
+              title: "Create",
+              text: " Aenean lacinia bibendum nulla sed consectetur. Fusce dapibus, tellus ac cursus commodo.",
             },
             {
-              title: 'Belong',
-              text: 'Donec id elit non mi porta gravida at eget metus. Cum sociis natoque penatibus et magnis.',
+              title: "Belong",
+              text: "Donec id elit non mi porta gravida at eget metus. Cum sociis natoque penatibus et magnis.",
             },
           ].map((item, i) => (
             <motion.div

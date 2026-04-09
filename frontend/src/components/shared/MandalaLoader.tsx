@@ -1,7 +1,7 @@
 "use client";
 
-import React, { useEffect, useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import React, { useEffect, useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 
 const MandalaLoader = () => {
   const [isVisible, setIsVisible] = useState(true);
@@ -22,7 +22,7 @@ const MandalaLoader = () => {
         >
           <motion.svg
             animate={{ rotate: 360 }}
-            transition={{ duration: 8, repeat: Infinity, ease: 'linear' }}
+            transition={{ duration: 8, repeat: Infinity, ease: "linear" }}
             width="120"
             height="120"
             viewBox="0 0 120 120"

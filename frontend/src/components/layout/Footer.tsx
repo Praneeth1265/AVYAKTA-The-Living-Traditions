@@ -1,7 +1,7 @@
-import React from 'react';
-import Link from 'next/link';
-import PaisleyBackground from '../shared/PaisleyBackground';
-import { Mail, MessageCircle } from 'lucide-react';
+import React from "react";
+import Link from "next/link";
+import PaisleyBackground from "../shared/PaisleyBackground";
+import { Mail, MessageCircle } from "lucide-react";
 
 const Footer = () => {
   return (
@@ -116,7 +116,7 @@ const Footer = () => {
 
         {/* IRA Credit */}
         <div className="mb-8 font-playfair italic text-dull-olive text-sm">
-          A branch of{' '}
+          A branch of{" "}
           <Link
             href="/about-ira"
             className="hover:underline hover:text-gold-light transition-colors"

@@ -1,10 +1,10 @@
 "use client";
 
-import React from 'react';
-import { motion } from 'framer-motion';
-import Link from 'next/link';
-import PaisleyBackground from '@/components/shared/PaisleyBackground';
-import { ChevronLeft } from 'lucide-react';
+import React from "react";
+import { motion } from "framer-motion";
+import Link from "next/link";
+import PaisleyBackground from "@/components/shared/PaisleyBackground";
+import { ChevronLeft } from "lucide-react";
 
 const AboutIRA = () => {
   return (
@@ -65,7 +65,8 @@ const AboutIRA = () => {
                 amet fermentum.
               </p>
               <p className="font-playfair italic text-lg text-bronze-gold border-l-2 border-bronze-gold pl-4 my-8">
-                &quot;Empowering students to achieve excellence through diversity...&quot;
+                &quot;Empowering students to achieve excellence through
+                diversity...&quot;
               </p>
               <p>
                 Aenean eu leo quam. Pellentesque ornare sem lacinia quam
