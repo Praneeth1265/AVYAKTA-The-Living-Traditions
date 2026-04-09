@@ -1,0 +1,652 @@
+AVYAKTA
+Cultural Multi-Domain Club
+WEBSITE DESIGN DOCUMENT
+Crafting a Digital Space Where Culture Comes Alive
+Version 1.0  |  2025–26  |  Internal – For Development Teams
+A branch of Club IRA
+AVYAKTA
+Website Design Document  |  Confidential
+Avyakta – Cultural Multi-Domain Club
+Page 2
+Table of Contents
+1
+Project Overview & Team Structure
+3
+2
+Design Philosophy & Visual Identity
+3
+3
+Colour Palette & Typography
+4
+4
+Indian Design Elements & Motifs
+4
+5
+Navigation & Layout Architecture
+5
+6
+Page-by-Page Design Specification
+5
+6.1
+Home Page
+5
+6.2
+Navbar
+6
+6.3
+Footer
+6
+6.4
+About / What is Avyakta Page
+7
+6.5
+About IRA Page
+7
+6.6
+Recruitment Page
+7
+6.7
+Events Page
+8
+6.8
+Event Detail Page
+8
+6.9
+Gallery Page
+9
+6.10
+Members Page
+9
+6.11
+Registrations / Volunteer Page
+10
+6.12
+History / Timeline Page
+10
+7
+Admin & Domain-Head Dashboard System
+11
+8
+Supabase Data Architecture
+12
+9
+Animations & Interaction Design
+13
+10
+Responsiveness & Accessibility
+13
+11
+Tech Stack Summary
+14
+12
+Development Team Responsibilities
+14
+AVYAKTA
+Website Design Document  |  Confidential
+Avyakta – Cultural Multi-Domain Club
+Page 3
+1. Project Overview & Team Structure
+Avyakta is a cultural multi-domain club that brings together students passionate about performing arts, design,
+technology, event management, and more. This document defines the complete visual and functional design of
+the Avyakta website — a digital home that mirrors the club's spirit: vibrant, inclusive, rooted in Indian culture,
+and welcoming to new talent.
+Team
+ Members
+ Responsibilities
+ 
+Team 1 Core &
+Structure
+Teja, Arrham, Preksha
+Layout (Navbar, Footer, routing), Home Page,
+About Page, Admin Dashboard, Base Styling
+Team 2 Recruitment &
+Data
+Suhith, Vrushabendra,
+Navyashree
+Recruitment form UI, Form validation, Supabase
+integration, Data storage & schema
+Team 3 Events,
+Gallery & UX
+Naman, Akhil, Nikita
+Events page, Event detail page, Gallery,
+Animations & responsiveness, History page,
+Members page, Registrations
+2. Design Philosophy & Visual Identity
+The Avyakta website is designed to feel like stepping into a richly decorated cultural space — the warmth of a
+festive evening, the elegance of Indian craftsmanship, and the energy of a college club that is actively doing
+things. Every design decision is governed by three principles:
+   Culturally Rooted: Indian motifs, patterns, and colour sensibilities inform every element without being
+cliché or overwhelming.
+   Energetically Welcoming: Animations, scroll interactions, and layout guide visitors toward participation
+— joining, registering, volunteering.
+   Functionally Clean: Ornament never obstructs usability. Information hierarchy is always clear.
+The gold-and-emerald logo is the anchor. The website extends that palette into bronze, charcoal, deep crimson,
+and muted warm whites — reminiscent of silk textiles, temple stone, and festival lights. Geometric
+rangoli-inspired dividers, paisley micro-patterns in subtle backgrounds, and mandala-style loading spinners add
+cultural texture without being kitschy.
+AVYAKTA
+Website Design Document  |  Confidential
+Avyakta – Cultural Multi-Domain Club
+Page 4
+3. Colour Palette & Typography
+Swatch
+Name
+Primary Usage
+Bronze Gold #92791B
+Primary headings, CTAs, borders, accents
+Emerald Green #1B5E3B
+Secondary headings, nav highlights, success states
+Charcoal Black #1C1C1C
+Body text, footer background, overlay darks
+Dull Olive Yellow #737955
+Subheadings, captions, secondary labels
+Deep Crimson #8B1A1A
+Alerts, tags, cultural accent elements
+Muted Warm White #F5F0E8
+Page backgrounds, card surfaces
+Gold Light #C9A84C
+Hover glows, icon highlights, divider lines
+Typography
+Role
+Font & Usage
+Primary Display
+Cormorant Garamond (serif) — headings, club name, event titles
+Body / UI
+Inter or DM Sans (sans-serif) — paragraphs, labels, form fields
+Accent / Quote
+Playfair Display Italic — pull quotes, member bios, taglines
+Code / Mono
+JetBrains Mono — admin dashboard data, form field placeholders
+Hindi Captions
+Noto Sans Devanagari — optional cultural text, page ornaments
+Note: All fonts should be loaded via Google Fonts with display=swap for performance.
+4. Indian Design Elements & Motifs
+Indian design influence should feel woven in — not pasted on. The following elements are to be implemented as
+SVG/CSS components, ensuring scalability and performance.
+Element
+Implementation Guidance
+Rangoli Dividers
+SVG geometric star/petal dividers (6–8 points) between page sections. Render in bronze with a subtle drop shadow. Animate in on scroll.
+Mandala Loader
+Full-screen mandala SVG that rotates and fades out as the page loads. Gold on charcoal. Appears only on first load per session.
+Paisley Background
+Low-opacity (#92791B at 4–6% opacity) tiled paisley SVG pattern on section backgrounds. Subtle enough to not distract.
+Jaali (Lattice) Overlay
+Geometric jali-pattern overlay on hero image and gallery thumbnails on hover — CSS clip-path or SVG mask.
+Diya Icon Set
+Custom diya/lamp icons for domain labels in the recruitment section and event categories.
+Kolam Border Animation
+On the home hero section, a thin kolam-style animated border traces around the frame on page load (CSS stroke-dashoffset animation).
+Festival Colour Particles
+Floating coloured particles (holi/rangoli colours) on the events page hero — subtle, performant CSS/canvas animation.
+Fabric Texture Cards
+Card components use a faint silk/ikat texture overlay (CSS background-blend-mode) to evoke Indian textile richness.
+AVYAKTA
+Website Design Document  |  Confidential
+Avyakta – Cultural Multi-Domain Club
+Page 5
+5. Navigation & Layout Architecture
+Global Layout
+The website uses a full-width layout with a fixed top navbar and a rich footer. Content sections are full-width with
+max-width containers (1280px) centred inside. Vertical rhythm is governed by an 8px grid.
+Navbar Design
+The navbar is initially transparent over the hero, transitioning to charcoal with bronze border-bottom on scroll.
+The Avyakta logo (gold + emerald) sits left. Navigation links animate in from the top with a staggered fade +
+slide on open.
+Nav Links: Gallery · Events · Registrations / Volunteer · Recruitment · Members
+On mobile, the hamburger icon triggers a full-screen slide-over menu with a rangoli motif background and large,
+spaced links. The menu close button is an animated X.
+Note: The navbar must NOT include any link to the hidden admin dashboard.
+6. Page-by-Page Design Specification
+6.1 Home Page
+The home page is the club's handshake with every visitor. It should immediately communicate culture, energy,
+and openness.
+Section
+Design Details
+Hero Section
+Full-viewport height. Background: cinematic club photo with charcoal overlay + kolam border animation. Centre: Club name in Cormorant Garamond (large, bronze), one-line tagline in italic, and a prominent CTA button 'Know More →' that routes to the About / What is Avyakta page.
+Announcements Popup / Banner
+A dismissible floating card (bottom-right on desktop, bottom sheet on mobile) that shows active announcements: recruitment open, upcoming events, etc. Pulls from Supabase 'announcements' table. Auto-dismisses after 8 seconds; reappears next visit if not manually closed. Styled with EMERALD header and BRONZE border.
+About Snippet
+Two-column: left is 3–4 lines about Avyakta; right is a decorative rangoli-framed image or club stats (members, events, years). 'Know More' link routes to the full About page.
+IRA Mention
+A single subtle line below the about snippet: 'A proud branch of Club IRA' — 'Club IRA' is a hyperlink styled in dull olive yellow, underlined only on hover. Routes to the About IRA page.
+Club Timeline / History Scroll
+Horizontal scroll section (or vertical alternating on mobile). Each milestone card has: year, event/achievement title, one-line description, and a small decorative element. Uses scroll-driven animation (Intersection Observer) — cards slide in from alternating sides.
+Domains Preview
+A row of domain cards (Tech, Design, EVM, …) with diya icons, each in a jali-overlay card. Links to the Recruitment page.
+Upcoming Events Teaser
+3 upcoming event cards in a horizontal scroll. Each card: event poster image, name, date, and 'View Event →' button. Consistent with Events page card design.
+6.2 Navbar
+Property
+Specification
+Behaviour
+Fixed position. Transparent on hero, solid charcoal (#1C1C1C) after 80px scroll.
+Logo
+SVG logo (gold + emerald). Left-aligned. Links to home.
+Links
+Uppercase, letter-spacing 0.1em, 13px, muted white. Active link gets BRONZE underline.
+Open Animation
+Staggered fadeInDown per link, 60ms delay between each.
+Mobile
+Hamburger → full-screen overlay with rangoli background pattern.
+Hover State
+Link colour transitions to GOLD_LIGHT with a 0.2s ease.
+AVYAKTA
+Website Design Document  |  Confidential
+Avyakta – Cultural Multi-Domain Club
+Page 6
+6.3 Footer
+Element
+Specification
+Background
+Charcoal (#1C1C1C) with subtle paisley SVG overlay at 5% opacity.
+Logo
+Avyakta logo centred at top of footer, 48px height.
+Contact Links
+Email, Instagram, LinkedIn, WhatsApp — icon buttons with hover glow in BRONZE.
+Quick Links
+About, Events, Gallery, Recruitment, Members.
+IRA Credit
+Very small italic line: 'A branch of Club IRA' with hyperlink.
+Copyright
+Bottom bar in charcoal-darker with muted white 8px text.
+AVYAKTA
+Website Design Document  |  Confidential
+Avyakta – Cultural Multi-Domain Club
+Page 7
+6.4 About / What is Avyakta Page
+Section
+Details
+Hero
+Full-width image banner with BRONZE gradient overlay. Page title 'About Avyakta' in large serif.
+Mission & Vision
+Two cards side-by-side. Crimson left border accent. Body text in BODY style.
+Domains Section
+Icon grid of all domains with short descriptions.
+Why Join
+3-column card row: 'Grow', 'Create', 'Belong' with diya icons.
+Faculty Advisors Preview
+Small card strip. Links to full Members page.
+CTA
+Prominent 'Apply Now' button → Recruitment page.
+6.5 About IRA Page
+A single-page informational view about Club IRA — the parent club. Design is intentionally subdued (uses same
+theme but lighter section treatments) to make clear this is a reference page, not a primary Avyakta page.
+Contains: IRA logo, brief description, link to IRA's official presence, and a 'Back to Avyakta' breadcrumb.
+6.6 Recruitment Page
+This page serves dual purpose: inspire applicants with the club's ethos and collect their application.
+Element
+Details
+Ethics Statement
+One impactful paragraph about the spirit of joining a cultural multi-domain club — written in Playfair Display Italic, centred, with a decorative rangoli divider below.
+Domain Cards
+One card per domain (Tech, Design, EVM, + others). Each has: diya icon, domain name, 2-line description. Cards animate in on scroll. Clicking a card pre-selects that domain in the form below.
+Form — Personal Info
+Fields: Full Name, SRN, Branch, Class, Section. Clean floating-label inputs with BRONZE focus border.
+Form — Domain Interest
+Multi-select pill buttons (not a dropdown) for domain preference.
+Form — Experience
+Textarea: 'Tell us about your relevant experience'. 300 character soft limit with live counter.
+Form — Links Section
+Dynamic link fields. 'Add Link +' button appends a row: [Dropdown: Portfolio / GitHub / LinkedIn / YouTube / Behance / Drive / Other] + [URL text input]. User can add or remove rows freely. Minimum 0, maximum 10 links.
+Submit
+EMERALD button with diya icon. On submission: animated success state with 'Namaste ■' message and confirmation.
+Validation
+Real-time inline validation. SRN format check. URL validity check. Required fields highlighted in crimson on empty submit.
+AVYAKTA
+Website Design Document  |  Confidential
+Avyakta – Cultural Multi-Domain Club
+Page 8
+6.7 Events Page
+Element
+Details
+Layout
+Horizontal scroll carousel of event cards on desktop; vertical stack on mobile.
+Categories
+Filter tabs: All · Upcoming · Ongoing · Past. Active tab has BRONZE underline.
+Event Card
+Aspect ratio 4:3. Background: event poster. Overlay: gradient from transparent to charcoal. Text: event name, date, category tag. Hover: jaali SVG overlay fades in + card scales 1.03.
+Scroll Behaviour
+Desktop: mouse wheel triggers horizontal scroll within the section. Scroll indicator dots below.
+Past Events
+Cards display a 'View Gallery →' badge instead of a Register button.
+Upcoming/Ongoing
+Cards display a 'Register / Volunteer →' badge.
+Animation
+Cards animate in with staggered slide-up on page load. Festival particle effect in the page hero.
+6.8 Event Detail Page
+Element
+Details
+Route
+/events/[event-slug]
+Hero
+Full-width event poster with charcoal gradient. Event name in large Cormorant Garamond.
+Details Section
+Icon-label pairs: ■ Date & Time  |  ■ Venue  |  ■ Category  |  ■ Capacity.
+About the Event
+Rich text description. Can include formatted paragraphs from Supabase.
+Coordinators
+Small avatar + name cards of event coordinators.
+CTA for Future/Current Events
+Two buttons: 'Register as Participant' + 'Volunteer for this Event'. Both route to Registrations page with event pre-filled.
+CTA for Past Events
+'View Gallery →' button only. Routes to Gallery filtered to that event.
+Related Events
+Horizontal strip of 3 related event cards at page bottom.
+6.9 Gallery Page
+Element
+Details
+Layout
+Left: vertical list of events (scrollable). Right: masonry grid of that event's images.
+Event List
+Each item: event name + year + thumbnail. Active event highlighted with BRONZE left border.
+Image Grid
+Masonry layout. Hover: jaali overlay + image name caption slides up from bottom.
+Lightbox
+Click any image → full-screen lightbox with left/right navigation, close (X), and keyboard arrow support.
+Load More
+Pagination via 'Load More' button or infinite scroll (preference: Load More for control).
+Mobile
+Single column scroll. Tap image → lightbox.
+AVYAKTA
+Website Design Document  |  Confidential
+Avyakta – Cultural Multi-Domain Club
+Page 9
+6.10 Members Page
+The Members page is a living tribute to everyone who built Avyakta. It is divided into clearly labelled sections:
+Element
+Details
+Sections
+Founders · Faculty Advisors · Previous Heads · Previous Members · Current Core Team
+Photo Cards
+Square-ish image with rounded corners. Name + designation below. On hover: bronze border glow + slight scale + a subtle tilt (CSS transform). Hover overlay adds club-branded texture.
+Click → Popup
+Clicking a card opens a centred modal overlay (same page, no navigation). Modal contains: larger photo, full name, designation/year, quote or 'About' blurb. Close via X button (top-right) or clicking outside the modal.
+Modal Design
+Charcoal background, BRONZE border, rangoli corner ornaments as SVG. X button: circle icon, hover turns crimson.
+Animation
+Modal fades + scales in (scale 0.9 → 1, opacity 0 → 1). Cards stagger in on scroll.
+Data Source
+Supabase 'members' table. Each record: name, designation, section (founders/advisors/etc.), photo_url, quote, year.
+6.11 Registrations / Volunteer Page
+This page mirrors the Recruitment page structure but is focused on event participation and volunteering.
+Element
+Details
+Event Selector
+Dropdown or pill selector for which event the user is registering/volunteering for.
+Role Toggle
+Pill toggle: 'Participant' / 'Volunteer'. Switches the form fields accordingly.
+Common Fields
+Name, SRN, Branch, Class, Section, Phone Number, Email.
+Participant Fields
+Dietary needs (if event has meals), team name (if team event).
+Volunteer Fields
+Domain of help (logistics, decor, tech, etc.), prior volunteer experience (textarea).
+Links Section
+Same dynamic link-field component as Recruitment page.
+Submit
+Same EMERALD CTA with confirmation animation.
+6.12 History / Timeline Page
+Element
+Details
+Layout
+Vertical alternating timeline. Central vertical BRONZE line. Cards alternate left/right on desktop; stack left-aligned on mobile.
+Card Content
+Year (large, BRONZE), milestone title, 1–2 line description, optional small image.
+Scroll Animation
+Each card slides in from its respective side on scroll (Intersection Observer).
+First Entry
+Always: 'Founded — [Year]' with founder names. Styled as the anchor card.
+IRA Mention
+One entry: 'Established as a branch of Club IRA' — subtle crimson tag.
+AVYAKTA
+Website Design Document  |  Confidential
+Avyakta – Cultural Multi-Domain Club
+Page 10
+7. Admin & Domain-Head Dashboard System
+7.1 Architecture Overview
+The dashboard system operates at a hidden URL not linked anywhere on the public website. All authentication
+happens on this page. Two tiers of access exist: Admin (full) and Domain Head (scoped to their domain's recruit
+data).
+7.2 Hidden URL
+/avyakta-control-[randomhash]
+The URL segment is a random alphanumeric hash (e.g. /avyakta-control-x7k2m9p). It is shared only verbally or
+via secure message to authorized personnel. There is NO link to this route from any public-facing page, nav,
+footer, or sitemap.
+7.3 Login System
+Aspect
+Details
+Login Page Design
+Dark charcoal fullscreen. Avyakta logo centred. Single card: email + password fields. BRONZE 'Enter' button. No 'Forgot Password' link visible (reduces attack surface — admin handles resets manually).
+Admin Login
+One superuser account. Always active. Full dashboard access.
+Domain Head Logins
+Multiple accounts, one per domain (e.g., design-head@avyakta, tech-head@avyakta). Accounts are DISABLED outside of recruitment season. Admin enables/disables them via Supabase Auth dashboard.
+Session
+JWT-based session via Supabase Auth. Session expires after 8 hours of inactivity.
+Failed Attempts
+After 5 failed attempts, IP is soft-blocked for 15 minutes (Supabase rate limiting).
+7.4 Admin Dashboard (Full Access)
+Module
+Details
+Overview Cards
+Total applicants, events this semester, gallery images, active members.
+Announcements Manager
+Create/edit/delete announcements shown in home page popup. Fields: title, body, type (recruitment/event/general), expiry date.
+Recruitment Overview
+Table of all applicants across all domains. Filter by domain, status. Export to CSV.
+Events Manager
+Create/edit/delete events. Fields: name, date, venue, description, poster image upload, category.
+Gallery Manager
+Upload images per event. Batch upload supported. Images stored in Supabase Storage.
+Members Manager
+Add/edit/remove members per section (founders, advisors, etc.). Photo upload.
+User Manager
+Enable/disable domain head accounts. Reset passwords.
+7.5 Domain Head Dashboard (Scoped Access)
+Feature
+Details
+View
+Table of all applicants who selected their domain. Columns: Name, SRN, Branch, Experience, Links, Status, Interview Slot.
+Interview Scheduling
+Per applicant, domain head can set: interview date, time, mode (online/offline), venue/link, and a personal note. This triggers a (future) notification or is visible to admin.
+Status Update
+Dropdown per applicant: Pending → Shortlisted → Interviewed → Selected → Rejected.
+Cannot Access
+No other domain's data. No events, gallery, or member management. No announcement editing.
+AVYAKTA
+Website Design Document  |  Confidential
+Avyakta – Cultural Multi-Domain Club
+Page 11
+Availability
+Accounts are inactive outside recruitment season. Login returns 'Access not available at this time' message if attempted when disabled.
+AVYAKTA
+Website Design Document  |  Confidential
+Avyakta – Cultural Multi-Domain Club
+Page 12
+8. Supabase Data Architecture
+All dynamic data is stored in Supabase (PostgreSQL). The following tables define the schema. Supabase
+Storage is used for images (gallery, member photos, event posters).
+Table Name
+Key Columns
+announcements
+id, title, body, type (enum: recruitment/event/general), is_active, expires_at,
+created_at
+events
+id, slug, name, description (rich text), date, end_date, venue, category, poster_url,
+is_past, created_at
+recruitment_applicat
+ions
+id, name, srn, branch, class, section, domain (array), experience, links (jsonb:
+[{type, url}]), status (enum), interview_slot (jsonb), created_at
+registrations
+id, event_id (FK→events), role (participant/volunteer), name, srn, branch, class,
+section, phone, email, extra_fields (jsonb), created_at
+gallery_images
+id, event_id (FK→events), image_url, caption, display_order, uploaded_at
+members
+id, name, designation, section (enum:
+founders/advisors/prev_heads/prev_members/current_core), photo_url, quote,
+year, display_order
+history_milestones
+id, year, title, description, image_url, display_order
+domain_heads
+id, domain, supabase_user_id (FK→auth.users), is_active
+Row-Level Security (RLS)
+   Public (anon) can READ: events, gallery_images, history_milestones, members, announcements (where
+is_active = true).
+   Public can INSERT INTO: recruitment_applications, registrations.
+   Domain heads can SELECT recruitment_applications WHERE domain = their domain only (enforced via
+RLS policy referencing domain_heads table).
+   Admin (service role key, never exposed to frontend) has full access via server-side API routes.
+AVYAKTA
+Website Design Document  |  Confidential
+Avyakta – Cultural Multi-Domain Club
+Page 13
+9. Animations & Interaction Design
+Interaction
+Specification
+Page Load
+Mandala SVG loader (rotate + fade out). Only on cold load.
+Hero Kolam
+CSS stroke-dashoffset animation traces kolam border on hero section load. Duration: 2.4s ease-in-out.
+Scroll Reveal
+Intersection Observer triggers 'slide-up + fade in' on all cards and timeline entries. Threshold: 0.15. One-time trigger.
+Navbar Transition
+Background + border transition on scroll (requestAnimationFrame, not scroll event).
+Member Card Hover
+scale(1.04) + box-shadow BRONZE glow + CSS rotateY(3deg) tilt. Transition: 0.25s ease.
+Member Modal
+scale(0.9→1) + opacity(0→1). Backdrop: blur(6px) + rgba(28,28,28,0.85). Duration: 0.3s.
+Event Card Hover
+scale(1.03) + jaali SVG overlay fades in (opacity 0→0.6). Duration: 0.3s.
+Gallery Lightbox
+Fade in. Arrow navigation with slide transition (translateX). Keyboard accessible.
+Form Submit Success
+Checkmark draw animation + 'Namaste ■' text fade-in.
+Festival Particles
+CSS/canvas floating coloured dots on Events page hero. Max 40 particles, requestAnimationFrame loop.
+Horizontal Scroll Events
+Snap-scroll on X axis. Scroll indicator dots with active state.
+Announcement Popup
+Slide up from bottom-right. Auto-dismiss after 8s with countdown indicator.
+Note: All animations must respect prefers-reduced-motion: reduce CSS media query. If set, replace all transitions with instant
+state changes.
+10. Responsiveness & Accessibility
+Area
+Specification
+Breakpoints
+Mobile: 0–640px · Tablet: 641–1024px · Desktop: 1025px+
+Mobile Navbar
+Full-screen overlay menu. Touch-friendly link targets (min 44px height).
+Events Scroll
+Horizontal on desktop; vertical card stack on mobile.
+Gallery
+3-col masonry on desktop; 2-col on tablet; 1-col on mobile.
+Members Grid
+4-col on desktop; 2-col on tablet; 2-col on mobile.
+Forms
+Full-width single-column on mobile. Side-by-side pairs on desktop.
+Images
+All images use lazy loading (loading='lazy'). srcSet for responsive images.
+Accessibility
+All interactive elements keyboard-navigable. ARIA labels on icon buttons. Color contrast ratios meet WCAG AA. Focus rings visible (BRONZE outline).
+SEO
+Semantic HTML (h1→h6, nav, main, article, footer). Open Graph meta tags per page. Sitemap.xml (excludes hidden admin route).
+AVYAKTA
+Website Design Document  |  Confidential
+Avyakta – Cultural Multi-Domain Club
+Page 14
+11. Tech Stack Summary
+Layer
+Choice & Notes
+Framework
+Next.js 14+ (App Router) — SSR for public pages, client components for interactive UI
+Styling
+Tailwind CSS with custom theme tokens for the Avyakta palette
+Animations
+Framer Motion (complex scroll + modal animations) + CSS transitions (simple hovers)
+Backend / DB
+Supabase (PostgreSQL + Auth + Storage + Realtime)
+Forms
+React Hook Form + Zod for validation
+Icons
+Lucide React + custom SVG icon set (diya, rangoli, mandala)
+Fonts
+Next/font with Google Fonts (Cormorant Garamond, Inter, Playfair Display)
+Image Hosting
+Supabase Storage (with CDN). next/image for optimised delivery
+Deployment
+Vercel (recommended). Environment variables managed in Vercel dashboard
+Auth
+Supabase Auth (email+password). Server-side session check for dashboard route
+12. Development Team Responsibilities
+Team 1 — Core Pages & Structure (Teja, Arrham, Preksha)
+Task
+Details
+Layout Shell
+Create _layout.tsx with Navbar + Footer. Set up route structure.
+Tailwind Config
+Configure custom colours, fonts, spacing tokens per this document.
+Navbar
+Implement scroll-aware navbar, staggered link animation, mobile overlay menu.
+Footer
+Logo, contact icons, quick links, IRA credit.
+Home Page
+All 7 home sections including announcement popup logic.
+About Page
+Static page with all sections. Fetch Faculty Advisors preview from Supabase.
+About IRA Page
+Static informational page.
+Admin Dashboard
+Full admin view — all management modules. Hidden route + auth guard.
+Indian Motif SVGs
+Create/source and integrate rangoli dividers, paisley bg, mandala loader.
+Team 2 — Recruitment & Data Flow (Suhith, Vrushabendra, Navyashree)
+Task
+Details
+Recruitment Page
+Ethics section, domain cards, full form with dynamic link fields.
+Form Validation
+React Hook Form + Zod schema. Inline error messages. SRN + URL validation.
+Supabase Setup
+Create all tables (schema per Section 8). Configure RLS policies.
+Supabase Auth
+Set up admin and domain head user accounts. Account enable/disable flow.
+AVYAKTA
+Website Design Document  |  Confidential
+Avyakta – Cultural Multi-Domain Club
+Page 15
+API Routes
+Next.js API routes for form submission (server-side insert, avoids exposing keys).
+Domain Head Dashboard
+Scoped dashboard view — applicant table, status update, interview slot setter.
+Registrations Page
+Volunteer/register form with event selector. Same link-field component as recruitment.
+Data Exports
+CSV export functionality for admin recruitment overview.
+Team 3 — Events, Gallery & UI Enhancement (Naman, Akhil, Nikita)
+Task
+Details
+Events Page
+Horizontal snap-scroll carousel, filter tabs, event cards with jaali hover.
+Event Detail Page
+Dynamic route /events/[slug]. Full layout per Section 6.8.
+Gallery Page
+Event list + masonry image grid + lightbox. Supabase Storage integration.
+Members Page
+All member sections, photo cards, hover animations, modal popup.
+History / Timeline Page
+Alternating scroll timeline. Intersection Observer animations.
+Animations
+Framer Motion setup, scroll reveals, hero kolam animation, festival particles.
+Responsiveness
+Ensure all pages meet breakpoint specs. Test on real devices.
+Accessibility Audit
+Tab order, ARIA labels, contrast check, reduced-motion support.
+ Design Principles Reminder
+ Every pixel of the Avyakta website should feel like an invitation. Indian culture is not a decoration — it is
+the foundation. Let the colours breathe, let the animations delight, and let the content speak for a club that
+ is genuinely worth joining.
+ 
