@@ -169,7 +169,7 @@ AVYAKTA-The-Living-Traditions/
 | `gallery_images` | Gallery photos |
 | `members` | Team profiles |
 | `history_milestones` | Timeline entries |
-| `domain_heads` | Domain head accounts |
+| `domain_accounts` | Domain head accounts |
 
 ---
 
