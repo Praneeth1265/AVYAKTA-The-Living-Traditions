@@ -1,4 +1,5 @@
-# AVYAKTA – The Living Traditions
+# IRA - The AVYAKTA Chapter 
+## AVYAKTA – The Living Traditions
 
 A culturally rooted, vibrant website for Avyakta - a cultural multi-domain club that brings together students passionate about performing arts, design, technology, event management, and more.
 
@@ -6,14 +7,14 @@ A culturally rooted, vibrant website for Avyakta - a cultural multi-domain club 
 
 ## Tech Stack
 
-- **Framework**: Next.js 14+ (App Router)
-- **Styling**: Tailwind CSS with custom theme tokens
-- **Animations**: Framer Motion + CSS transitions
+- **Framework**: Next.js 14+ (App Router) with TypeScript (.tsx)
+- **Styling**: Tailwind CSS
+- **Animations**: CSS transitions
 - **Backend/DB**: Supabase (PostgreSQL + Auth + Storage)
-- **Forms**: React Hook Form + Zod
+- **Forms**: React Hook Form + validation (regex + logic)
 - **CI/CD**: GitHub Actions
 - **Node.js**: v24.x
-
+- Backend logic is handled using Next.js API routes (App Router)
 ---
 
 ## Project Structure
@@ -23,28 +24,52 @@ AVYAKTA-The-Living-Traditions/
 │
 ├── frontend/                      # Next.js application
 │   ├── src/
-│   │   ├── app/                  # Next.js App Router pages
-│   │   │   ├── page.jsx         # Home Page
-│   │   │   ├── about/           # About / What is Avyakta
-│   │   │   ├── about-ira/       # About Club IRA (parent)
-│   │   │   ├── recruitment/     # Recruitment form
+│   │   ├── app/                  # Next.js App Router (pages + routing)
+│   │   │   ├── layout.tsx       # Root layout (required)
+│   │   │   ├── page.tsx         # Home Page
+│   │   │   ├── about/
+│   │   │   │   └── page.tsx
+│   │   │   ├── about-ira/
+│   │   │   │   └── page.tsx
+│   │   │   ├── recruitment/
+│   │   │   │   └── page.tsx
 │   │   │   ├── events/
-│   │   │   │   ├── page.jsx     # Events listing
-│   │   │   │   └── [slug]/      # Event detail pages
-│   │   │   ├── gallery/         # Photo gallery
-│   │   │   ├── members/         # Team members
-│   │   │   ├── registrations/   # Volunteer/participant
-│   │   │   ├── history/         # Timeline page
-│   │   │   └── avyakta-control-[hash]/
-│   │   │       ├── page.jsx     # Admin login
-│   │   │       └── dashboard/    # Admin dashboard
-│   │   │           ├── announcements/
-│   │   │           ├── recruitment/
-│   │   │           ├── events/
-│   │   │           ├── gallery/
-│   │   │           ├── members/
-│   │   │           └── users/
-│   │   │
+│   │   │   │   ├── page.tsx
+│   │   │   │   └── [slug]/
+│   │   │   │       └── page.tsx
+│   │   │   ├── gallery/
+│   │   │   │   └── page.tsx
+│   │   │   ├── members/
+│   │   │   │   └── page.tsx
+│   │   │   ├── registrations/
+│   │   │   │   └── page.tsx
+│   │   │   ├── history/
+│   │   │   │   └── page.tsx
+│   │   │   └── avyakta-control/
+│   │   │       └── [hash]/      # Dynamic hidden admin route
+│   │   │           ├── page.tsx
+│   │   │           └── dashboard/
+│   │   │               ├── page.tsx
+│   │   │               ├── announcements/
+│   │   │               ├── recruitment/
+│   │   │               ├── events/
+│   │   │               ├── gallery/
+│   │   │               ├── members/
+│   │   │               └── users/
+│   │   ├── app/api/             # Next.js API routes (backend logic)
+│   │   │   ├── recruitment/
+│   │   │   │   └── route.ts     # POST - submit applications
+│   │   │   ├── events/
+│   │   │   │   └── route.ts     # CRUD - events
+│   │   │   ├── gallery/
+│   │   │   │   └── route.ts     # GET, POST - images
+│   │   │   ├── members/
+│   │   │   │   └── route.ts     # GET, POST - members
+│   │   │   ├── announcements/
+│   │   │   │   └── route.ts     # GET, POST - announcements
+│   │   │   └── admin/
+│   │   │       └── recruits/
+│   │   │           └── route.ts # GET, PATCH - admin recruit actions
 │   │   ├── components/
 │   │   │   ├── layout/          # Navbar, Footer, MobileMenu
 │   │   │   ├── home/            # Hero, Announcements, Domains, etc.
@@ -56,26 +81,26 @@ AVYAKTA-The-Living-Traditions/
 │   │   │   └── shared/          # RangoliDivider, MandalaLoader, etc.
 │   │   │
 │   │   ├── lib/
-│   │   │   ├── supabase/        # Supabase client & types
+│   │   │   ├── supabase/        # Supabase client & config
 │   │   │   └── utils/           # Helper functions
 │   │   │
 │   │   ├── hooks/               # Custom React hooks
 │   │   ├── styles/              # Global styles
 │   │   └── assets/
-│   │       ├── icons/            # Custom SVG icons (diya, rangoli)
-│   │       └── patterns/         # SVG patterns (paisley, jaali)
+│   │       ├── icons/           # Custom SVG icons (diya, rangoli)
+│   │       └── patterns/        # SVG patterns (paisley, jaali)
 │   │
 │   ├── public/
 │   │   └── images/
 │   │
-│   ├── .env.local               # Environment variables
+│   ├── .env.local               # Environment variables (DO NOT COMMIT)
 │   ├── tailwind.config.js
 │   ├── next.config.js
 │   └── package.json
 │
 ├── .github/
 │   └── workflows/
-│       └── ci.yml              # CI Pipeline
+│       └── ci.yml               # CI Pipeline
 │
 └── README.md
 ```
@@ -237,6 +262,8 @@ The CI pipeline runs on every PR to protected branches:
 
 ## Setup Instructions
 
+Note: The main application is inside the `frontend/` folder.
+
 ```bash
 # Clone the repository
 git clone https://github.com/Praneeth1265/AVYAKTA-The-Living-Traditions
@@ -259,9 +286,12 @@ npm run dev
 ## Important Notes
 
 - Node.js v24.x required
-- Do NOT commit `node_modules/`
+- Do NOT commit `node_modules/` 
 - Follow the project structure
 - Write clean, modular code
+- Use only TypeScript (.tsx / .ts). Do not use .js or .jsx files
+- Supabase keys and environment variables must be stored in .env.local and never committed
+- Authentication and role-based access (admin/domain heads) will be handled using Supabase Auth
 
 ---
 
