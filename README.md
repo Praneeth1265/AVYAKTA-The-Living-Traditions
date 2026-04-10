@@ -93,7 +93,7 @@ AVYAKTA-The-Living-Traditions/
 │   ├── public/
 │   │   └── images/
 │   │
-│   ├── .env.local               # Environment variables (DO NOT COMMIT)
+│   ├── .env.local               # Environment variables 
 │   ├── tailwind.config.js
 │   ├── next.config.js
 │   └── package.json
