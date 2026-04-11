@@ -284,9 +284,6 @@ cd frontend
 # Install dependencies
 npm install
 
-# Create environment file
-cp .env.example .env.local
-
 # Run development server
 npm run dev
 ```
