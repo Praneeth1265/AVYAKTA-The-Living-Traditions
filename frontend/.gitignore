@@ -33,7 +33,8 @@ yarn-error.log*
 
 # env files
 .env*
-!.env.local.example
+!.env.local.example --- IGNORE ---
+!.env.local --- Consider this for DB credentials ---
 
 # vercel
 .vercel
