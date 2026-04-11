@@ -2,7 +2,7 @@ name: CI Pipeline
 
 on:
   pull_request:
-    branches: [main, team/1-core-structure, team/2-recruitment-data, team/3-events-gallery-ux]
+    branches: [main, dev, team/1-core-structure, team/2-recruitment-data, team/3-events-gallery-ux]
 
 jobs:
   build:
@@ -10,15 +10,18 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Setup Node
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
           node-version: '24'
 
       - name: Install dependencies
         run: cd frontend && npm ci
+
+      - name: Type check
+        run: cd frontend && npx tsc --noEmit
 
       - name: Run lint
         run: cd frontend && npm run lint
@@ -36,10 +39,10 @@ jobs:
         run: cd frontend && npx playwright install --with-deps
 
       - name: Start app
-        run: cd frontend && npm run dev &
+        run: cd frontend && npm run start &
 
       - name: Wait for app
-        run: cd frontend && npx wait-on http://localhost:5173
+        run: cd frontend && npx wait-on http://localhost:3000
 
       - name: Run E2E tests
         run: cd frontend && npx playwright test || echo "No E2E tests yet"
