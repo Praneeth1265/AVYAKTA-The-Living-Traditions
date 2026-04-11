@@ -32,9 +32,8 @@ yarn-error.log*
 .pnpm-debug.log*
 
 # env files
-!.env.local --- Consider this for DB credentials ---
 .env*
-!.env.local.example --- IGNORE ---
+!.env.local.example
 
 # vercel
 .vercel
