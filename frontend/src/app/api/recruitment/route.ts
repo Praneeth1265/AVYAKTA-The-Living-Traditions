@@ -7,6 +7,7 @@ export async function POST(request: NextRequest) {
 
     const {
       name,
+      domain,
       srn,
       sem,
       branch,
@@ -33,6 +34,7 @@ export async function POST(request: NextRequest) {
       .insert([
         {
           name,
+          domain: domain || null,
           srn: srn || null,
           sem: sem || null,
           branch: branch || null,

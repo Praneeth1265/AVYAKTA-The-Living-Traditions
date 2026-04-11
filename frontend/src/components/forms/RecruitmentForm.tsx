@@ -6,11 +6,23 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 
 const recruitmentSchema = z.object({
-  name: z.string().min(2, "Name must be at least 2 characters"),
+  name: z
+    .string()
+    .min(2, "Name must be at least 2 characters")
+    .regex(/^[a-zA-Z\s]+$/, "Name can only contain letters and spaces"),
   email: z.string().email("Invalid email address"),
-  phone_number: z.string().min(10, "Invalid phone number"),
+  phone_number: z
+    .string()
+    .regex(/^\d{10}$/, "Phone number must be exactly 10 digits"),
+  domain: z.string().min(1, "Domain is required"),
   srn: z.string().optional(),
-  sem: z.string().optional(),
+  sem: z
+    .string()
+    .refine(
+      (val) => val === "" || (parseInt(val) >= 1 && parseInt(val) <= 8),
+      "Semester must be between 1-8"
+    )
+    .optional(),
   branch: z.string().optional(),
   section: z.string().optional(),
   links: z.string().optional(),
@@ -136,6 +148,30 @@ export default function RecruitmentForm() {
           )}
         </div>
 
+        {/* Domain Field */}
+        <div>
+          <label className="block text-sm font-medium mb-1">
+            Domain <span className="text-red-500">*</span>
+          </label>
+          <select
+            {...register("domain")}
+            className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+          >
+            <option value="">Select your domain of interest</option>
+            <option value="Technical">Technical</option>
+            <option value="Design">Design</option>
+            <option value="Event Management">Event Management</option>
+            <option value="Ethics and Discipline">Ethics and Discipline</option>
+            <option value="Media and Visibility">Media and Visibility</option>
+            <option value="Logistics and Operations">Logistics and Operations</option>
+            <option value="Marketing">Marketing</option>
+            <option value="Finance">Finance</option>
+          </select>
+          {errors.domain && (
+            <p className="text-red-500 text-sm mt-1">{errors.domain.message}</p>
+          )}
+        </div>
+
         {/* SRN Field */}
         <div>
           <label className="block text-sm font-medium mb-1">SRN</label>
@@ -152,10 +188,15 @@ export default function RecruitmentForm() {
           <label className="block text-sm font-medium mb-1">Semester</label>
           <input
             {...register("sem")}
-            type="text"
-            placeholder="Your current semester"
+            type="number"
+            min="1"
+            max="8"
+            placeholder="1-8"
             className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
+          {errors.sem && (
+            <p className="text-red-500 text-sm mt-1">{errors.sem.message}</p>
+          )}
         </div>
 
         {/* Branch Field */}
