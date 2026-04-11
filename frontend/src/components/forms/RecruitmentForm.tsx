@@ -15,20 +15,19 @@ const recruitmentSchema = z.object({
     .string()
     .regex(/^\d{10}$/, "Phone number must be exactly 10 digits"),
   domain: z.string().min(1, "Domain is required"),
-  srn: z.string().optional(),
+  srn: z.string().min(1, "SRN is required"),
   sem: z
     .string()
     .refine(
-      (val) => val === "" || (parseInt(val) >= 1 && parseInt(val) <= 8),
+      (val) => parseInt(val) >= 1 && parseInt(val) <= 8,
       "Semester must be between 1-8",
-    )
-    .optional(),
-  branch: z.string().optional(),
-  section: z.string().optional(),
+    ),
+  branch: z.string().min(1, "Branch is required"),
+  section: z.string().min(1, "Section is required"),
   links: z.string().optional(),
   experience: z.string().optional(),
-  why_you: z.string().optional(),
-  why_us: z.string().optional(),
+  why_you: z.string().min(10, "Please provide at least 10 characters"),
+  why_us: z.string().min(10, "Please provide at least 10 characters"),
 });
 
 export type RecruitmentFormData = z.infer<typeof recruitmentSchema>;
@@ -37,15 +36,27 @@ export default function RecruitmentForm() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [successMessage, setSuccessMessage] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
+  const [linkInputs, setLinkInputs] = useState([""]); // Local state for dynamic links
 
   const {
     register,
     handleSubmit,
     formState: { errors },
     reset,
+    watch,
   } = useForm<RecruitmentFormData>({
     resolver: zodResolver(recruitmentSchema),
   });
+
+  const addLinkInput = () => setLinkInputs([...linkInputs, ""]);
+  const removeLinkInput = (index: number) => {
+    setLinkInputs(linkInputs.filter((_, i) => i !== index));
+  };
+  const updateLinkInput = (index: number, value: string) => {
+    const newLinks = [...linkInputs];
+    newLinks[index] = value;
+    setLinkInputs(newLinks);
+  };
 
   const onSubmit = async (data: RecruitmentFormData) => {
     setIsSubmitting(true);
@@ -53,12 +64,21 @@ export default function RecruitmentForm() {
     setErrorMessage("");
 
     try {
+      // Filter empty links and convert to JSON string
+      const validLinks = linkInputs.filter((link) => link.trim().length > 0);
+      const linksJson = JSON.stringify(validLinks);
+
+      const payload = {
+        ...data,
+        links: linksJson,
+      };
+
       const response = await fetch("/api/recruitment", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(data),
+        body: JSON.stringify(payload),
       });
 
       const result = await response.json();
@@ -70,6 +90,7 @@ export default function RecruitmentForm() {
 
       setSuccessMessage("Application submitted successfully!");
       reset();
+      setLinkInputs([""]);
 
       // Clear success message after 5 seconds
       setTimeout(() => setSuccessMessage(""), 5000);
@@ -176,18 +197,25 @@ export default function RecruitmentForm() {
 
         {/* SRN Field */}
         <div>
-          <label className="block text-sm font-medium mb-1">SRN</label>
+          <label className="block text-sm font-medium mb-1">
+            SRN <span className="text-red-500">*</span>
+          </label>
           <input
             {...register("srn")}
             type="text"
             placeholder="Your SRN/Roll Number"
             className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
+          {errors.srn && (
+            <p className="text-red-500 text-sm mt-1">{errors.srn.message}</p>
+          )}
         </div>
 
         {/* Semester Field */}
         <div>
-          <label className="block text-sm font-medium mb-1">Semester</label>
+          <label className="block text-sm font-medium mb-1">
+            Semester <span className="text-red-500">*</span>
+          </label>
           <input
             {...register("sem")}
             type="number"
@@ -203,37 +231,74 @@ export default function RecruitmentForm() {
 
         {/* Branch Field */}
         <div>
-          <label className="block text-sm font-medium mb-1">Branch</label>
+          <label className="block text-sm font-medium mb-1">
+            Branch <span className="text-red-500">*</span>
+          </label>
           <input
             {...register("branch")}
             type="text"
             placeholder="Your branch/stream"
             className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
+          {errors.branch && (
+            <p className="text-red-500 text-sm mt-1">{errors.branch.message}</p>
+          )}
         </div>
 
         {/* Section Field */}
         <div>
-          <label className="block text-sm font-medium mb-1">Section</label>
+          <label className="block text-sm font-medium mb-1">
+            Section <span className="text-red-500">*</span>
+          </label>
           <input
             {...register("section")}
             type="text"
             placeholder="Your section"
             className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
+          {errors.section && (
+            <p className="text-red-500 text-sm mt-1">
+              {errors.section.message}
+            </p>
+          )}
         </div>
 
-        {/* Links Field */}
+        {/* Links Field (Dynamic Array UI) */}
         <div>
-          <label className="block text-sm font-medium mb-1">
-            Portfolio/Links
-          </label>
-          <textarea
-            {...register("links")}
-            placeholder="Portfolio links, GitHub, etc."
-            rows={2}
-            className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
+          <label className="block text-sm font-medium mb-1">Links</label>
+          <div className="space-y-2">
+            {linkInputs.map((link, index) => (
+              <div key={index} className="flex gap-2">
+                <input
+                  type="url"
+                  placeholder="https://example-link.com (optional)"
+                  value={link}
+                  onChange={(e) => updateLinkInput(index, e.target.value)}
+                  className="flex-1 px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+                {index > 0 && (
+                  <button
+                    type="button"
+                    onClick={() => removeLinkInput(index)}
+                    className="px-3 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition"
+                  >
+                    Remove
+                  </button>
+                )}
+              </div>
+            ))}
+          </div>
+          <button
+            type="button"
+            onClick={addLinkInput}
+            className="mt-2 px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition"
+          >
+            + Add Another Link
+          </button>
+          <p className="text-gray-500 text-xs mt-1">
+            Add multiple links (portfolio, GitHub, LinkedIn, etc.) - all
+            optional
+          </p>
         </div>
 
         {/* Experience Field */}
@@ -250,25 +315,35 @@ export default function RecruitmentForm() {
         {/* Why You Field */}
         <div>
           <label className="block text-sm font-medium mb-1">
-            Why do you want to join?
+            Why do you want to join? <span className="text-red-500">*</span>
           </label>
           <textarea
             {...register("why_you")}
-            placeholder="Tell us why you're interested in AVYAKTA"
+            placeholder="Tell us why you're interested in AVYAKTA (minimum 10 characters)"
             rows={3}
             className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
+          {errors.why_you && (
+            <p className="text-red-500 text-sm mt-1">
+              {errors.why_you.message}
+            </p>
+          )}
         </div>
 
         {/* Why Us Field */}
         <div>
-          <label className="block text-sm font-medium mb-1">Why AVYAKTA?</label>
+          <label className="block text-sm font-medium mb-1">
+            Why AVYAKTA? <span className="text-red-500">*</span>
+          </label>
           <textarea
             {...register("why_us")}
-            placeholder="What do you expect from AVYAKTA?"
+            placeholder="What do you expect from AVYAKTA? (minimum 10 characters)"
             rows={3}
             className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
+          {errors.why_us && (
+            <p className="text-red-500 text-sm mt-1">{errors.why_us.message}</p>
+          )}
         </div>
 
         {/* Submit Button */}
