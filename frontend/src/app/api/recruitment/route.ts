@@ -18,7 +18,7 @@ const recruitmentSchema = z.object({
     .string()
     .refine(
       (val) => parseInt(val) >= 1 && parseInt(val) <= 8,
-      "Semester must be between 1-8"
+      "Semester must be between 1-8",
     ),
   branch: z.string().min(1, "Branch is required"),
   section: z.string().min(1, "Section is required"),
@@ -37,7 +37,7 @@ export async function POST(request: NextRequest) {
     if (!validation.success) {
       return NextResponse.json(
         { error: "Validation failed", errors: validation.error.flatten() },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -83,13 +83,13 @@ export async function POST(request: NextRequest) {
         message: "Recruitment application submitted successfully",
         data: insertedData?.[0],
       },
-      { status: 201 }
+      { status: 201 },
     );
   } catch (error) {
     console.error("Recruitment submission error:", error);
     return NextResponse.json(
       { error: "Failed to submit recruitment application" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
