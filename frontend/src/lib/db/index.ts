@@ -2,5 +2,11 @@ import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
 import * as schema from "@drizzle/schema";
 
-const client = postgres(process.env.DATABASE_URL!);
+declare global {
+  // eslint-disable-next-line no-var
+  var __dbClient: ReturnType<typeof postgres> | undefined;
+}
+
+const client =
+  globalThis.__dbClient ?? (globalThis.__dbClient = postgres(process.env.DATABASE_URL!));
 export const db = drizzle(client, { schema });
