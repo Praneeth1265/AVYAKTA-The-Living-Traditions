@@ -6,7 +6,7 @@ import { z } from "zod";
 const recruitmentSchema = z.object({
   name: z
     .string()
-    .min(3, "Name must be at least 2 characters")
+    .min(3, "Name must be at least 3 characters")
     .regex(/^[a-zA-Z\s]+$/, "Name can only contain letters and spaces"),
   email: z.string().email("Invalid email address"),
   phone_number: z
