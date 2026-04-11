@@ -121,7 +121,16 @@ AVYAKTA-The-Living-Traditions/
 | `/members` | Members | Team grid with modal popups |
 | `/registrations` | Registrations | Volunteer/participant signup |
 | `/history` | History | Animated timeline page |
-| `/avyakta-control-[hash]` | Admin | Hidden admin dashboard |
+| *(hidden route)* | Admin | Hidden admin dashboard — URL shared privately by tech team only |
+
+### Page-specific Notes
+
+- **Home**: Announcements popup (recruitment/events), timeline/history scroll, subtle IRA mention linking to `/about-ira`.
+- **Members**: Sections for founders, faculty advisors, previous heads, previous members. Hover animation on images; click opens popup with name, designation, and description/quote.
+- **Recruitment**: Ethics statement → domain descriptions → form (name, SRN, branch, class, section, domain interest, experience) → dynamic links section (type dropdown + URL per link).
+- **Gallery**: Event-wise image groups. Users scroll through events and view all images of a selected event.
+- **Events**: Scroll-based layout for past/present/future. Past events show "View Gallery"; upcoming events show Register/Volunteer button.
+- **Admin**: Not linked anywhere in public navigation. URL is shared privately. Navigation flow: `Homepage → Hidden URL → Login → Dashboard`.
 
 ---
 
@@ -201,8 +210,8 @@ npx prettier --write .
 
 | Team | Members | Tasks |
 |------|---------|-------|
-| Team 1 - Core & Structure | Suhith, Arrham, Preksha | Layout, Navbar, Footer, Home, About, Admin |
-| Team 2 - Recruitment & Data | Teja, Vrushabendra, Navyashree | Forms, Supabase, Domain Head Dashboard |
+| Team 1 - Core & Structure | Suhith, Arrham | Layout, Navbar, Footer, Home, About, Admin |
+| Team 2 - Recruitment & Data | Teja, Vrushabendra | Forms, Supabase, Domain Head Dashboard |
 | Team 3 - Events, Gallery & UX | Naman, Akhil, Nikita | Events, Gallery, Members, History, Animations |
 
 ---
@@ -242,6 +251,7 @@ npx prettier --write .
 - All changes via PRs
 - CI checks must pass before merging
 - Strictly don't make changes in CI Pipeline
+- Avoid merging directly between team branches — cross-team integration goes through `dev` only
 
 ---
 
@@ -274,9 +284,6 @@ cd frontend
 # Install dependencies
 npm install
 
-# Create environment file
-cp .env.example .env.local
-
 # Run development server
 npm run dev
 ```
@@ -292,6 +299,62 @@ npm run dev
 - Use only TypeScript (.tsx / .ts). Do not use .js or .jsx files
 - Supabase keys and environment variables must be stored in .env.local and never committed
 - Authentication and role-based access (admin/domain heads) will be handled using Supabase Auth
+
+---
+
+## API Routes
+
+| Endpoint | Methods | Description |
+|----------|---------|-------------|
+| `/api/recruitment` | `POST` | Submit recruitment application |
+| `/api/events` | `GET, POST, PATCH, DELETE` | Manage events |
+| `/api/gallery` | `GET, POST` | Fetch/upload gallery images |
+| `/api/members` | `GET, POST` | Fetch/add members |
+| `/api/announcements` | `GET, POST` | Fetch/create announcements |
+| `/api/admin/recruits` | `GET, PATCH` | Domain heads view/update recruit status |
+
+---
+
+## Admin Dashboard
+
+Embedded in the same Next.js app — not a separate deployment. Hidden from public navigation.
+
+### Roles
+
+| Role | Access | Active When |
+|------|--------|-------------|
+| Tech (main admin) | Full dashboard — all domains & data | Always |
+| Domain Head | Own domain recruits only | Recruitment season only |
+
+### Domain Head Can
+
+- View their domain's recruits
+- Edit recruit details
+- Delete entries
+- Update status: `selected` / `rejected` / `pending`
+
+### Auth & Security
+
+- Passwords are **hashed** — never hardcoded. Each domain head sets their own.
+- All dashboard routes are protected (auth + role check).
+- Domain heads cannot access other domains' data.
+
+---
+
+## Form Validation Rules
+
+Applied to Recruitment and Registration forms:
+
+| Rule | Details |
+|------|---------|
+| Required fields | No field may be empty |
+| Type checking | String / number enforced per field |
+| SRN format | Regex pattern |
+| Email format | Standard email regex |
+| Phone number | Format + length |
+| Min/Max length | Enforced per field |
+| Allowed values | Dropdowns restricted to valid options |
+| Links section | Each entry must be a valid URL; count is dynamic |
 
 ---
 
