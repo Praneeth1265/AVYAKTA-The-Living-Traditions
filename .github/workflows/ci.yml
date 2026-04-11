@@ -10,10 +10,10 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Setup Node
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
           node-version: '24'
 
@@ -39,7 +39,7 @@ jobs:
         run: cd frontend && npx playwright install --with-deps
 
       - name: Start app
-        run: cd frontend && npm run dev &
+        run: cd frontend && npm run start &
 
       - name: Wait for app
         run: cd frontend && npx wait-on http://localhost:3000
