@@ -100,33 +100,41 @@ export default function RecruitmentForm() {
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
         {/* Name Field */}
         <div>
-          <label className="block text-sm font-medium mb-1">
+          <label htmlFor="name" className="block text-sm font-medium mb-1">
             Name <span className="text-red-500">*</span>
           </label>
           <input
+            id="name"
+            aria-describedby={errors.name ? "name-error" : undefined}
             {...register("name")}
             type="text"
             placeholder="Your full name"
             className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
           {errors.name && (
-            <p className="text-red-500 text-sm mt-1">{errors.name.message}</p>
+            <p id="name-error" className="text-red-500 text-sm mt-1">
+              {errors.name.message}
+            </p>
           )}
         </div>
 
         {/* Email Field */}
         <div>
-          <label className="block text-sm font-medium mb-1">
+          <label htmlFor="email" className="block text-sm font-medium mb-1">
             Email <span className="text-red-500">*</span>
           </label>
           <input
+            id="email"
+            aria-describedby={errors.email ? "email-error" : undefined}
             {...register("email")}
             type="email"
             placeholder="your@email.com"
             className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
           {errors.email && (
-            <p className="text-red-500 text-sm mt-1">{errors.email.message}</p>
+            <p id="email-error" className="text-red-500 text-sm mt-1">
+              {errors.email.message}
+            </p>
           )}
         </div>
 
