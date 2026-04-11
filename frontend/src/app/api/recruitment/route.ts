@@ -24,7 +24,7 @@ export async function POST(request: NextRequest) {
     if (!name || !email) {
       return NextResponse.json(
         { error: "Name and email are required" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -59,13 +59,13 @@ export async function POST(request: NextRequest) {
         message: "Recruitment application submitted successfully",
         data: data?.[0],
       },
-      { status: 201 }
+      { status: 201 },
     );
   } catch (error) {
     console.error("Recruitment submission error:", error);
     return NextResponse.json(
       { error: "Failed to submit recruitment application" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -87,7 +87,7 @@ export async function GET() {
     console.error("Error fetching recruitments:", error);
     return NextResponse.json(
       { error: "Failed to fetch recruitments" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

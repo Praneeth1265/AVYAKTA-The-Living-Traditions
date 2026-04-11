@@ -20,7 +20,7 @@ const recruitmentSchema = z.object({
     .string()
     .refine(
       (val) => val === "" || (parseInt(val) >= 1 && parseInt(val) <= 8),
-      "Semester must be between 1-8"
+      "Semester must be between 1-8",
     )
     .optional(),
   branch: z.string().optional(),
@@ -163,7 +163,9 @@ export default function RecruitmentForm() {
             <option value="Event Management">Event Management</option>
             <option value="Ethics and Discipline">Ethics and Discipline</option>
             <option value="Media and Visibility">Media and Visibility</option>
-            <option value="Logistics and Operations">Logistics and Operations</option>
+            <option value="Logistics and Operations">
+              Logistics and Operations
+            </option>
             <option value="Marketing">Marketing</option>
             <option value="Finance">Finance</option>
           </select>
@@ -260,9 +262,7 @@ export default function RecruitmentForm() {
 
         {/* Why Us Field */}
         <div>
-          <label className="block text-sm font-medium mb-1">
-            Why AVYAKTA?
-          </label>
+          <label className="block text-sm font-medium mb-1">Why AVYAKTA?</label>
           <textarea
             {...register("why_us")}
             placeholder="What do you expect from AVYAKTA?"
