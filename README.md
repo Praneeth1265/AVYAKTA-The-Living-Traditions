@@ -1,4 +1,5 @@
-# AVYAKTA – The Living Traditions
+# IRA - The AVYAKTA Chapter 
+## AVYAKTA – The Living Traditions
 
 A culturally rooted, vibrant website for Avyakta - a cultural multi-domain club that brings together students passionate about performing arts, design, technology, event management, and more.
 
@@ -6,14 +7,14 @@ A culturally rooted, vibrant website for Avyakta - a cultural multi-domain club 
 
 ## Tech Stack
 
-- **Framework**: Next.js 14+ (App Router)
-- **Styling**: Tailwind CSS with custom theme tokens
-- **Animations**: Framer Motion + CSS transitions
+- **Framework**: Next.js 14+ (App Router) with TypeScript (.tsx)
+- **Styling**: Tailwind CSS
+- **Animations**: CSS transitions
 - **Backend/DB**: Supabase (PostgreSQL + Auth + Storage)
-- **Forms**: React Hook Form + Zod
+- **Forms**: React Hook Form + validation (regex + logic)
 - **CI/CD**: GitHub Actions
 - **Node.js**: v24.x
-
+- Backend logic is handled using Next.js API routes (App Router)
 ---
 
 ## Project Structure
@@ -23,28 +24,52 @@ AVYAKTA-The-Living-Traditions/
 │
 ├── frontend/                      # Next.js application
 │   ├── src/
-│   │   ├── app/                  # Next.js App Router pages
+│   │   ├── app/                  # Next.js App Router (pages + routing)
+│   │   │   ├── layout.tsx       # Root layout (required)
 │   │   │   ├── page.tsx         # Home Page
-│   │   │   ├── about/           # About / What is Avyakta
-│   │   │   ├── about-ira/       # About Club IRA (parent)
-│   │   │   ├── recruitment/     # Recruitment form
+│   │   │   ├── about/
+│   │   │   │   └── page.tsx
+│   │   │   ├── about-ira/
+│   │   │   │   └── page.tsx
+│   │   │   ├── recruitment/
+│   │   │   │   └── page.tsx
 │   │   │   ├── events/
-│   │   │   │   ├── page.tsx     # Events listing
-│   │   │   │   └── [slug]/      # Event detail pages
-│   │   │   ├── gallery/         # Photo gallery
-│   │   │   ├── members/         # Team members
-│   │   │   ├── registrations/   # Volunteer/participant
-│   │   │   ├── history/         # Timeline page
-│   │   │   └── avyakta-control-[hash]/
-│   │   │       ├── page.tsx     # Admin login
-│   │   │       └── dashboard/    # Admin dashboard
-│   │   │           ├── announcements/
-│   │   │           ├── recruitment/
-│   │   │           ├── events/
-│   │   │           ├── gallery/
-│   │   │           ├── members/
-│   │   │           └── users/
-│   │   │
+│   │   │   │   ├── page.tsx
+│   │   │   │   └── [slug]/
+│   │   │   │       └── page.tsx
+│   │   │   ├── gallery/
+│   │   │   │   └── page.tsx
+│   │   │   ├── members/
+│   │   │   │   └── page.tsx
+│   │   │   ├── registrations/
+│   │   │   │   └── page.tsx
+│   │   │   ├── history/
+│   │   │   │   └── page.tsx
+│   │   │   └── avyakta-control/
+│   │   │       └── [hash]/      # Dynamic hidden admin route
+│   │   │           ├── page.tsx
+│   │   │           └── dashboard/
+│   │   │               ├── page.tsx
+│   │   │               ├── announcements/
+│   │   │               ├── recruitment/
+│   │   │               ├── events/
+│   │   │               ├── gallery/
+│   │   │               ├── members/
+│   │   │               └── users/
+│   │   ├── app/api/             # Next.js API routes (backend logic)
+│   │   │   ├── recruitment/
+│   │   │   │   └── route.ts     # POST - submit applications
+│   │   │   ├── events/
+│   │   │   │   └── route.ts     # CRUD - events
+│   │   │   ├── gallery/
+│   │   │   │   └── route.ts     # GET, POST - images
+│   │   │   ├── members/
+│   │   │   │   └── route.ts     # GET, POST - members
+│   │   │   ├── announcements/
+│   │   │   │   └── route.ts     # GET, POST - announcements
+│   │   │   └── admin/
+│   │   │       └── recruits/
+│   │   │           └── route.ts # GET, PATCH - admin recruit actions
 │   │   ├── components/
 │   │   │   ├── layout/          # Navbar, Footer, MobileMenu
 │   │   │   ├── home/            # Hero, Announcements, Domains, etc.
@@ -56,28 +81,26 @@ AVYAKTA-The-Living-Traditions/
 │   │   │   └── shared/          # RangoliDivider, MandalaLoader, etc.
 │   │   │
 │   │   ├── lib/
-│   │   │   ├── supabase/        # Supabase client & types
+│   │   │   ├── supabase/        # Supabase client & config
 │   │   │   └── utils/           # Helper functions
 │   │   │
 │   │   ├── hooks/               # Custom React hooks
-│   │   ├── types/               # TypeScript definitions
 │   │   ├── styles/              # Global styles
 │   │   └── assets/
-│   │       ├── icons/            # Custom SVG icons (diya, rangoli)
-│   │       └── patterns/         # SVG patterns (paisley, jaali)
+│   │       ├── icons/           # Custom SVG icons (diya, rangoli)
+│   │       └── patterns/        # SVG patterns (paisley, jaali)
 │   │
 │   ├── public/
 │   │   └── images/
 │   │
-│   ├── .env.local               # Environment variables
-│   ├── tailwind.config.ts
+│   ├── .env.local               # Environment variables 
+│   ├── tailwind.config.js
 │   ├── next.config.js
 │   └── package.json
 │
-├── frontend-vite/                # Old Vite project (reference)
 ├── .github/
 │   └── workflows/
-│       └── ci.yml              # CI Pipeline
+│       └── ci.yml               # CI Pipeline
 │
 └── README.md
 ```
@@ -99,6 +122,15 @@ AVYAKTA-The-Living-Traditions/
 | `/registrations` | Registrations | Volunteer/participant signup |
 | `/history` | History | Animated timeline page |
 | `/avyakta-control-[hash]` | Admin | Hidden admin dashboard |
+
+### Page-specific Notes
+
+- **Home**: Includes announcements popup (recruitment/events), a timeline/history scroll, and a subtle line linking to the About IRA page.
+- **Members**: Sections for founders, faculty advisors, previous heads, and previous members. Hover animation on images; click opens a popup with name, designation, and a short description/quote.
+- **Recruitment**: Starts with a short ethics statement, followed by domain descriptions. Form includes name, SRN, branch, class, section, domain interest, and experience. A dynamic links section lets users add multiple links with a type dropdown + URL field.
+- **Gallery**: Event-wise image groups. Users scroll through events and view all images for a selected event.
+- **Events**: Scroll-based layout for past, present, and future events. Past events show a "View Gallery" option; upcoming events show a Register/Volunteer button.
+- **Admin (`/avyakta-control-[hash]`)**: Not linked in public navigation. Accessed only by typing the URL directly. Navigation flow: `Homepage → Hidden URL → Login → Dashboard`.
 
 ---
 
@@ -146,7 +178,7 @@ AVYAKTA-The-Living-Traditions/
 | `gallery_images` | Gallery photos |
 | `members` | Team profiles |
 | `history_milestones` | Timeline entries |
-| `domain_heads` | Domain head accounts |
+| `domain_accounts` | Domain head accounts |
 
 ---
 
@@ -178,25 +210,40 @@ npx prettier --write .
 
 | Team | Members | Tasks |
 |------|---------|-------|
-| Team 1 - Core & Structure | Teja, Arrham, Preksha | Layout, Navbar, Footer, Home, About, Admin |
-| Team 2 - Recruitment & Data | Suhith, Vrushabendra, Navyashree | Forms, Supabase, Domain Head Dashboard |
+| Team 1 - Core & Structure | Suhith, Arrham, Preksha | Layout, Navbar, Footer, Home, About, Admin |
+| Team 2 - Recruitment & Data | Teja, Vrushabendra, Navyashree | Forms, Supabase, Domain Head Dashboard |
+| Team 1 - Core & Structure | Suhith, Arrham, Preksha | Layout, Navbar, Footer, Home, About, Admin |
+| Team 2 - Recruitment & Data | Teja, Vrushabendra, Navyashree | Forms, Supabase, Domain Head Dashboard |
 | Team 3 - Events, Gallery & UX | Naman, Akhil, Nikita | Events, Gallery, Members, History, Animations |
 
 ---
 
 ## Branching Strategy
 
+| Branch | Purpose | Protection | Merge Approvals |
+|--------|---------|------------|------------------|
+| `main` | Production (final release) | Codeowner approval | Codeowner |
+| `dev` | Integration & testing | Protected | Tech leads |
+| `team/1-core-structure` | Team 1 integration | Protected | Min. 2 approvals |
+| `team/2-recruitment-data` | Team 2 integration | Protected | Min. 2 approvals |
+| `team/3-events-gallery-ux` | Team 3 integration | Protected | Min. 2 approvals |
+| `feature/*` | Individual feature work | Not protected | — |
 | Branch | Purpose | Protection |
 |--------|---------|------------|
 | `main` | Production-ready code | Protected |
-| `team/1-core-structure` | Team 1 integration | Protected |
-| `team/2-recruitment-data` | Team 2 integration | Protected |
-| `team/3-events-gallery-ux` | Team 3 integration | Protected |
+| `dev` | Integration layer | Protected |
+| `team/1-core-structure` | Team 1 integration | Protected (min approvals=2)|
+| `team/2-recruitment-data` | Team 2 integration | Protected (min approvals=2)|
+| `team/3-events-gallery-ux` | Team 3 integration | Protected (min approvals=2)|
 | `feature/*` | Individual work | Not protected |
 
 ### Workflow
 
-1. Create feature branch from your team branch:
+```
+feature/* → PR → team branch → PR → dev → (tech leads) → main
+```
+
+1. Create a feature branch from your team branch:
    ```bash
    git checkout team/1-core-structure
    git checkout -b feature/navbar
@@ -208,15 +255,20 @@ npx prettier --write .
    git push origin feature/navbar
    ```
 
-3. Create PR → your team branch (e.g., `team/1-core-structure`)
+3. Open PR → your team branch (requires **2 approvals**).
 
-4. After review, create PR → `main`
+4. Team branch → PR → `dev` (handled by tech leads).
+
+5. `dev` → `main` after integration testing (codeowner approval required).
 
 ### Rules
 
-- No direct push to protected branches
-- All changes via PRs
-- CI checks must pass before merging
+- No direct pushes to protected branches.
+- All changes go through PRs.
+- **Do not** merge directly between team branches — cross-team integration happens only via `dev`.
+- CI checks must pass before any merge.
+- Testing happens at the `dev` integration stage, not in isolation.
+- Strictly don't make changes in CI Pipeline
 
 ---
 
@@ -236,6 +288,8 @@ The CI pipeline runs on every PR to protected branches:
 ---
 
 ## Setup Instructions
+
+Note: The main application is inside the `frontend/` folder.
 
 ```bash
 # Clone the repository
@@ -259,9 +313,73 @@ npm run dev
 ## Important Notes
 
 - Node.js v24.x required
-- Do NOT commit `node_modules/`
+- Do NOT commit `node_modules/` 
 - Follow the project structure
 - Write clean, modular code
+- Use only TypeScript (.tsx / .ts). Do not use .js or .jsx files
+- Supabase keys and environment variables must be stored in .env.local and never committed
+- Authentication and role-based access (admin/domain heads) will be handled using Supabase Auth
+- Node.js v24.x required.
+- Do NOT commit `node_modules/` or `.env.local`.
+- Follow the project structure and use `.tsx` files throughout (TypeScript strict mode).
+- Write clean, modular code.
+
+---
+
+## API Routes
+
+| Endpoint | Methods | Description |
+|----------|---------|-------------|
+| `/api/recruitment` | `POST` | Submit recruitment application |
+| `/api/events` | `GET, POST, PATCH, DELETE` | Manage events |
+| `/api/gallery` | `GET, POST` | Fetch/upload gallery images |
+| `/api/members` | `GET, POST` | Fetch/add members |
+| `/api/announcements` | `GET, POST` | Fetch/create announcements |
+| `/api/admin/recruits` | `GET, PATCH` | Domain heads view/update recruit status |
+
+---
+
+## Admin Dashboard
+
+The dashboard is embedded within the same Next.js app — **not** a separate deployment. It is hidden from public navigation and accessed only via a secret URL known to admins.
+
+### Access & Roles
+
+| Role | Access | Active Period |
+|------|--------|---------------|
+| Tech (main admin) | Full dashboard — all data, all domains | Always |
+| Domain Head | Own domain recruits only | Recruitment season only |
+
+### Domain Head Capabilities
+
+- View recruits for their domain.
+- Edit recruit details.
+- Delete entries.
+- Update status: `selected` / `rejected` / `pending`.
+
+### Authentication & Security
+
+- Credentials are **never hardcoded**. Passwords are hashed; each domain head sets their own password.
+- Route protection is enforced on all `/dashboard/*` routes.
+- Domain heads are redirected to their scoped view after login; they cannot access other domains' data.
+- Outside of recruitment season, only the tech/admin login is active.
+
+---
+
+## Form Validation Rules
+
+Applied to both the Recruitment and Registration/Volunteer forms:
+
+| Rule | Details |
+|------|---------|
+| Required fields | No field may be empty |
+| Type checking | String, number enforced per field |
+| SRN format | Regex pattern validation |
+| Email format | Standard email regex |
+| Phone number | Format + length validation |
+| Min/Max length | Enforced per field |
+| Allowed values | Dropdowns restricted to valid options |
+| Links section | Each entry must be a valid URL; number of links is dynamic |
 
 ---
 
