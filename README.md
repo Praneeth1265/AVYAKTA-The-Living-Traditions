@@ -100,6 +100,15 @@ AVYAKTA-The-Living-Traditions/
 | `/history` | History | Animated timeline page |
 | `/avyakta-control-[hash]` | Admin | Hidden admin dashboard |
 
+### Page-specific Notes
+
+- **Home**: Includes announcements popup (recruitment/events), a timeline/history scroll, and a subtle line linking to the About IRA page.
+- **Members**: Sections for founders, faculty advisors, previous heads, and previous members. Hover animation on images; click opens a popup with name, designation, and a short description/quote.
+- **Recruitment**: Starts with a short ethics statement, followed by domain descriptions. Form includes name, SRN, branch, class, section, domain interest, and experience. A dynamic links section lets users add multiple links with a type dropdown + URL field.
+- **Gallery**: Event-wise image groups. Users scroll through events and view all images for a selected event.
+- **Events**: Scroll-based layout for past, present, and future events. Past events show a "View Gallery" option; upcoming events show a Register/Volunteer button.
+- **Admin (`/avyakta-control-[hash]`)**: Not linked in public navigation. Accessed only by typing the URL directly. Navigation flow: `Homepage → Hidden URL → Login → Dashboard`.
+
 ---
 
 ## Color Palette
@@ -186,17 +195,22 @@ npx prettier --write .
 
 ## Branching Strategy
 
-| Branch | Purpose | Protection |
-|--------|---------|------------|
-| `main` | Production-ready code | Protected |
-| `team/1-core-structure` | Team 1 integration | Protected |
-| `team/2-recruitment-data` | Team 2 integration | Protected |
-| `team/3-events-gallery-ux` | Team 3 integration | Protected |
-| `feature/*` | Individual work | Not protected |
+| Branch | Purpose | Protection | Merge Approvals |
+|--------|---------|------------|------------------|
+| `main` | Production (final release) | Codeowner approval | Codeowner |
+| `dev` | Integration & testing | Protected | Tech leads |
+| `team/1-core-structure` | Team 1 integration | Protected | Min. 2 approvals |
+| `team/2-recruitment-data` | Team 2 integration | Protected | Min. 2 approvals |
+| `team/3-events-gallery-ux` | Team 3 integration | Protected | Min. 2 approvals |
+| `feature/*` | Individual feature work | Not protected | — |
 
 ### Workflow
 
-1. Create feature branch from your team branch:
+```
+feature/* → PR → team branch → PR → dev → (tech leads) → main
+```
+
+1. Create a feature branch from your team branch:
    ```bash
    git checkout team/1-core-structure
    git checkout -b feature/navbar
@@ -208,15 +222,19 @@ npx prettier --write .
    git push origin feature/navbar
    ```
 
-3. Create PR → your team branch (e.g., `team/1-core-structure`)
+3. Open PR → your team branch (requires **2 approvals**).
 
-4. After review, create PR → `main`
+4. Team branch → PR → `dev` (handled by tech leads).
+
+5. `dev` → `main` after integration testing (codeowner approval required).
 
 ### Rules
 
-- No direct push to protected branches
-- All changes via PRs
-- CI checks must pass before merging
+- No direct pushes to protected branches.
+- All changes go through PRs.
+- **Do not** merge directly between team branches — cross-team integration happens only via `dev`.
+- CI checks must pass before any merge.
+- Testing happens at the `dev` integration stage, not in isolation.
 
 ---
 
@@ -258,10 +276,67 @@ npm run dev
 
 ## Important Notes
 
-- Node.js v24.x required
-- Do NOT commit `node_modules/`
-- Follow the project structure
-- Write clean, modular code
+- Node.js v24.x required.
+- Do NOT commit `node_modules/` or `.env.local`.
+- Follow the project structure and use `.tsx` files throughout (TypeScript strict mode).
+- Write clean, modular code.
+
+---
+
+## API Routes
+
+| Endpoint | Methods | Description |
+|----------|---------|-------------|
+| `/api/recruitment` | `POST` | Submit recruitment application |
+| `/api/events` | `GET, POST, PATCH, DELETE` | Manage events |
+| `/api/gallery` | `GET, POST` | Fetch/upload gallery images |
+| `/api/members` | `GET, POST` | Fetch/add members |
+| `/api/announcements` | `GET, POST` | Fetch/create announcements |
+| `/api/admin/recruits` | `GET, PATCH` | Domain heads view/update recruit status |
+
+---
+
+## Admin Dashboard
+
+The dashboard is embedded within the same Next.js app — **not** a separate deployment. It is hidden from public navigation and accessed only via a secret URL known to admins.
+
+### Access & Roles
+
+| Role | Access | Active Period |
+|------|--------|---------------|
+| Tech (main admin) | Full dashboard — all data, all domains | Always |
+| Domain Head | Own domain recruits only | Recruitment season only |
+
+### Domain Head Capabilities
+
+- View recruits for their domain.
+- Edit recruit details.
+- Delete entries.
+- Update status: `selected` / `rejected` / `pending`.
+
+### Authentication & Security
+
+- Credentials are **never hardcoded**. Passwords are hashed; each domain head sets their own password.
+- Route protection is enforced on all `/dashboard/*` routes.
+- Domain heads are redirected to their scoped view after login; they cannot access other domains' data.
+- Outside of recruitment season, only the tech/admin login is active.
+
+---
+
+## Form Validation Rules
+
+Applied to both the Recruitment and Registration/Volunteer forms:
+
+| Rule | Details |
+|------|---------|
+| Required fields | No field may be empty |
+| Type checking | String, number enforced per field |
+| SRN format | Regex pattern validation |
+| Email format | Standard email regex |
+| Phone number | Format + length validation |
+| Min/Max length | Enforced per field |
+| Allowed values | Dropdowns restricted to valid options |
+| Links section | Each entry must be a valid URL; number of links is dynamic |
 
 ---
 
