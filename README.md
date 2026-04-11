@@ -1,4 +1,5 @@
-# AVYAKTA – The Living Traditions
+# IRA - The AVYAKTA Chapter 
+## AVYAKTA – The Living Traditions
 
 A culturally rooted, vibrant website for Avyakta - a cultural multi-domain club that brings together students passionate about performing arts, design, technology, event management, and more.
 
@@ -6,14 +7,14 @@ A culturally rooted, vibrant website for Avyakta - a cultural multi-domain club 
 
 ## Tech Stack
 
-- **Framework**: Next.js 14+ (App Router)
-- **Styling**: Tailwind CSS with custom theme tokens
-- **Animations**: Framer Motion + CSS transitions
+- **Framework**: Next.js 14+ (App Router) with TypeScript (.tsx)
+- **Styling**: Tailwind CSS
+- **Animations**: CSS transitions
 - **Backend/DB**: Supabase (PostgreSQL + Auth + Storage)
-- **Forms**: React Hook Form + Zod
+- **Forms**: React Hook Form + validation (regex + logic)
 - **CI/CD**: GitHub Actions
 - **Node.js**: v24.x
-
+- Backend logic is handled using Next.js API routes (App Router)
 ---
 
 ## Project Structure
@@ -23,28 +24,52 @@ AVYAKTA-The-Living-Traditions/
 │
 ├── frontend/                      # Next.js application
 │   ├── src/
-│   │   ├── app/                  # Next.js App Router pages
+│   │   ├── app/                  # Next.js App Router (pages + routing)
+│   │   │   ├── layout.tsx       # Root layout (required)
 │   │   │   ├── page.tsx         # Home Page
-│   │   │   ├── about/           # About / What is Avyakta
-│   │   │   ├── about-ira/       # About Club IRA (parent)
-│   │   │   ├── recruitment/     # Recruitment form
+│   │   │   ├── about/
+│   │   │   │   └── page.tsx
+│   │   │   ├── about-ira/
+│   │   │   │   └── page.tsx
+│   │   │   ├── recruitment/
+│   │   │   │   └── page.tsx
 │   │   │   ├── events/
-│   │   │   │   ├── page.tsx     # Events listing
-│   │   │   │   └── [slug]/      # Event detail pages
-│   │   │   ├── gallery/         # Photo gallery
-│   │   │   ├── members/         # Team members
-│   │   │   ├── registrations/   # Volunteer/participant
-│   │   │   ├── history/         # Timeline page
-│   │   │   └── avyakta-control-[hash]/
-│   │   │       ├── page.tsx     # Admin login
-│   │   │       └── dashboard/    # Admin dashboard
-│   │   │           ├── announcements/
-│   │   │           ├── recruitment/
-│   │   │           ├── events/
-│   │   │           ├── gallery/
-│   │   │           ├── members/
-│   │   │           └── users/
-│   │   │
+│   │   │   │   ├── page.tsx
+│   │   │   │   └── [slug]/
+│   │   │   │       └── page.tsx
+│   │   │   ├── gallery/
+│   │   │   │   └── page.tsx
+│   │   │   ├── members/
+│   │   │   │   └── page.tsx
+│   │   │   ├── registrations/
+│   │   │   │   └── page.tsx
+│   │   │   ├── history/
+│   │   │   │   └── page.tsx
+│   │   │   └── avyakta-control/
+│   │   │       └── [hash]/      # Dynamic hidden admin route
+│   │   │           ├── page.tsx
+│   │   │           └── dashboard/
+│   │   │               ├── page.tsx
+│   │   │               ├── announcements/
+│   │   │               ├── recruitment/
+│   │   │               ├── events/
+│   │   │               ├── gallery/
+│   │   │               ├── members/
+│   │   │               └── users/
+│   │   ├── app/api/             # Next.js API routes (backend logic)
+│   │   │   ├── recruitment/
+│   │   │   │   └── route.ts     # POST - submit applications
+│   │   │   ├── events/
+│   │   │   │   └── route.ts     # CRUD - events
+│   │   │   ├── gallery/
+│   │   │   │   └── route.ts     # GET, POST - images
+│   │   │   ├── members/
+│   │   │   │   └── route.ts     # GET, POST - members
+│   │   │   ├── announcements/
+│   │   │   │   └── route.ts     # GET, POST - announcements
+│   │   │   └── admin/
+│   │   │       └── recruits/
+│   │   │           └── route.ts # GET, PATCH - admin recruit actions
 │   │   ├── components/
 │   │   │   ├── layout/          # Navbar, Footer, MobileMenu
 │   │   │   ├── home/            # Hero, Announcements, Domains, etc.
@@ -56,28 +81,26 @@ AVYAKTA-The-Living-Traditions/
 │   │   │   └── shared/          # RangoliDivider, MandalaLoader, etc.
 │   │   │
 │   │   ├── lib/
-│   │   │   ├── supabase/        # Supabase client & types
+│   │   │   ├── supabase/        # Supabase client & config
 │   │   │   └── utils/           # Helper functions
 │   │   │
 │   │   ├── hooks/               # Custom React hooks
-│   │   ├── types/               # TypeScript definitions
 │   │   ├── styles/              # Global styles
 │   │   └── assets/
-│   │       ├── icons/            # Custom SVG icons (diya, rangoli)
-│   │       └── patterns/         # SVG patterns (paisley, jaali)
+│   │       ├── icons/           # Custom SVG icons (diya, rangoli)
+│   │       └── patterns/        # SVG patterns (paisley, jaali)
 │   │
 │   ├── public/
 │   │   └── images/
 │   │
-│   ├── .env.local               # Environment variables
-│   ├── tailwind.config.ts
+│   ├── .env.local               # Environment variables 
+│   ├── tailwind.config.js
 │   ├── next.config.js
 │   └── package.json
 │
-├── frontend-vite/                # Old Vite project (reference)
 ├── .github/
 │   └── workflows/
-│       └── ci.yml              # CI Pipeline
+│       └── ci.yml               # CI Pipeline
 │
 └── README.md
 ```
@@ -155,7 +178,7 @@ AVYAKTA-The-Living-Traditions/
 | `gallery_images` | Gallery photos |
 | `members` | Team profiles |
 | `history_milestones` | Timeline entries |
-| `domain_heads` | Domain head accounts |
+| `domain_accounts` | Domain head accounts |
 
 ---
 
@@ -189,6 +212,8 @@ npx prettier --write .
 |------|---------|-------|
 | Team 1 - Core & Structure | Suhith, Arrham, Preksha | Layout, Navbar, Footer, Home, About, Admin |
 | Team 2 - Recruitment & Data | Teja, Vrushabendra, Navyashree | Forms, Supabase, Domain Head Dashboard |
+| Team 1 - Core & Structure | Suhith, Arrham, Preksha | Layout, Navbar, Footer, Home, About, Admin |
+| Team 2 - Recruitment & Data | Teja, Vrushabendra, Navyashree | Forms, Supabase, Domain Head Dashboard |
 | Team 3 - Events, Gallery & UX | Naman, Akhil, Nikita | Events, Gallery, Members, History, Animations |
 
 ---
@@ -203,6 +228,14 @@ npx prettier --write .
 | `team/2-recruitment-data` | Team 2 integration | Protected | Min. 2 approvals |
 | `team/3-events-gallery-ux` | Team 3 integration | Protected | Min. 2 approvals |
 | `feature/*` | Individual feature work | Not protected | — |
+| Branch | Purpose | Protection |
+|--------|---------|------------|
+| `main` | Production-ready code | Protected |
+| `dev` | Integration layer | Protected |
+| `team/1-core-structure` | Team 1 integration | Protected (min approvals=2)|
+| `team/2-recruitment-data` | Team 2 integration | Protected (min approvals=2)|
+| `team/3-events-gallery-ux` | Team 3 integration | Protected (min approvals=2)|
+| `feature/*` | Individual work | Not protected |
 
 ### Workflow
 
@@ -235,6 +268,7 @@ feature/* → PR → team branch → PR → dev → (tech leads) → main
 - **Do not** merge directly between team branches — cross-team integration happens only via `dev`.
 - CI checks must pass before any merge.
 - Testing happens at the `dev` integration stage, not in isolation.
+- Strictly don't make changes in CI Pipeline
 
 ---
 
@@ -254,6 +288,8 @@ The CI pipeline runs on every PR to protected branches:
 ---
 
 ## Setup Instructions
+
+Note: The main application is inside the `frontend/` folder.
 
 ```bash
 # Clone the repository
@@ -276,6 +312,13 @@ npm run dev
 
 ## Important Notes
 
+- Node.js v24.x required
+- Do NOT commit `node_modules/` 
+- Follow the project structure
+- Write clean, modular code
+- Use only TypeScript (.tsx / .ts). Do not use .js or .jsx files
+- Supabase keys and environment variables must be stored in .env.local and never committed
+- Authentication and role-based access (admin/domain heads) will be handled using Supabase Auth
 - Node.js v24.x required.
 - Do NOT commit `node_modules/` or `.env.local`.
 - Follow the project structure and use `.tsx` files throughout (TypeScript strict mode).
