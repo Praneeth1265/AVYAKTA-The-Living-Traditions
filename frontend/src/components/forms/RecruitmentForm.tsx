@@ -1,33 +1,72 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
+
+const branches = [
+  "CSE",
+  "AIML",
+  "ECE",
+  "Pharm.D.",
+  "B.Pharm.",
+  "MBA",
+  "BBA",
+  "MBBS",
+  "Nursing",
+  "AHS",
+  "BPT",
+  "FOMC",
+];
 
 const recruitmentSchema = z.object({
   name: z
     .string()
     .min(2, "Name must be at least 2 characters")
+    .max(1024, "Name must not exceed 1024 characters")
     .regex(/^[a-zA-Z\s]+$/, "Name can only contain letters and spaces"),
   email: z.string().email("Invalid email address"),
   phone_number: z
     .string()
     .regex(/^\d{10}$/, "Phone number must be exactly 10 digits"),
   domain: z.string().min(1, "Domain is required"),
-  srn: z.string().min(1, "SRN is required"),
+  srn: z
+    .string()
+    .length(13, "SRN must be exactly 13 characters")
+    .regex(
+      /^PES2[A-Z]{2}\d{2}[A-Z]{2}\d{3}$/,
+      "SRN format: PES2 + 2 Alpha + 2 numbers + 2 Alpha + 3 numbers",
+    ),
   sem: z
     .string()
     .refine(
       (val) => parseInt(val) >= 1 && parseInt(val) <= 8,
       "Semester must be between 1-8",
     ),
-  branch: z.string().min(1, "Branch is required"),
-  section: z.string().min(1, "Section is required"),
+  branch: z.enum(branches as [string, ...string[]], {
+    message: "Please select a valid branch",
+  }),
+  section: z
+    .string()
+    .min(1, "Section is required")
+    .max(1024, "Section must not exceed 1024 characters"),
   links: z.string().optional(),
-  experience: z.string().optional(),
-  why_you: z.string().min(10, "Please provide at least 10 characters"),
-  why_us: z.string().min(10, "Please provide at least 10 characters"),
+  experience: z
+    .string()
+    .optional()
+    .refine(
+      (val) => !val || val.length <= 1024,
+      "Experience must not exceed 1024 characters",
+    ),
+  why_you: z
+    .string()
+    .min(10, "Please provide at least 10 characters")
+    .max(1024, "Must not exceed 1024 characters"),
+  why_us: z
+    .string()
+    .min(10, "Please provide at least 10 characters")
+    .max(1024, "Must not exceed 1024 characters"),
 });
 
 export type RecruitmentFormData = z.infer<typeof recruitmentSchema>;
@@ -38,12 +77,19 @@ export default function RecruitmentForm() {
   const [errorMessage, setErrorMessage] = useState("");
   const [linkInputs, setLinkInputs] = useState([""]); // Local state for dynamic links
 
+  // Cleanup timeout on unmount to prevent memory leaks
+  useEffect(() => {
+    if (!successMessage) return;
+
+    const timeoutId = setTimeout(() => setSuccessMessage(""), 5000);
+    return () => clearTimeout(timeoutId);
+  }, [successMessage]);
+
   const {
     register,
     handleSubmit,
     formState: { errors },
     reset,
-    watch,
   } = useForm<RecruitmentFormData>({
     resolver: zodResolver(recruitmentSchema),
   });
@@ -91,9 +137,6 @@ export default function RecruitmentForm() {
       setSuccessMessage("Application submitted successfully!");
       reset();
       setLinkInputs([""]);
-
-      // Clear success message after 5 seconds
-      setTimeout(() => setSuccessMessage(""), 5000);
     } catch (error) {
       console.error("Submission error:", error);
       setErrorMessage("An error occurred. Please try again.");
@@ -130,6 +173,7 @@ export default function RecruitmentForm() {
             {...register("name")}
             type="text"
             placeholder="Your full name"
+            maxLength={1024}
             className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
           {errors.name && (
@@ -209,14 +253,22 @@ export default function RecruitmentForm() {
             SRN <span className="text-red-500">*</span>
           </label>
           <input
-            {...register("srn")}
+            {...register("srn", {
+              onChange: (e) => {
+                e.target.value = e.target.value.toUpperCase();
+              },
+            })}
             type="text"
-            placeholder="Your SRN/Roll Number"
-            className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            placeholder="SRN"
+            maxLength={13}
+            className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 uppercase"
           />
           {errors.srn && (
             <p className="text-red-500 text-sm mt-1">{errors.srn.message}</p>
           )}
+          <p className="text-gray-500 text-xs mt-1">
+            Format: PES2 + 2 Alpha + 2 numbers + 2 Alpha + 3 numbers
+          </p>
         </div>
 
         {/* Semester Field */}
@@ -242,12 +294,17 @@ export default function RecruitmentForm() {
           <label className="block text-sm font-medium mb-1">
             Branch <span className="text-red-500">*</span>
           </label>
-          <input
+          <select
             {...register("branch")}
-            type="text"
-            placeholder="Your branch/stream"
             className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
+          >
+            <option value="">Select your branch</option>
+            {branches.map((b) => (
+              <option key={b} value={b}>
+                {b}
+              </option>
+            ))}
+          </select>
           {errors.branch && (
             <p className="text-red-500 text-sm mt-1">{errors.branch.message}</p>
           )}
@@ -262,6 +319,7 @@ export default function RecruitmentForm() {
             {...register("section")}
             type="text"
             placeholder="Your section"
+            maxLength={1024}
             className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
           {errors.section && (
@@ -271,17 +329,37 @@ export default function RecruitmentForm() {
           )}
         </div>
 
+        {/* Experience Field */}
+        <div>
+          <label className="block text-sm font-medium mb-1">Experience</label>
+          <textarea
+            {...register("experience")}
+            placeholder="Your relevant experience"
+            rows={2}
+            maxLength={1024}
+            className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+          {errors.experience && (
+            <p className="text-red-500 text-sm mt-1">
+              {errors.experience.message}
+            </p>
+          )}
+        </div>
+
         {/* Links Field (Dynamic Array UI) */}
         <div>
-          <label className="block text-sm font-medium mb-1">Links</label>
+          <label className="block text-sm font-medium mb-1">
+            Showcase Your Work (Links)
+          </label>
           <div className="space-y-2">
             {linkInputs.map((link, index) => (
               <div key={index} className="flex gap-2">
                 <input
                   type="url"
-                  placeholder="https://example-link.com (optional)"
+                  placeholder="github, portfolio, drive links etc"
                   value={link}
                   onChange={(e) => updateLinkInput(index, e.target.value)}
+                  maxLength={1024}
                   className="flex-1 px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
                 {index > 0 && (
@@ -304,31 +382,22 @@ export default function RecruitmentForm() {
             + Add Another Link
           </button>
           <p className="text-gray-500 text-xs mt-1">
-            Add multiple links (portfolio, GitHub, LinkedIn, etc.) - all
-            optional
+            You may include links to your portfolio, GitHub, Google Drive, or
+            any previous work/projects to showcase your experience (optional)
           </p>
-        </div>
-
-        {/* Experience Field */}
-        <div>
-          <label className="block text-sm font-medium mb-1">Experience</label>
-          <textarea
-            {...register("experience")}
-            placeholder="Your relevant experience"
-            rows={2}
-            className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
         </div>
 
         {/* Why You Field */}
         <div>
           <label className="block text-sm font-medium mb-1">
-            Why do you want to join? <span className="text-red-500">*</span>
+            What do you bring to the table?{" "}
+            <span className="text-red-500">*</span>
           </label>
           <textarea
             {...register("why_you")}
             placeholder="Tell us why you're interested in AVYAKTA (minimum 10 characters)"
             rows={3}
+            maxLength={1024}
             className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
           {errors.why_you && (
@@ -347,6 +416,7 @@ export default function RecruitmentForm() {
             {...register("why_us")}
             placeholder="What do you expect from AVYAKTA? (minimum 10 characters)"
             rows={3}
+            maxLength={1024}
             className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
           {errors.why_us && (
