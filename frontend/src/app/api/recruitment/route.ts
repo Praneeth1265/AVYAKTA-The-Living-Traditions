@@ -91,8 +91,8 @@ export async function POST(request: NextRequest) {
       .insert([
         {
           name: data.name,
-          domain: data.domain || null,
-          srn: data.srn || null,
+          domain: data.domain,
+          srn: data.srn,
           sem: data.sem || null,
           branch: data.branch || null,
           section: data.section || null,

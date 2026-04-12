@@ -52,8 +52,8 @@ export const posters = pgTable("posters", {
 export const recruitment = pgTable("recruitment", {
   id: uuid("id").primaryKey().defaultRandom(),
   name: text("name").notNull(),
-  domain: text("domain"),
-  srn: text("srn"),
+  domain: text("domain").notNull(),
+  srn: text("srn").notNull(),
   sem: text("sem"),
   branch: text("branch"),
   section: text("section"),
