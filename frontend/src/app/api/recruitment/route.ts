@@ -46,7 +46,7 @@ export async function POST(request: NextRequest) {
           error: "Failed to submit recruitment application",
           code: "RECRUITMENT_INSERT_FAILED",
         },
-        { status: 400 },
+        { status: 500 },
       );
     }
 

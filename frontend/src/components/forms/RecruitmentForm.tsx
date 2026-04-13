@@ -323,13 +323,24 @@ export default function RecruitmentForm() {
           <button
             type="button"
             onClick={addLinkInput}
-            className="mt-2 px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition"
+            disabled={linkInputs.length >= 10}
+            className={`mt-2 px-4 py-2 text-white rounded-lg transition ${
+              linkInputs.length >= 10
+                ? "bg-gray-400 cursor-not-allowed"
+                : "bg-green-500 hover:bg-green-600"
+            }`}
           >
             + Add Another Link
           </button>
+          {linkInputs.length >= 10 && (
+            <p className="text-orange-600 text-xs mt-2 font-medium">
+              Maximum 10 links allowed
+            </p>
+          )}
           <p className="text-gray-500 text-xs mt-1">
             You may include links to your portfolio, GitHub, Google Drive, or
-            any previous work/projects to showcase your experience (optional)
+            any previous work/projects to showcase your experience (optional,
+            max 10 links)
           </p>
         </div>
 
