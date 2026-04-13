@@ -1,4 +1,11 @@
-import { pgTable, uuid, text, date, boolean } from "drizzle-orm/pg-core";
+import {
+  pgTable,
+  uuid,
+  text,
+  date,
+  boolean,
+  integer,
+} from "drizzle-orm/pg-core";
 
 export const events = pgTable("events", {
   id: uuid("id").primaryKey().defaultRandom(),
@@ -24,8 +31,8 @@ export const event_slug = pgTable("event_slug", {
 export const members = pgTable("members", {
   id: uuid("id").primaryKey().defaultRandom(),
   name: text("name").notNull(),
-  domain: text("domain"),
-  role: text("role"),
+  domain: text("domain").notNull(),
+  role: text("role").notNull(),
 });
 
 export const posters = pgTable("posters", {
@@ -37,7 +44,7 @@ export const posters = pgTable("posters", {
       onUpdate: "cascade",
     }),
   title: text("title").notNull(),
-  poster_image_url: text("poster_image_url"),
+  poster_image_url: text("poster_image_url").notNull(),
 });
 
 export const recruitment = pgTable("recruitment", {
@@ -45,25 +52,25 @@ export const recruitment = pgTable("recruitment", {
   name: text("name").notNull(),
   domain: text("domain").notNull(),
   srn: text("srn").notNull(),
-  year: text("year"),
-  branch: text("branch"),
-  section: text("section"),
+  year: integer("year").notNull(),
+  branch: text("branch").notNull(),
+  section: text("section").notNull(),
   links: text("links"),
   experience: text("experience"),
-  why_you: text("why_you"),
-  why_us: text("why_us"),
-  phone_number: text("phone_number"),
-  email: text("email"),
+  why_you: text("why_you").notNull(),
+  why_us: text("why_us").notNull(),
+  phone_no: integer("phone_no").notNull(),
+  email: text("email").notNull(),
 });
 
 export const registration = pgTable("registration", {
   id: uuid("id").primaryKey().defaultRandom(),
   name: text("name").notNull(),
-  srn: text("srn"),
-  branch: text("branch"),
+  srn: text("srn").notNull(),
+  branch: text("branch").notNull(),
   hostel: boolean("hostel").default(false),
-  email: text("email"),
-  phone_no: text("phone_no"),
+  email: text("email").notNull(),
+  phone_no: integer("phone_no").notNull(),
   payment_image_url: text("payment_image_url"),
 });
 

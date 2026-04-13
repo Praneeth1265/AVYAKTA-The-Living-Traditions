@@ -25,7 +25,7 @@ export async function POST(request: NextRequest) {
         {
           name: data.name,
           email: data.email,
-          phone_number: data.phone_number,
+          phone_no: data.phone_number ? parseInt(data.phone_number) : null,
           domain: data.domain,
           srn: data.srn,
           year: data.year ?? null,
