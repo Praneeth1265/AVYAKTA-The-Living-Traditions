@@ -11,21 +11,6 @@ interface SuccessResponse {
   message: string;
 }
 
-interface RecruitmentInsertData {
-  name: string;
-  email: string;
-  phone_no: number | null;
-  domain: string;
-  srn: string;
-  year: number | null;
-  branch: string | null;
-  section: string | null;
-  links: string[] | null;
-  experience: string | null;
-  why_you: string;
-  why_us: string;
-}
-
 export async function POST(
   request: NextRequest,
 ): Promise<NextResponse<SuccessResponse | ErrorResponse>> {
@@ -43,26 +28,34 @@ export async function POST(
 
     const data = validation.data;
 
+    // Parse links from JSON string to array
+    let parsedLinks: string[] | null = null;
+    if (data.links) {
+      try {
+        parsedLinks = JSON.parse(data.links);
+      } catch {
+        parsedLinks = null;
+      }
+    }
+
     // links already validated by schema (parsed JSON array with size/length limits)
     const supabaseAdmin = getSupabaseAdmin();
-    const { error } = await supabaseAdmin
-      .from("recruitment")
-      .insert<RecruitmentInsertData>([
-        {
-          name: data.name,
-          email: data.email,
-          phone_no: data.phone_number ? parseInt(data.phone_number) : null,
-          domain: data.domain,
-          srn: data.srn,
-          year: data.year ?? null,
-          branch: data.branch || null,
-          section: data.section || null,
-          links: data.links ?? null,
-          experience: data.experience ?? null,
-          why_you: data.why_you,
-          why_us: data.why_us,
-        },
-      ]);
+    const { error } = await supabaseAdmin.from("recruitment").insert([
+      {
+        name: data.name,
+        email: data.email,
+        phone_no: data.phone_number ? parseInt(data.phone_number) : null,
+        domain: data.domain,
+        srn: data.srn,
+        year: data.year ?? null,
+        branch: data.branch || null,
+        section: data.section || null,
+        links: parsedLinks,
+        experience: data.experience ?? null,
+        why_you: data.why_you,
+        why_us: data.why_us,
+      },
+    ]);
 
     if (error) {
       console.error("Supabase insert error:", error);
