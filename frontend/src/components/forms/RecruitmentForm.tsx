@@ -3,73 +3,11 @@
 import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
-
-const branches = [
-  "CSE",
-  "AIML",
-  "ECE",
-  "Pharm.D.",
-  "B.Pharm.",
-  "MBA",
-  "BBA",
-  "MBBS",
-  "Nursing",
-  "AHS",
-  "BPT",
-  "FOMC",
-];
-
-const recruitmentSchema = z.object({
-  name: z
-    .string()
-    .min(2, "Name must be at least 2 characters")
-    .max(1024, "Name must not exceed 1024 characters")
-    .regex(/^[a-zA-Z\s]+$/, "Name can only contain letters and spaces"),
-  email: z.string().email("Invalid email address"),
-  phone_number: z
-    .string()
-    .regex(/^\d{10}$/, "Phone number must be exactly 10 digits"),
-  domain: z.string().min(1, "Domain is required"),
-  srn: z
-    .string()
-    .length(13, "SRN must be exactly 13 characters")
-    .regex(
-      /^PES2[A-Z]{2}\d{2}[A-Z]{2}\d{3}$/,
-      "SRN format: PES2 + 2 Alpha + 2 numbers + 2 Alpha + 3 numbers",
-    ),
-  sem: z
-    .string()
-    .refine(
-      (val) => parseInt(val) >= 1 && parseInt(val) <= 8,
-      "Semester must be between 1-8",
-    ),
-  branch: z.enum(branches as [string, ...string[]], {
-    message: "Please select a valid branch",
-  }),
-  section: z
-    .string()
-    .min(1, "Section is required")
-    .max(1024, "Section must not exceed 1024 characters"),
-  links: z.string().optional(),
-  experience: z
-    .string()
-    .optional()
-    .refine(
-      (val) => !val || val.length <= 1024,
-      "Experience must not exceed 1024 characters",
-    ),
-  why_you: z
-    .string()
-    .min(10, "Please provide at least 10 characters")
-    .max(1024, "Must not exceed 1024 characters"),
-  why_us: z
-    .string()
-    .min(10, "Please provide at least 10 characters")
-    .max(1024, "Must not exceed 1024 characters"),
-});
-
-export type RecruitmentFormData = z.infer<typeof recruitmentSchema>;
+import {
+  recruitmentSchema,
+  RECRUITMENT_BRANCHES,
+  RecruitmentFormData,
+} from "../../lib/validators/recruitment";
 
 export default function RecruitmentForm() {
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -112,7 +50,8 @@ export default function RecruitmentForm() {
     try {
       // Filter empty links and convert to JSON string
       const validLinks = linkInputs.filter((link) => link.trim().length > 0);
-      const linksJson = JSON.stringify(validLinks);
+      const linksJson =
+        validLinks.length > 0 ? JSON.stringify(validLinks) : null;
 
       const payload = {
         ...data,
@@ -299,7 +238,7 @@ export default function RecruitmentForm() {
             className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
             <option value="">Select your branch</option>
-            {branches.map((b) => (
+            {RECRUITMENT_BRANCHES.map((b) => (
               <option key={b} value={b}>
                 {b}
               </option>
