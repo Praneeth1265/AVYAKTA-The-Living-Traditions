@@ -1,6 +1,5 @@
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
-import AdminDashboardClient from "../../../../components/admin/AdminDashboardClient";
 
 export default async function DashboardPage() {
   const authCookie = (await cookies()).get("avyakta-auth")?.value;
@@ -9,5 +8,5 @@ export default async function DashboardPage() {
     redirect("/auth/login");
   }
 
-  return <AdminDashboardClient />;
+  redirect("/avyakta-control/admin/dashboard");
 }
