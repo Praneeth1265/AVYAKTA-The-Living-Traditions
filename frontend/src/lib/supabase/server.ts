@@ -1,8 +1,23 @@
+import "server-only";
 import { createClient } from "@supabase/supabase-js";
 
 // Server-only admin client (has full permissions)
 // Only use this in server actions and API routes
-export const supabaseAdmin = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!,
-);
+export function getSupabaseAdmin() {
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+  if (!supabaseUrl) {
+    throw new Error(
+      "Missing required environment variable: NEXT_PUBLIC_SUPABASE_URL",
+    );
+  }
+
+  if (!serviceRoleKey) {
+    throw new Error(
+      "Missing required environment variable: SUPABASE_SERVICE_ROLE_KEY",
+    );
+  }
+
+  return createClient(supabaseUrl, serviceRoleKey);
+}
