@@ -33,12 +33,10 @@ export const recruitmentSchema = z.object({
       /^PES2[A-Z]{2}\d{2}[A-Z]{2}\d{3}$/,
       "SRN format: PES2 + 2 letters + 2 numbers + 2 letters + 3 numbers (e.g., PES2UG23CS135)",
     ),
-  sem: z
-    .string()
-    .refine(
-      (val) => parseInt(val) >= 1 && parseInt(val) <= 8,
-      "Semester must be between 1-8",
-    ),
+  year: z
+    .number()
+    .int("Year must be an integer")
+    .min(1, "Year must be greater than 0"),
   branch: z.enum(RECRUITMENT_BRANCHES, {
     message: "Please select a valid branch",
   }),

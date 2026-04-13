@@ -45,7 +45,7 @@ export const recruitment = pgTable("recruitment", {
   name: text("name").notNull(),
   domain: text("domain").notNull(),
   srn: text("srn").notNull(),
-  sem: text("sem"),
+  year: text("year"),
   branch: text("branch"),
   section: text("section"),
   links: text("links"),

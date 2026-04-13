@@ -51,7 +51,7 @@ export default function RecruitmentForm() {
       // Filter empty links and convert to JSON string
       const validLinks = linkInputs.filter((link) => link.trim().length > 0);
       const linksJson =
-        validLinks.length > 0 ? JSON.stringify(validLinks) : null;
+        validLinks.length > 0 ? JSON.stringify(validLinks) : undefined;
 
       const payload = {
         ...data,
@@ -210,22 +210,29 @@ export default function RecruitmentForm() {
           </p>
         </div>
 
-        {/* Semester Field */}
+        {/* Year Field */}
         <div>
-          <label className="block text-sm font-medium mb-1">
-            Semester <span className="text-red-500">*</span>
+          <label htmlFor="year" className="block text-sm font-medium mb-1">
+            Year <span className="text-red-500">*</span>
           </label>
           <input
-            {...register("sem")}
+            id="year"
+            aria-describedby={errors.year ? "year-error" : undefined}
+            {...register("year", { valueAsNumber: true })}
             type="number"
             min="1"
-            max="8"
-            placeholder="1-8"
+            step="1"
+            placeholder="Enter year"
             className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
-          {errors.sem && (
-            <p className="text-red-500 text-sm mt-1">{errors.sem.message}</p>
+          {errors.year && (
+            <p id="year-error" className="text-red-500 text-sm mt-1">
+              {errors.year.message}
+            </p>
           )}
+          <p className="text-gray-500 text-xs mt-1">
+            Enter your academic year (must be greater than 0, integers only)
+          </p>
         </div>
 
         {/* Branch Field */}

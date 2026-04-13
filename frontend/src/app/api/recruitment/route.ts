@@ -1,9 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSupabaseAdmin } from "../../../lib/supabase/server";
-import {
-  recruitmentSchema,
-  RECRUITMENT_BRANCHES,
-} from "../../../lib/validators/recruitment";
+import { recruitmentSchema } from "../../../lib/validators/recruitment";
 
 export async function POST(request: NextRequest) {
   try {
@@ -27,17 +24,17 @@ export async function POST(request: NextRequest) {
       .insert([
         {
           name: data.name,
+          email: data.email,
+          phone_number: data.phone_number,
           domain: data.domain,
           srn: data.srn,
-          sem: data.sem || null,
+          year: data.year ?? null,
           branch: data.branch || null,
           section: data.section || null,
-          links: data.links || null,
-          experience: data.experience || null,
-          why_you: data.why_you || null,
-          why_us: data.why_us || null,
-          phone_number: data.phone_number || null,
-          email: data.email,
+          links: data.links ?? null,
+          experience: data.experience ?? null,
+          why_you: data.why_you,
+          why_us: data.why_us,
         },
       ])
       .select();
