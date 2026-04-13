@@ -1,26 +1,147 @@
+/* Tailwind CSS */
 @import "tailwindcss";
 
+/* Import all CSS modules */
+@import "../styles/variables.css";
+@import "../styles/typography.css";
+@import "../styles/components.css";
+@import "../styles/animations.css";
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Avyakta Color Palette */
+  --color-bronze-gold: #92791b;
+  --color-emerald-green: #1b5e3b;
+  --color-charcoal-black: #1c1c1c;
+  --color-dull-olive: #737955;
+  --color-deep-crimson: #8b1a1a;
+  --color-warm-white: #f5f0e8;
+  --color-gold-light: #c9a84c;
+
+  /* Primary Usage */
+  --background: #f5f0e8;
+  --foreground: #1c1c1c;
+  --primary: #92791b;
+  --secondary: #1b5e3b;
+  --accent: #8b1a1a;
+  --muted: #737955;
+  --border: #c9a84c;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-primary: var(--primary);
+  --color-secondary: var(--secondary);
+  --color-accent: var(--accent);
+  --color-muted: var(--muted);
+  --color-border: var(--border);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --background: #1c1c1c;
+    --foreground: #f5f0e8;
   }
+}
+
+html {
+  scroll-behavior: smooth;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family:
+    -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue",
+    Arial, sans-serif;
+  margin: 0;
+  padding: 0;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/* Tailwind Utilities */
+@layer components {
+  .btn-primary {
+    @apply bg-[#92791B] hover:bg-[#C9A84C] text-[#F5F0E8] font-medium py-2 px-4 rounded-lg transition-all duration-300 shadow-md hover:shadow-lg cursor-pointer;
+  }
+
+  .btn-secondary {
+    @apply bg-[#1B5E3B] hover:bg-[#2d8659] text-[#F5F0E8] font-medium py-2 px-4 rounded-lg transition-all duration-300;
+  }
+
+  .heading-primary {
+    @apply text-[#92791B] font-bold text-xl;
+  }
+
+  .heading-secondary {
+    @apply text-[#1B5E3B] font-semibold text-lg;
+  }
+
+  .text-muted {
+    @apply text-[#737955];
+  }
+
+  .border-accent {
+    @apply border-[#C9A84C];
+  }
+
+  .alert-error {
+    @apply bg-[#8B1A1A]/10 border border-[#8B1A1A]/30 text-[#8B1A1A] px-4 py-3 rounded-lg;
+  }
+
+  .alert-success {
+    @apply bg-[#1B5E3B]/10 border border-[#1B5E3B]/30 text-[#1B5E3B] px-4 py-3 rounded-lg;
+  }
+
+  .card-background {
+    @apply bg-[#F5F0E8] shadow-lg rounded-lg p-6;
+  }
+
+  .input-field {
+    @apply w-full px-4 py-2 rounded-lg border border-[#C9A84C] bg-[#F5F0E8] text-[#1C1C1C] focus:outline-none focus:ring-2 focus:ring-[#92791B]/50;
+  }
+
+  .input-field:disabled {
+    @apply opacity-60 cursor-not-allowed;
+  }
+}
+
+/* Scrollbar Styling */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--background);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 5px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--primary);
+}
+
+/* Selection Color */
+::selection {
+  background-color: var(--primary);
+  color: var(--background);
+}
+
+::-moz-selection {
+  background-color: var(--primary);
+  color: var(--background);
 }
