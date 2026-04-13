@@ -13,7 +13,9 @@ export default function AdminDashboardClient() {
             <p className="text-sm font-semibold uppercase tracking-[0.3em] text-amber-600">
               Avyakta Admin
             </p>
-            <h1 className="mt-2 text-3xl font-bold text-gray-900">Admin Dashboard</h1>
+            <h1 className="mt-2 text-3xl font-bold text-gray-900">
+              Admin Dashboard
+            </h1>
             <p className="mt-1 text-sm text-gray-600">
               Manage events, members, registrations, and content from here.
             </p>
@@ -54,7 +56,9 @@ export default function AdminDashboardClient() {
               className={`rounded-2xl border-t-4 ${card.accent} bg-slate-50 p-6 shadow-sm`}
             >
               <h2 className="text-xl font-bold text-gray-900">{card.title}</h2>
-              <p className="mt-2 text-sm leading-6 text-gray-600">{card.description}</p>
+              <p className="mt-2 text-sm leading-6 text-gray-600">
+                {card.description}
+              </p>
             </section>
           ))}
         </div>

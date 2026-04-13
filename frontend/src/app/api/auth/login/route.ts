@@ -1,6 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import bcrypt from "bcrypt";
 import { getSupabaseAdmin } from "../../../../lib/supabase/server";
+import {
+  createSessionToken,
+  getSessionCookieName,
+} from "../../../../lib/auth/session";
 
 export async function POST(request: NextRequest) {
   try {
@@ -10,7 +14,7 @@ export async function POST(request: NextRequest) {
     if (!email || !password) {
       return NextResponse.json(
         { error: "Email and password are required" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -21,7 +25,7 @@ export async function POST(request: NextRequest) {
     const { data, error: queryError } = await supabase
       .from("login_credentials")
       .select("id, email, password_hash")
-      .ilike("email", normalizedEmail)
+      .eq("email", normalizedEmail)
       .limit(1)
       .maybeSingle();
 
@@ -54,6 +58,11 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    const sessionToken = await createSessionToken({
+      userId: String(credential.id),
+      email: credential.email,
+    });
+
     const response = NextResponse.json(
       {
         message: "Login successful",
@@ -66,8 +75,8 @@ export async function POST(request: NextRequest) {
     );
 
     response.cookies.set({
-      name: "avyakta-auth",
-      value: credential.id,
+      name: getSessionCookieName(),
+      value: sessionToken,
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: "lax",
@@ -79,7 +88,9 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.error("Login error:", error);
     const message =
-      error instanceof Error ? error.message : "An error occurred during sign in";
+      error instanceof Error
+        ? error.message
+        : "An error occurred during sign in";
     return NextResponse.json(
       {
         error:

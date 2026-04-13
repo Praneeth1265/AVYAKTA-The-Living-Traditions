@@ -19,8 +19,12 @@ export default function LoginPage() {
             <div className="absolute top-0 left-0 w-12 h-12 border-t-2 border-l-2 border-white opacity-50"></div>
             <div className="absolute bottom-0 right-0 w-12 h-12 border-b-2 border-r-2 border-white opacity-50"></div>
 
-            <h1 className="text-4xl font-bold text-white mb-2 tracking-wide">Avyakta</h1>
-            <p className="text-amber-50 text-sm font-medium">The Living Traditions</p>
+            <h1 className="text-4xl font-bold text-white mb-2 tracking-wide">
+              Avyakta
+            </h1>
+            <p className="text-amber-50 text-sm font-medium">
+              The Living Traditions
+            </p>
             <div className="mt-4 flex justify-center gap-1">
               <div className="w-2 h-2 rounded-full bg-white opacity-70"></div>
               <div className="w-2 h-2 rounded-full bg-white opacity-100"></div>
@@ -30,8 +34,12 @@ export default function LoginPage() {
 
           {/* Form Content */}
           <div className="p-8">
-            <h2 className="text-2xl font-bold text-gray-900 mb-1">Welcome Back</h2>
-            <p className="text-gray-600 text-sm mb-6">Join our community of creativity and tradition</p>
+            <h2 className="text-2xl font-bold text-gray-900 mb-1">
+              Welcome Back
+            </h2>
+            <p className="text-gray-600 text-sm mb-6">
+              Join our community of creativity and tradition
+            </p>
 
             <LoginForm />
           </div>
@@ -39,7 +47,8 @@ export default function LoginPage() {
           {/* Footer */}
           <div className="bg-gradient-to-r from-slate-50 to-amber-50 px-8 py-4 border-t border-gray-200">
             <p className="text-xs text-gray-500 text-center">
-              By signing in, you agree to our Terms of Service and Privacy Policy
+              By signing in, you agree to our Terms of Service and Privacy
+              Policy
             </p>
           </div>
         </div>

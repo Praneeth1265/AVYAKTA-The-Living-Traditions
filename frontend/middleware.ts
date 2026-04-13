@@ -1,8 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
+import {
+  getSessionCookieName,
+  verifySessionToken,
+} from "./src/lib/auth/session";
 
 export async function middleware(request: NextRequest) {
-  // Get the auth token from the cookie
-  const token = request.cookies.get("avyakta-auth")?.value;
+  const cookieName = getSessionCookieName();
+  const token = request.cookies.get(cookieName)?.value;
+  const session = token ? await verifySessionToken(token) : null;
 
   // Define protected routes
   const protectedRoutes = ["/dashboard", "/avyakta-control"];
@@ -12,19 +17,25 @@ export async function middleware(request: NextRequest) {
 
   // Check if the current route is protected
   const isProtectedRoute = protectedRoutes.some((route) =>
-    pathname.startsWith(route)
+    pathname.startsWith(route),
   );
 
   // Check if it's an auth route
   const isAuthRoute = authRoutes.some((route) => pathname.startsWith(route));
 
   // If there's no token and they're trying to access a protected route, redirect to login
-  if (isProtectedRoute && !token) {
-    return NextResponse.redirect(new URL("/auth/login", request.url));
+  if (isProtectedRoute && !session) {
+    const response = NextResponse.redirect(new URL("/auth/login", request.url));
+
+    if (token) {
+      response.cookies.delete(cookieName);
+    }
+
+    return response;
   }
 
   // If they have a token and are trying to access auth routes, redirect to dashboard
-  if (isAuthRoute && token) {
+  if (isAuthRoute && session) {
     return NextResponse.redirect(new URL("/dashboard", request.url));
   }
 

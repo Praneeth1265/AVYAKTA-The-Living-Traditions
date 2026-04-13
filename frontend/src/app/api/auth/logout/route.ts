@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { getSessionCookieName } from "../../../../lib/auth/session";
 
 export async function POST() {
   try {
@@ -8,7 +9,7 @@ export async function POST() {
     );
 
     // Clear the auth cookie
-    response.cookies.delete("avyakta-auth");
+    response.cookies.delete(getSessionCookieName());
 
     return response;
   } catch (error) {
