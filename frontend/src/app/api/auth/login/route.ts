@@ -5,19 +5,31 @@ import {
   createSessionToken,
   getSessionCookieName,
 } from "../../../../lib/auth/session";
+import { loginSchema } from "../../../../lib/validators/auth";
 
-export async function POST(request: NextRequest) {
+interface ErrorResponse {
+  error: string;
+}
+
+interface Credential {
+  id: string | number;
+  email: string;
+  password_hash: string;
+}
+
+export async function POST(request: NextRequest): Promise<NextResponse> {
   try {
-    const { email, password } = await request.json();
+    const body = await request.json();
+    const parsed = loginSchema.safeParse(body);
 
-    // Validate input
-    if (!email || !password) {
+    if (!parsed.success) {
       return NextResponse.json(
-        { error: "Email and password are required" },
+        { error: "Email and password are required" } as ErrorResponse,
         { status: 400 },
       );
     }
 
+    const { email, password } = parsed.data;
     const normalizedEmail = String(email).trim().toLowerCase();
     const plainPassword = String(password);
     const supabase = getSupabaseAdmin();
@@ -27,21 +39,21 @@ export async function POST(request: NextRequest) {
       .select("id, email, password_hash")
       .eq("email", normalizedEmail)
       .limit(1)
-      .maybeSingle();
+      .maybeSingle<Credential>();
 
     if (queryError) {
       console.error("Credential lookup failed:", queryError);
       return NextResponse.json(
-        { error: "Unable to verify credentials" },
+        { error: "Unable to verify credentials" } as ErrorResponse,
         { status: 500 },
       );
     }
 
-    const credential = data;
+    const credential = data as Credential | null;
 
     if (!credential) {
       return NextResponse.json(
-        { error: "Invalid email or password" },
+        { error: "Invalid email or password" } as ErrorResponse,
         { status: 401 },
       );
     }
@@ -53,7 +65,7 @@ export async function POST(request: NextRequest) {
 
     if (!isPasswordValid) {
       return NextResponse.json(
-        { error: "Invalid email or password" },
+        { error: "Invalid email or password" } as ErrorResponse,
         { status: 401 },
       );
     }
@@ -64,13 +76,7 @@ export async function POST(request: NextRequest) {
     });
 
     const response = NextResponse.json(
-      {
-        message: "Login successful",
-        user: {
-          id: credential.id,
-          email: credential.email,
-        },
-      },
+      { message: "Login successful" } as { message: string },
       { status: 200 },
     );
 
@@ -87,17 +93,8 @@ export async function POST(request: NextRequest) {
     return response;
   } catch (error) {
     console.error("Login error:", error);
-    const message =
-      error instanceof Error
-        ? error.message
-        : "An error occurred during sign in";
     return NextResponse.json(
-      {
-        error:
-          process.env.NODE_ENV === "development"
-            ? message
-            : "An error occurred during sign in",
-      },
+      { error: "An error occurred during sign in" } as ErrorResponse,
       { status: 500 },
     );
   }

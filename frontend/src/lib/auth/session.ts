@@ -9,9 +9,15 @@ export type SessionPayload = JWTPayload & {
   email: string;
 };
 
+export function getSessionCookieName() {
+  return SESSION_COOKIE_NAME;
+}
+
 function getSessionSecret(): Uint8Array | null {
   const secret =
-    process.env.AUTH_SESSION_SECRET ?? process.env.SUPABASE_SERVICE_ROLE_KEY;
+    process.env.AUTH_SESSION_SECRET ??
+    process.env.SUPABASE_SERVICE_ROLE_KEY ??
+    process.env.NEXT_PUBLIC_SUPABASE_SERVICE_ROLE_KEY;
 
   if (!secret) {
     return null;
@@ -20,14 +26,10 @@ function getSessionSecret(): Uint8Array | null {
   return new TextEncoder().encode(secret);
 }
 
-export function getSessionCookieName() {
-  return SESSION_COOKIE_NAME;
-}
-
 export async function createSessionToken(params: {
   userId: string;
   email: string;
-}) {
+}): Promise<string> {
   const secret = getSessionSecret();
 
   if (!secret) {
@@ -44,7 +46,9 @@ export async function createSessionToken(params: {
     .sign(secret);
 }
 
-export async function verifySessionToken(token: string) {
+export async function verifySessionId(
+  token: string,
+): Promise<SessionPayload | null> {
   const secret = getSessionSecret();
 
   if (!secret) {

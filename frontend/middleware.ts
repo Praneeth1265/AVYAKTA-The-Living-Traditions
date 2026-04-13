@@ -1,17 +1,20 @@
 import { NextRequest, NextResponse } from "next/server";
 import {
   getSessionCookieName,
-  verifySessionToken,
+  verifySessionId,
+  type SessionPayload,
 } from "./src/lib/auth/session";
 
-export async function middleware(request: NextRequest) {
+export async function middleware(request: NextRequest): Promise<NextResponse> {
   const cookieName = getSessionCookieName();
   const token = request.cookies.get(cookieName)?.value;
-  const session = token ? await verifySessionToken(token) : null;
+  const session: SessionPayload | null = token
+    ? await verifySessionId(token)
+    : null;
 
   // Define protected routes
-  const protectedRoutes = ["/dashboard", "/avyakta-control"];
-  const authRoutes = ["/auth/login"];
+  const protectedRoutes: string[] = ["/dashboard", "/avyakta-control"];
+  const authRoutes: string[] = ["/auth/login"];
 
   const pathname = request.nextUrl.pathname;
 
@@ -28,7 +31,12 @@ export async function middleware(request: NextRequest) {
     const response = NextResponse.redirect(new URL("/auth/login", request.url));
 
     if (token) {
-      response.cookies.delete(cookieName);
+      response.cookies.set({
+        name: cookieName,
+        value: "",
+        path: "/",
+        maxAge: 0,
+      });
     }
 
     return response;

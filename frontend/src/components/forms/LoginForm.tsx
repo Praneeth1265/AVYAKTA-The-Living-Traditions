@@ -34,19 +34,29 @@ export default function LoginForm() {
         body: JSON.stringify(data),
       });
 
-      const result = await response.json();
-
-      if (!response.ok) {
-        setError(result.error || "Failed to login. Please try again.");
+      // Handle success response (200 OK)
+      if (response.ok) {
+        setSuccessMessage("Login successful! Redirecting to dashboard...");
+        // Give user a moment to see the success message, then redirect
+        setTimeout(() => {
+          router.push("/dashboard");
+        }, 500);
         return;
       }
 
-      setSuccessMessage("Login successful! Redirecting...");
+      // Handle error responses (4xx, 5xx)
+      if (response.status >= 400) {
+        try {
+          const result = (await response.json()) as { error?: string };
+          setError(result.error || "Failed to login. Please try again.");
+        } catch {
+          setError("Failed to login. Please try again.");
+        }
+        return;
+      }
 
-      // Wait a moment before redirecting
-      setTimeout(() => {
-        router.push("/avyakta-control/admin/dashboard");
-      }, 1000);
+      // Fallback for unexpected response
+      setError("An unexpected error occurred.");
     } catch (err) {
       console.error("Login error:", err);
       setError("An error occurred. Please try again.");
