@@ -93,13 +93,7 @@ export const recruitmentSchema = z
       .string()
       .min(10, "Please provide at least 10 characters")
       .max(1024, "Must not exceed 1024 characters"),
-    second_domain_preference: z
-      .string()
-      .optional()
-      .refine(
-        (val) => !val || val.length <= 1024,
-        "Second domain preference must not exceed 1024 characters",
-      ),
+    second_domain_preference: z.enum(RECRUITMENT_DOMAINS).optional(),
   })
   .refine(
     (data) => {

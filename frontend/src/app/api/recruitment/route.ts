@@ -35,7 +35,7 @@ export async function POST(request: NextRequest) {
           experience: data.experience ?? null,
           why_you: data.why_you,
           why_us: data.why_us,
-          second_domain_preference: data.second_domain_preference ?? null,
+          second_domain_preference: data.second_domain_preference || null,
         },
       ])
       .select();
