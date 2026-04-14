@@ -51,7 +51,7 @@ export const posters = pgTable("posters", {
 export const recruitment = pgTable("recruitment", {
   id: uuid("id").primaryKey().defaultRandom(),
   name: text("name").notNull(),
-  domain: text("domain").notNull(),
+  first_preference_domain: text("first_preference_domain").notNull(),
   srn: text("srn").notNull(),
   year: integer("year").notNull(),
   branch: text("branch").notNull(),
@@ -74,7 +74,7 @@ export const registration = pgTable("registration", {
   branch: text("branch").notNull(),
   hostel: boolean("hostel").default(false),
   email: text("email").notNull(),
-  phone_no: integer("phone_no").notNull(),
+  phone_no: text("phone_no").notNull(),
   payment_image_url: text("payment_image_url"),
 });
 

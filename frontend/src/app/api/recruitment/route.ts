@@ -26,7 +26,7 @@ export async function POST(request: NextRequest) {
           name: data.name,
           email: data.email,
           phone_no: data.phone_number,
-          domain: data.domain,
+          first_preference_domain: data.first_preference_domain,
           srn: data.srn,
           year: data.year ?? null,
           branch: data.branch || null,

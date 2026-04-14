@@ -34,9 +34,9 @@ export default function RecruitmentForm() {
     resolver: zodResolver(recruitmentSchema),
   });
 
-  const selectedDomain = useWatch({
+  const selectedFirstPreference = useWatch({
     control,
-    name: "domain",
+    name: "first_preference_domain",
   });
 
   const selectedSecondDomain = useWatch({
@@ -172,13 +172,13 @@ export default function RecruitmentForm() {
           )}
         </div>
 
-        {/* Domain Field */}
+        {/* First Domain Preference Field */}
         <div>
           <label className="block text-sm font-medium mb-1">
-            Domain <span className="text-red-500">*</span>
+            First Domain Preference<span className="text-red-500">*</span>
           </label>
           <select
-            {...register("domain")}
+            {...register("first_preference_domain")}
             className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
             <option value="">Select your domain of interest</option>
@@ -192,8 +192,10 @@ export default function RecruitmentForm() {
               </option>
             ))}
           </select>
-          {errors.domain && (
-            <p className="text-red-500 text-sm mt-1">{errors.domain.message}</p>
+          {errors.first_preference_domain && (
+            <p className="text-red-500 text-sm mt-1">
+              {errors.first_preference_domain.message}
+            </p>
           )}
         </div>
 
@@ -211,7 +213,7 @@ export default function RecruitmentForm() {
               <option
                 key={domain}
                 value={domain}
-                disabled={domain === selectedDomain}
+                disabled={domain === selectedFirstPreference}
               >
                 {domain}
               </option>

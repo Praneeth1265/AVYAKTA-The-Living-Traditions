@@ -38,7 +38,7 @@ export const recruitmentSchema = z
       .string()
       .length(10, "Phone number must be exactly 10 digits")
       .regex(/^\d{10}$/, "Phone number must contain only digits"),
-    domain: z.enum(RECRUITMENT_DOMAINS, {
+    first_preference_domain: z.enum(RECRUITMENT_DOMAINS, {
       message: "Please select a valid domain",
     }),
     srn: z
@@ -103,8 +103,8 @@ export const recruitmentSchema = z
   })
   .refine(
     (data) => {
-      if (data.domain && data.second_domain_preference) {
-        return data.domain !== data.second_domain_preference;
+      if (data.first_preference_domain && data.second_domain_preference) {
+        return data.first_preference_domain !== data.second_domain_preference;
       }
       return true;
     },
