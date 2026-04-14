@@ -9,6 +9,10 @@ import { loginSchema } from "../../../../lib/validators/auth";
 
 interface ErrorResponse {
   error: string;
+  issues?: Array<{
+    path: string[];
+    message: string;
+  }>;
 }
 
 interface Credential {
@@ -24,7 +28,13 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
 
     if (!parsed.success) {
       return NextResponse.json(
-        { error: "Email and password are required" } as ErrorResponse,
+        {
+          error: "Validation failed",
+          issues: parsed.error.issues.map((issue) => ({
+            path: issue.path.map(String),
+            message: issue.message,
+          })),
+        } as ErrorResponse,
         { status: 400 },
       );
     }

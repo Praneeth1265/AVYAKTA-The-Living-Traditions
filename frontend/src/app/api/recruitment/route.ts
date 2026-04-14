@@ -5,6 +5,10 @@ import { recruitmentSchema } from "../../../lib/validators/recruitment";
 interface ErrorResponse {
   error: string;
   code?: string;
+  issues?: Array<{
+    path: string[];
+    message: string;
+  }>;
 }
 
 interface SuccessResponse {
@@ -21,7 +25,13 @@ export async function POST(
     const validation = recruitmentSchema.safeParse(body);
     if (!validation.success) {
       return NextResponse.json(
-        { error: "Validation failed" } as ErrorResponse,
+        {
+          error: "Validation failed",
+          issues: validation.error.issues.map((issue) => ({
+            path: issue.path.map(String),
+            message: issue.message,
+          })),
+        } as ErrorResponse,
         { status: 400 },
       );
     }
