@@ -5,7 +5,6 @@ import {
   date,
   boolean,
   integer,
-  timestamp,
 } from "drizzle-orm/pg-core";
 
 export const events = pgTable("events", {
@@ -97,6 +96,9 @@ export const second_preference = pgTable("second_preference", {
   ),
 });
 
-export const deadline = pgTable("deadline", {
-  deadline_at: timestamp("deadline_at", { withTimezone: true }).notNull(),
+export const counter = pgTable("counter", {
+  domain: text("domain").primaryKey(),
+  not_sure: integer("not_sure").default(0),
+  approved: integer("approved").default(0),
+  rejected: integer("rejected").default(0),
 });
