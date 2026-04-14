@@ -5,6 +5,7 @@ import {
   date,
   boolean,
   integer,
+  timestamp,
 } from "drizzle-orm/pg-core";
 
 export const events = pgTable("events", {
@@ -61,6 +62,9 @@ export const recruitment = pgTable("recruitment", {
   why_us: text("why_us").notNull(),
   phone_no: integer("phone_no").notNull(),
   email: text("email").notNull(),
+  interview: boolean("interview").default(false),
+  first_preference_status: text("first_preference_status").default("not_sure"),
+  second_domain_preference: text("second_domain_preference"),
 });
 
 export const registration = pgTable("registration", {
@@ -78,4 +82,21 @@ export const login_credentials = pgTable("login_credentials", {
   id: uuid("id").primaryKey().defaultRandom(),
   email: text("email").unique().notNull(),
   password_hash: text("password_hash").notNull(),
+});
+
+export const second_preference = pgTable("second_preference", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  recruitment_id: uuid("recruitment_id")
+    .notNull()
+    .references(() => recruitment.id, {
+      onDelete: "cascade",
+    }),
+  interview: boolean("interview").default(false),
+  second_preference_status: text("second_preference_status").default(
+    "not_sure",
+  ),
+});
+
+export const deadline = pgTable("deadline", {
+  deadline_at: timestamp("deadline_at", { withTimezone: true }).notNull(),
 });

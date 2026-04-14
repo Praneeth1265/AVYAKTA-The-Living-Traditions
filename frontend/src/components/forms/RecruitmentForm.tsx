@@ -186,6 +186,37 @@ export default function RecruitmentForm() {
           )}
         </div>
 
+        {/* Second Domain Preference Field */}
+        <div>
+          <label className="block text-sm font-medium mb-1">
+            Second Domain Preference (Optional)
+          </label>
+          <select
+            {...register("second_domain_preference")}
+            className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+          >
+            <option value="">Select secondary domain (optional)</option>
+            <option value="Technical">Technical</option>
+            <option value="Design">Design</option>
+            <option value="Event Management">Event Management</option>
+            <option value="Ethics and Discipline">Ethics and Discipline</option>
+            <option value="Media and Visibility">Media and Visibility</option>
+            <option value="Logistics and Operations">
+              Logistics and Operations
+            </option>
+            <option value="Marketing">Marketing</option>
+            <option value="Finance">Finance</option>
+          </select>
+          {errors.second_domain_preference && (
+            <p className="text-red-500 text-sm mt-1">
+              {errors.second_domain_preference.message}
+            </p>
+          )}
+          <p className="text-gray-500 text-xs mt-1">
+            If interested in another domain, select it here. This is optional.
+          </p>
+        </div>
+
         {/* SRN Field */}
         <div>
           <label className="block text-sm font-medium mb-1">
