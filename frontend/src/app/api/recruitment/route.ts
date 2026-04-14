@@ -19,13 +19,13 @@ export async function POST(request: NextRequest) {
 
     // links already validated by schema (parsed JSON array with size/length limits)
     const supabaseAdmin = getSupabaseAdmin();
-    const { data: insertedData, error } = await supabaseAdmin
+    const { error } = await supabaseAdmin
       .from("recruitment")
       .insert([
         {
           name: data.name,
           email: data.email,
-          phone_no: data.phone_number ? parseInt(data.phone_number) : null,
+          phone_no: data.phone_number,
           domain: data.domain,
           srn: data.srn,
           year: data.year ?? null,

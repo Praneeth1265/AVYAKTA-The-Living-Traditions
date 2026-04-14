@@ -60,7 +60,7 @@ export const recruitment = pgTable("recruitment", {
   experience: text("experience"),
   why_you: text("why_you").notNull(),
   why_us: text("why_us").notNull(),
-  phone_no: integer("phone_no").notNull(),
+  phone_no: text("phone_no").notNull(),
   email: text("email").notNull(),
   interview: boolean("interview").default(false),
   first_preference_status: text("first_preference_status").default("not_sure"),

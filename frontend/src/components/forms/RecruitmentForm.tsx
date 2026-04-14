@@ -1,11 +1,12 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
   recruitmentSchema,
   RECRUITMENT_BRANCHES,
+  RECRUITMENT_DOMAINS,
   RecruitmentFormData,
 } from "../../lib/validators/recruitment";
 
@@ -28,8 +29,19 @@ export default function RecruitmentForm() {
     handleSubmit,
     formState: { errors },
     reset,
+    control,
   } = useForm<RecruitmentFormData>({
     resolver: zodResolver(recruitmentSchema),
+  });
+
+  const selectedDomain = useWatch({
+    control,
+    name: "domain",
+  });
+
+  const selectedSecondDomain = useWatch({
+    control,
+    name: "second_domain_preference",
   });
 
   const addLinkInput = () => setLinkInputs([...linkInputs, ""]);
@@ -170,16 +182,15 @@ export default function RecruitmentForm() {
             className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
             <option value="">Select your domain of interest</option>
-            <option value="Technical">Technical</option>
-            <option value="Design">Design</option>
-            <option value="Event Management">Event Management</option>
-            <option value="Ethics and Discipline">Ethics and Discipline</option>
-            <option value="Media and Visibility">Media and Visibility</option>
-            <option value="Logistics and Operations">
-              Logistics and Operations
-            </option>
-            <option value="Marketing">Marketing</option>
-            <option value="Finance">Finance</option>
+            {RECRUITMENT_DOMAINS.map((domain) => (
+              <option
+                key={domain}
+                value={domain}
+                disabled={domain === selectedSecondDomain}
+              >
+                {domain}
+              </option>
+            ))}
           </select>
           {errors.domain && (
             <p className="text-red-500 text-sm mt-1">{errors.domain.message}</p>
@@ -196,16 +207,15 @@ export default function RecruitmentForm() {
             className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
             <option value="">Select secondary domain (optional)</option>
-            <option value="Technical">Technical</option>
-            <option value="Design">Design</option>
-            <option value="Event Management">Event Management</option>
-            <option value="Ethics and Discipline">Ethics and Discipline</option>
-            <option value="Media and Visibility">Media and Visibility</option>
-            <option value="Logistics and Operations">
-              Logistics and Operations
-            </option>
-            <option value="Marketing">Marketing</option>
-            <option value="Finance">Finance</option>
+            {RECRUITMENT_DOMAINS.map((domain) => (
+              <option
+                key={domain}
+                value={domain}
+                disabled={domain === selectedDomain}
+              >
+                {domain}
+              </option>
+            ))}
           </select>
           {errors.second_domain_preference && (
             <p className="text-red-500 text-sm mt-1">
