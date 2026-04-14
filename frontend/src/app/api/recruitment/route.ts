@@ -19,14 +19,14 @@ export async function POST(request: NextRequest) {
 
     // links already validated by schema (parsed JSON array with size/length limits)
     const supabaseAdmin = getSupabaseAdmin();
-    const { data: insertedData, error } = await supabaseAdmin
+    const { error } = await supabaseAdmin
       .from("recruitment")
       .insert([
         {
           name: data.name,
           email: data.email,
-          phone_no: data.phone_number ? parseInt(data.phone_number) : null,
-          domain: data.domain,
+          phone_no: data.phone_number,
+          first_preference_domain: data.first_preference_domain,
           srn: data.srn,
           year: data.year ?? null,
           branch: data.branch || null,
@@ -35,6 +35,7 @@ export async function POST(request: NextRequest) {
           experience: data.experience ?? null,
           why_you: data.why_you,
           why_us: data.why_us,
+          second_domain_preference: data.second_domain_preference || null,
         },
       ])
       .select();
