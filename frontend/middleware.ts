@@ -13,7 +13,7 @@ export async function middleware(request: NextRequest): Promise<NextResponse> {
     : null;
 
   // Define protected routes
-  const protectedRoutes: string[] = ["/dashboard", "/avyakta-control"];
+  const protectedRoutes: string[] = ["/dashboard"];
   const authRoutes: string[] = ["/auth/login"];
 
   const pathname = request.nextUrl.pathname;

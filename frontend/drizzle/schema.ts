@@ -80,19 +80,3 @@ export const login_credentials = pgTable("login_credentials", {
   email: text("email").unique().notNull(),
   password_hash: text("password_hash").notNull(),
 });
-
-export const admin_sessions = pgTable("admin_sessions", {
-  id: text("id").primaryKey(),
-  user_id: uuid("user_id")
-    .notNull()
-    .references(() => login_credentials.id, {
-      onDelete: "cascade",
-      onUpdate: "cascade",
-    }),
-  email: text("email").notNull(),
-  expires_at: timestamp("expires_at", { withTimezone: true }).notNull(),
-  revoked_at: timestamp("revoked_at", { withTimezone: true }),
-  created_at: timestamp("created_at", { withTimezone: true })
-    .notNull()
-    .defaultNow(),
-});
