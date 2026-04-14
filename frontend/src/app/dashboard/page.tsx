@@ -1,25 +1,19 @@
-import { cookies } from "next/headers";
-import { redirect } from "next/navigation";
-import AdminDashboardClient from "../../components/admin/AdminDashboardClient";
-import {
-  getSessionCookieName,
-  verifySessionId,
-  type SessionPayload,
-} from "../../lib/auth/session";
+'use client';
 
-export default async function DashboardPage() {
-  // Verify session on server-side (double-check after middleware)
-  // Dashboard is only accessible after successful login
-  const authCookie = (await cookies()).get(getSessionCookieName())?.value;
-  const session: SessionPayload | null = authCookie
-    ? await verifySessionId(authCookie)
-    : null;
+import { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 
-  if (!session) {
-    // Not authenticated - redirect to login
-    redirect("/auth/login");
-  }
+export default function DashboardRedirect() {
+  const router = useRouter();
 
-  // User is authenticated, render dashboard
-  return <AdminDashboardClient />;
+  useEffect(() => {
+    const adminHash = process.env.NEXT_PUBLIC_ADMIN_HASH || 'secret123';
+    router.replace(`/avyakta-control/${adminHash}/dashboard`);
+  }, [router]);
+
+  return (
+    <div className="flex items-center justify-center min-h-screen">
+      <p>Redirecting to dashboard...</p>
+    </div>
+  );
 }

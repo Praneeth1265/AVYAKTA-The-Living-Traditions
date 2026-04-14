@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { loginSchema, LoginFormData } from "../../lib/validators/auth";
 
 export default function LoginForm() {
@@ -11,6 +11,8 @@ export default function LoginForm() {
   const [error, setError] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const redirectUrl = searchParams.get("redirect");
 
   const {
     register,
@@ -36,11 +38,10 @@ export default function LoginForm() {
 
       // Handle success response (200 OK)
       if (response.ok) {
-        setSuccessMessage("Login successful! Redirecting to dashboard...");
-        // Give user a moment to see the success message, then redirect
-        setTimeout(() => {
-          router.push("/dashboard");
-        }, 500);
+        setSuccessMessage("Login successful! Redirecting...");
+        // Redirect to the redirect URL if provided, otherwise to dashboard
+        const destination = redirectUrl || "/dashboard";
+        router.push(destination);
         return;
       }
 
@@ -116,10 +117,6 @@ export default function LoginForm() {
       <button type="submit" disabled={isLoading} className="login-submit-btn">
         {isLoading ? "Signing in..." : "Enter"}
       </button>
-
-      <div className="login-link">
-        <a href="/auth/forgot-password">Forgot your password?</a>
-      </div>
     </form>
   );
 }

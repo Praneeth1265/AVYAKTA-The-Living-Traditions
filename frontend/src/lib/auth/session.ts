@@ -13,12 +13,13 @@ export function getSessionCookieName() {
   return SESSION_COOKIE_NAME;
 }
 
-function getSessionSecret(): Uint8Array | null {
-  const secret =
-    process.env.AUTH_SESSION_SECRET ?? process.env.SUPABASE_SERVICE_ROLE_KEY;
+function getSessionSecret(): Uint8Array {
+  const secret = process.env.AUTH_SESSION_SECRET;
 
   if (!secret) {
-    return null;
+    throw new Error(
+      "Missing AUTH_SESSION_SECRET environment variable. This is required for session signing and must be set in frontend/.env.local",
+    );
   }
 
   return new TextEncoder().encode(secret);
@@ -29,12 +30,6 @@ export async function createSessionToken(params: {
   email: string;
 }): Promise<string> {
   const secret = getSessionSecret();
-
-  if (!secret) {
-    throw new Error(
-      "Missing AUTH_SESSION_SECRET (or fallback SUPABASE_SERVICE_ROLE_KEY)",
-    );
-  }
 
   return new SignJWT({ email: params.email })
     .setProtectedHeader({ alg: SESSION_ALGORITHM })
@@ -47,13 +42,9 @@ export async function createSessionToken(params: {
 export async function verifySessionId(
   token: string,
 ): Promise<SessionPayload | null> {
-  const secret = getSessionSecret();
-
-  if (!secret) {
-    return null;
-  }
-
   try {
+    const secret = getSessionSecret();
+
     const { payload } = await jwtVerify(token, secret, {
       algorithms: [SESSION_ALGORITHM],
     });

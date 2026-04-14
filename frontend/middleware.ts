@@ -6,17 +6,11 @@ import {
 } from "./src/lib/auth/session";
 
 export async function middleware(request: NextRequest): Promise<NextResponse> {
-  const cookieName = getSessionCookieName();
-  const token = request.cookies.get(cookieName)?.value;
-  const session: SessionPayload | null = token
-    ? await verifySessionId(token)
-    : null;
+  const pathname = request.nextUrl.pathname;
 
   // Define protected routes
-  const protectedRoutes: string[] = ["/dashboard"];
+  const protectedRoutes: string[] = ["/avyakta-control", "/dashboard"];
   const authRoutes: string[] = ["/auth/login"];
-
-  const pathname = request.nextUrl.pathname;
 
   // Check if the current route is protected
   const isProtectedRoute = protectedRoutes.some((route) =>
@@ -25,6 +19,19 @@ export async function middleware(request: NextRequest): Promise<NextResponse> {
 
   // Check if it's an auth route
   const isAuthRoute = authRoutes.some((route) => pathname.startsWith(route));
+
+  // Only verify session if accessing protected routes or redirecting from auth routes
+  // Skip session verification for public routes to improve performance
+  if (!isProtectedRoute && !isAuthRoute) {
+    return NextResponse.next();
+  }
+
+  // Now check session only when needed
+  const cookieName = getSessionCookieName();
+  const token = request.cookies.get(cookieName)?.value;
+  const session: SessionPayload | null = token
+    ? await verifySessionId(token)
+    : null;
 
   // If there's no token and they're trying to access a protected route, redirect to login
   if (isProtectedRoute && !session) {
@@ -42,9 +49,13 @@ export async function middleware(request: NextRequest): Promise<NextResponse> {
     return response;
   }
 
-  // If they have a token and are trying to access auth routes, redirect to dashboard
+  // If they have a token and are trying to access auth routes, redirect to admin entry
+  // Use the ADMIN_HASH from env as the access code
+  const adminHash = process.env.ADMIN_HASH || "secret123";
   if (isAuthRoute && session) {
-    return NextResponse.redirect(new URL("/dashboard", request.url));
+    return NextResponse.redirect(
+      new URL(`/avyakta-control/${adminHash}/dashboard`, request.url),
+    );
   }
 
   return NextResponse.next();
