@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { loginSchema, LoginFormData } from "../../lib/validators/auth";
 
 export default function LoginForm() {
@@ -11,8 +11,6 @@ export default function LoginForm() {
   const [error, setError] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
   const router = useRouter();
-  const searchParams = useSearchParams();
-  const redirectUrl = searchParams.get("redirect");
 
   const {
     register,
@@ -39,9 +37,8 @@ export default function LoginForm() {
       // Handle success response (200 OK)
       if (response.ok) {
         setSuccessMessage("Login successful! Redirecting...");
-        // Redirect to the redirect URL if provided, otherwise to dashboard
-        const destination = redirectUrl || "/dashboard";
-        router.push(destination);
+        // Always redirect to dashboard after successful login
+        router.push("/dashboard");
         return;
       }
 

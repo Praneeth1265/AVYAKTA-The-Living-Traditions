@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { jwtVerify } from "jose";
+import { getSessionCookieName } from "./src/lib/auth/session";
 
-const AUTH_COOKIE_NAME = "avyakta-auth";
 const PROTECTED_ROUTES = ["/dashboard", "/avyakta-control"];
 
 async function verifySessionToken(token: string): Promise<boolean> {
@@ -19,7 +19,7 @@ async function verifySessionToken(token: string): Promise<boolean> {
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
-  const authCookie = request.cookies.get(AUTH_COOKIE_NAME)?.value;
+  const authCookie = request.cookies.get(getSessionCookieName())?.value;
 
   // Check if user is authenticated
   const isAuthenticated = authCookie
@@ -51,11 +51,10 @@ export const config = {
   matcher: [
     /*
      * Match all request paths except for the ones starting with:
-     * - _next/static (static files)
-     * - _next/image (image optimization files)
-     * - favicon.ico (favicon file)
-     * - public (public files)
+     * - api (API routes)
+     * - _next/* (Next.js internals)
+     * - common metadata files
      */
-    "/((?!_next/static|_next/image|favicon.ico|public).*)",
+    "/((?!api|_next|favicon.ico|sitemap.xml|robots.txt).*)",
   ],
 };

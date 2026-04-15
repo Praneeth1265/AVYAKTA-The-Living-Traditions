@@ -10,11 +10,11 @@ import {
 export default async function DashboardPage({
   params,
 }: {
-  params: Promise<{ hash: string }>;
+  params: { hash: string };
 }) {
   // Validate the hash parameter
-  const { hash } = await params;
-  const expectedHash = process.env.ADMIN_HASH || "secret123";
+  const { hash } = params;
+  const expectedHash = process.env.ADMIN_HASH;
   if (hash !== expectedHash) {
     // Invalid hash - return 404
     notFound();
