@@ -78,11 +78,19 @@ export async function GET(
       .eq("domain", domain)
       .single();
 
+    // ============ STEP 5: INDICATOR DATA ============
+    const { data: indicatorData } = await supabaseAdmin
+      .from("indicator")
+      .select("*")
+      .eq("domain", domain)
+      .single();
+
     return NextResponse.json(
       {
         firstPreference: firstPreferenceRecruits,
         secondPreference: secondPreferenceRecruits,
         counter: counterData,
+        indicator: indicatorData,
       },
       { status: 200 }
     );

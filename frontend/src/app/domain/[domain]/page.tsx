@@ -24,6 +24,12 @@ interface Counter {
   rejected: number;
 }
 
+interface Indicator {
+  id: string;
+  domain: string;
+  indicator: boolean;
+}
+
 export default function DomainDashboard() {
   const params = useParams();
   const router = useRouter();
@@ -36,13 +42,35 @@ export default function DomainDashboard() {
     Recruit[]
   >([]);
   const [counter, setCounter] = useState<Counter | null>(null);
+  const [indicator, setIndicator] = useState<Indicator | null>(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
+  const [error, setError] = useState<string>("");
 
   const displayDomainName = domain
     .split("-")
     .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
     .join(" ");
+
+  const handleIndicatorToggle = async () => {
+    if (!indicator || indicator.indicator) return;
+
+    try {
+      const response = await fetch(`/api/indicator/${displayDomainName}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ indicator: true }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to update indicator");
+      }
+
+      const updatedIndicator = await response.json();
+      setIndicator(updatedIndicator);
+    } catch (err) {
+      console.error("Error updating indicator:", err);
+    }
+  };
 
   useEffect(() => {
     const fetchRecruits = async () => {
@@ -58,10 +86,27 @@ export default function DomainDashboard() {
         setFirstPreferenceRecruits(data.firstPreference || []);
         setSecondPreferenceRecruits(data.secondPreference || []);
         setCounter(data.counter);
+        
+        // Set indicator from response or default
+        if (data.indicator) {
+          setIndicator(data.indicator);
+        } else {
+          setIndicator({
+            id: "",
+            domain: displayDomainName,
+            indicator: false,
+          });
+        }
       } catch (err) {
         setError(
           err instanceof Error ? err.message : "Failed to load recruits"
         );
+        // Set default indicator on error
+        setIndicator({
+          id: "",
+          domain: displayDomainName,
+          indicator: false,
+        });
       } finally {
         setLoading(false);
       }
@@ -108,6 +153,24 @@ export default function DomainDashboard() {
             Manage and review recruitment applications
           </p>
         </div>
+
+        {/* Indicator Buzzer */}
+        {indicator && (
+          <div className="mb-8 flex justify-center">
+            <button
+              onClick={handleIndicatorToggle}
+              disabled={indicator.indicator}
+              className={`w-20 h-20 rounded-full font-bold text-white text-2xl transition-all duration-300 ${
+                indicator.indicator
+                  ? "bg-green-500 cursor-not-allowed opacity-90"
+                  : "bg-red-500 hover:bg-red-600 cursor-pointer shadow-lg"
+              }`}
+            >
+              {indicator.indicator ? "✓" : "●"}
+            </button>
+          </div>
+        )}
+
 
         {/* Counter Statistics */}
         {counter && (
