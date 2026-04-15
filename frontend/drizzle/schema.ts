@@ -68,6 +68,12 @@ export const recruitment = pgTable("recruitment", {
 
 export const registration = pgTable("registration", {
   id: uuid("id").primaryKey().defaultRandom(),
+  event_id: uuid("event_id")
+    .notNull()
+    .references(() => events.id, {
+      onDelete: "cascade",
+      onUpdate: "cascade",
+    }),
   name: text("name").notNull(),
   srn: text("srn").notNull(),
   branch: text("branch").notNull(),
@@ -101,4 +107,10 @@ export const counter = pgTable("counter", {
   not_sure: integer("not_sure").default(0),
   approved: integer("approved").default(0),
   rejected: integer("rejected").default(0),
+});
+
+export const indicator = pgTable("indicator", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  domain: text("domain").notNull().unique(),
+  indicator: boolean("indicator").default(false),
 });
