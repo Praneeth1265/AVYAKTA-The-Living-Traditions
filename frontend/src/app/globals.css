@@ -1,26 +1,52 @@
+@import url("https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400&family=Inter:wght@400;500;600&family=Playfair+Display:ital@1&display=swap");
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --bronze: #92791b;
+  --emerald: #1b5e3b;
+  --charcoal: #1c1c1c;
+  --olive: #737955;
+  --crimson: #8b1a1a;
+  --warm-white: #f5f0e8;
+  --gold-light: #c9a84c;
+  --background: var(--warm-white);
+  --foreground: var(--charcoal);
 }
 
 @theme inline {
+  --color-bronze: #92791b;
+  --color-emerald: #1b5e3b;
+  --color-charcoal: #1c1c1c;
+  --color-olive: #737955;
+  --color-crimson: #8b1a1a;
+  --color-warm-white: #f5f0e8;
+  --color-gold-light: #c9a84c;
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-heading: "Cormorant Garamond", serif;
+  --font-body: "Inter", sans-serif;
+  --font-accent: "Playfair Display", serif;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+* {
+  box-sizing: border-box;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--warm-white);
+  color: var(--charcoal);
+  font-family: "Inter", sans-serif;
+  min-height: 100vh;
+}
+
+@keyframes fadeScaleIn {
+  from { opacity: 0; transform: scale(0.92); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
 }
