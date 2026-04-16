@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { Cormorant_Garamond, Inter, Playfair_Display } from "next/font/google";
 import "./globals.css";
+import Navbar from "@/components/layout/Navbar";
+import Footer from "@/components/layout/Footer";
 
 const heading = Cormorant_Garamond({
   subsets: ["latin"],
@@ -34,7 +36,9 @@ export default function RootLayout({
       className={`${heading.variable} ${bodyFont.variable} ${accent.variable}`}
     >
       <body className="min-h-screen bg-warm text-charcoal font-body">
+        <Navbar />
         {children}
+        <Footer />
       </body>
     </html>
   );
