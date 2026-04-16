@@ -1,12 +1,19 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSupabaseAdmin } from "@/lib/supabase/server";
+import { isValidDomain } from "@/lib/utils/domainValidator";
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: Promise<{ domain: string; id: string }> }
+  { params }: { params: Promise<{ domain: string; id: string }> },
 ) {
   try {
-    const { id: recruitId } = await params;
+    const { domain, id: recruitId } = await params;
+
+    // Validate domain
+    if (!isValidDomain(domain)) {
+      return NextResponse.json({ error: "Invalid domain" }, { status: 404 });
+    }
+
     const supabaseAdmin = getSupabaseAdmin();
 
     // Fetch recruit details
@@ -17,10 +24,7 @@ export async function GET(
       .single();
 
     if (error) {
-      return NextResponse.json(
-        { error: "Recruit not found" },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: "Recruit not found" }, { status: 404 });
     }
 
     // Fetch second preference if exists
@@ -35,20 +39,20 @@ export async function GET(
         recruit,
         secondPreference: secondPref,
       },
-      { status: 200 }
+      { status: 200 },
     );
   } catch (error) {
     console.error("Recruit fetch error:", error);
     return NextResponse.json(
       { error: "Failed to fetch recruit details" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: Promise<{ domain: string; id: string }> }
+  { params }: { params: Promise<{ domain: string; id: string }> },
 ) {
   try {
     const { id: recruitId } = await params;
@@ -69,14 +73,20 @@ export async function PUT(
       // PREVENT CHANGES FROM REJECTED STATUS (FINAL)
       if (currentSecondPref?.second_preference_status === "rejected") {
         return NextResponse.json(
-          { error: "Cannot change status from rejected - this is a final decision" },
-          { status: 403 }
+          {
+            error:
+              "Cannot change status from rejected - this is a final decision",
+          },
+          { status: 403 },
         );
       }
 
       // Build update object - only include fields that actually changed
-      const updateObj: any = {};
-      if (interview !== undefined && currentSecondPref?.interview !== interview) {
+      const updateObj: Record<string, unknown> = {};
+      if (
+        interview !== undefined &&
+        currentSecondPref?.interview !== interview
+      ) {
         updateObj.interview = interview;
       }
       if (status && currentSecondPref?.second_preference_status !== status) {
@@ -87,7 +97,7 @@ export async function PUT(
       if (Object.keys(updateObj).length === 0) {
         return NextResponse.json(
           { message: "No changes detected" },
-          { status: 200 }
+          { status: 200 },
         );
       }
 
@@ -99,14 +109,17 @@ export async function PUT(
       if (updateError) {
         console.error("Error updating second preference:", updateError);
         return NextResponse.json(
-          { error: "Failed to update second preference", details: updateError.message },
-          { status: 500 }
+          {
+            error: "Failed to update second preference",
+            details: updateError.message,
+          },
+          { status: 500 },
         );
       }
 
       return NextResponse.json(
         { message: "Second preference updated successfully" },
-        { status: 200 }
+        { status: 200 },
       );
     }
 
@@ -121,13 +134,16 @@ export async function PUT(
     // PREVENT CHANGES FROM REJECTED STATUS (FINAL)
     if (currentRecruit?.first_preference_status === "rejected") {
       return NextResponse.json(
-        { error: "Cannot change status from rejected - this is a final decision" },
-        { status: 403 }
+        {
+          error:
+            "Cannot change status from rejected - this is a final decision",
+        },
+        { status: 403 },
       );
     }
 
     // Build update object - only include fields that actually changed
-    const updateObj: any = {};
+    const updateObj: Record<string, unknown> = {};
     if (interview !== undefined && currentRecruit?.interview !== interview) {
       updateObj.interview = interview;
     }
@@ -139,7 +155,7 @@ export async function PUT(
     if (Object.keys(updateObj).length === 0) {
       return NextResponse.json(
         { message: "No changes detected" },
-        { status: 200 }
+        { status: 200 },
       );
     }
 
@@ -153,12 +169,16 @@ export async function PUT(
       console.error("Error updating recruitment:", updateError);
       return NextResponse.json(
         { error: "Failed to update recruit", details: updateError.message },
-        { status: 500 }
+        { status: 500 },
       );
     }
 
     // If status is rejected and second_domain_preference exists, ensure second_preference record exists
-    if (status === "rejected" && updatedRecruit && updatedRecruit[0]?.second_domain_preference) {
+    if (
+      status === "rejected" &&
+      updatedRecruit &&
+      updatedRecruit[0]?.second_domain_preference
+    ) {
       const { data: existingSecondPref } = await supabaseAdmin
         .from("second_preference")
         .select("id")
@@ -183,13 +203,13 @@ export async function PUT(
 
     return NextResponse.json(
       { message: "Recruit updated successfully", recruit: updatedRecruit?.[0] },
-      { status: 200 }
+      { status: 200 },
     );
   } catch (error) {
     console.error("Recruit update error:", error);
     return NextResponse.json(
       { error: "Failed to update recruit" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

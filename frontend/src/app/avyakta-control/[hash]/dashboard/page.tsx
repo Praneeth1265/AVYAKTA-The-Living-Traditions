@@ -19,7 +19,9 @@ export default function DashboardPage() {
   return (
     <main className="min-h-screen bg-gray-50 p-8">
       <div className="max-w-4xl mx-auto">
-        <h1 className="text-4xl font-bold text-gray-900 mb-2">Admin Dashboard</h1>
+        <h1 className="text-4xl font-bold text-gray-900 mb-2">
+          Admin Dashboard
+        </h1>
         <p className="text-gray-600 mb-8">
           Control domain recruitment indicators
         </p>
@@ -37,8 +39,13 @@ export default function DashboardPage() {
         <div className="mt-8 p-4 bg-blue-50 border border-blue-200 rounded-lg">
           <h2 className="font-semibold text-blue-900 mb-2">Legend:</h2>
           <ul className="space-y-1 text-sm text-blue-800">
-            <li>🔴 <strong>Red Button:</strong> Recruitment closed. Click to open.</li>
-            <li>🟢 <strong>Green Button:</strong> Recruitment open. Cannot be changed.</li>
+            <li>
+              🔴 <strong>Red Button:</strong> Recruitment closed. Click to open.
+            </li>
+            <li>
+              🟢 <strong>Green Button:</strong> Recruitment open. Cannot be
+              changed.
+            </li>
           </ul>
         </div>
       </div>

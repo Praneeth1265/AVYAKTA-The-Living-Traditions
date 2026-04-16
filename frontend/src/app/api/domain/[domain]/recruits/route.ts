@@ -1,16 +1,19 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSupabaseAdmin } from "@/lib/supabase/server";
+import { validateAndFormatDomain } from "@/lib/utils/domainValidator";
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: Promise<{ domain: string }> }
+  { params }: { params: Promise<{ domain: string }> },
 ) {
   try {
     const { domain: domainParam } = await params;
-    const domain = domainParam
-      .split("-")
-      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-      .join(" ");
+
+    // Validate domain
+    const domain = validateAndFormatDomain(domainParam);
+    if (!domain) {
+      return NextResponse.json({ error: "Invalid domain" }, { status: 404 });
+    }
 
     const supabaseAdmin = getSupabaseAdmin();
 
@@ -21,7 +24,9 @@ export async function GET(
       .select("recruitment_id");
 
     const secondPrefIds = new Set(
-      (secondPrefAllData || []).map((item: any) => item.recruitment_id)
+      (secondPrefAllData || []).map(
+        (item: Record<string, unknown>) => item.recruitment_id,
+      ),
     );
 
     // ============ STEP 2: FIRST PREFERENCE RECRUITS ============
@@ -34,7 +39,7 @@ export async function GET(
 
     // Filter out those who have a second_preference entry
     const firstPreferenceRecruits = (allFirstPref || []).filter(
-      (recruit: any) => !secondPrefIds.has(recruit.id)
+      (recruit: Record<string, unknown>) => !secondPrefIds.has(recruit.id),
     );
 
     // ============ STEP 3: SECOND PREFERENCE RECRUITS ============
@@ -47,15 +52,19 @@ export async function GET(
         interview,
         second_preference_status,
         recruitment:recruitment_id(*)
-      `
+      `,
       );
 
     // Filter to only include recruits for this specific domain
     // AND deduplicate to ensure each recruit appears only once
     // AND exclude rejected recruits
     const secondPrefMap = new Map();
-    (secondPrefData || []).forEach((item: any) => {
-      if (item.recruitment && item.recruitment.second_domain_preference === domain && item.second_preference_status !== 'rejected') {
+    (secondPrefData || []).forEach((item: Record<string, unknown>) => {
+      if (
+        item.recruitment &&
+        item.recruitment.second_domain_preference === domain &&
+        item.second_preference_status !== "rejected"
+      ) {
         const recruitId = item.recruitment.id;
         // Only keep the first entry for each recruit
         if (!secondPrefMap.has(recruitId)) {
@@ -85,6 +94,9 @@ export async function GET(
       .eq("domain", domain)
       .single();
 
+    // If indicator doesn't exist, that's okay - just return null
+    // The frontend will handle the missing indicator case
+
     return NextResponse.json(
       {
         firstPreference: firstPreferenceRecruits,
@@ -92,13 +104,13 @@ export async function GET(
         counter: counterData,
         indicator: indicatorData,
       },
-      { status: 200 }
+      { status: 200 },
     );
   } catch (error) {
     console.error("Domain recruits fetch error:", error);
     return NextResponse.json(
       { error: "Failed to fetch recruits" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

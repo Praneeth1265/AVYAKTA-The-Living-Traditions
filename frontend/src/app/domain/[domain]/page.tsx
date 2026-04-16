@@ -1,8 +1,11 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useParams, useRouter } from "next/navigation";
+import { useParams } from "next/navigation";
 import Link from "next/link";
+import { formatDomainFromUrl } from "@/lib/utils/domainFormatter";
+import { isValidDomain } from "@/lib/utils/domainValidator";
+import "../domain-dashboard.css";
 
 interface Recruit {
   id: string;
@@ -32,7 +35,6 @@ interface Indicator {
 
 export default function DomainDashboard() {
   const params = useParams();
-  const router = useRouter();
   const domain = typeof params.domain === "string" ? params.domain : "";
 
   const [firstPreferenceRecruits, setFirstPreferenceRecruits] = useState<
@@ -46,23 +48,29 @@ export default function DomainDashboard() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string>("");
 
-  const displayDomainName = domain
-    .split("-")
-    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-    .join(" ");
+  const displayDomainName = formatDomainFromUrl(domain);
 
   const handleIndicatorToggle = async () => {
     if (!indicator || indicator.indicator) return;
 
     try {
-      const response = await fetch(`/api/indicator/${displayDomainName}`, {
+      const response = await fetch(`/api/indicator/${domain}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ indicator: true }),
       });
 
       if (!response.ok) {
-        throw new Error("Failed to update indicator");
+        const errorData = await response.json();
+        console.error("API Error Response:", {
+          status: response.status,
+          error: errorData,
+          domain: domain,
+          displayDomain: displayDomainName,
+        });
+        throw new Error(
+          `Failed to update indicator: ${errorData.error || response.statusText}`,
+        );
       }
 
       const updatedIndicator = await response.json();
@@ -79,14 +87,22 @@ export default function DomainDashboard() {
         const response = await fetch(`/api/domain/${domain}/recruits`);
 
         if (!response.ok) {
-          throw new Error("Failed to fetch recruits");
+          throw new Error(`Failed to fetch recruits: ${response.status}`);
         }
 
         const data = await response.json();
+        console.log("Fetched recruit data:", {
+          domain,
+          displayDomainName,
+          indicator: data.indicator,
+          firstPrefLength: data.firstPreference?.length,
+          secondPrefLength: data.secondPreference?.length,
+        });
+
         setFirstPreferenceRecruits(data.firstPreference || []);
         setSecondPreferenceRecruits(data.secondPreference || []);
         setCounter(data.counter);
-        
+
         // Set indicator from response or default
         if (data.indicator) {
           setIndicator(data.indicator);
@@ -99,7 +115,7 @@ export default function DomainDashboard() {
         }
       } catch (err) {
         setError(
-          err instanceof Error ? err.message : "Failed to load recruits"
+          err instanceof Error ? err.message : "Failed to load recruits",
         );
         // Set default indicator on error
         setIndicator({
@@ -115,55 +131,78 @@ export default function DomainDashboard() {
     if (domain) {
       fetchRecruits();
     }
-  }, [domain]);
+  }, [domain, displayDomainName]);
+
+  if (!isValidDomain(domain)) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <h1 className="text-4xl font-bold text-gray-800 mb-4">
+            404 - Domain Not Found
+          </h1>
+          <p className="text-gray-600 mb-6">
+            The domain {displayDomainName} does not exist or is not available.
+          </p>
+          <Link
+            href="/domain"
+            className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
+          >
+            Back to Domains
+          </Link>
+        </div>
+      </div>
+    );
+  }
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-lg text-gray-600">Loading recruits...</div>
+      <div className="domain-dashboard-container loading-container">
+        <div>
+          <div className="loading-spinner"></div>
+          <div className="loading-text">Loading recruits...</div>
+        </div>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
-          {error}
+      <div className="domain-dashboard-container domain-error-container">
+        <div className="error-box">
+          <h1 className="error-title">Error</h1>
+          <p className="error-message">{error}</p>
+          <Link href="/domain" className="error-button">
+            Back to Domains
+          </Link>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
-      <div className="max-w-6xl mx-auto">
+    <div className="domain-dashboard-container">
+      <div className="domain-dashboard-inner">
         {/* Header */}
-        <div className="mb-8">
-          <button
-            onClick={() => router.back()}
-            className="mb-4 px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition"
-          >
-            ← Back
-          </button>
-          <h1 className="text-4xl font-bold text-gray-800 mb-2">
-            {displayDomainName} Domain Dashboard
-          </h1>
-          <p className="text-gray-600">
+        <div className="domain-header">
+          <h1 className="domain-title">{displayDomainName} Domain Dashboard</h1>
+          <p className="domain-subtitle">
             Manage and review recruitment applications
           </p>
         </div>
 
+        {/* Rangoli Divider */}
+        <div className="rangoli-divider"></div>
+
         {/* Indicator Buzzer */}
         {indicator && (
-          <div className="mb-8 flex justify-center">
+          <div className="indicator-container">
             <button
               onClick={handleIndicatorToggle}
               disabled={indicator.indicator}
-              className={`w-20 h-20 rounded-full font-bold text-white text-2xl transition-all duration-300 ${
+              className={`indicator-button ${
                 indicator.indicator
-                  ? "bg-green-500 cursor-not-allowed opacity-90"
-                  : "bg-red-500 hover:bg-red-600 cursor-pointer shadow-lg"
+                  ? "indicator-button-green"
+                  : "indicator-button-red"
               }`}
             >
               {indicator.indicator ? "✓" : "●"}
@@ -171,96 +210,69 @@ export default function DomainDashboard() {
           </div>
         )}
 
-
         {/* Counter Statistics */}
         {counter && (
-          <div className="grid grid-cols-3 gap-4 mb-8">
-            <div className="bg-white rounded-lg shadow p-6">
-              <div className="text-3xl font-bold text-blue-600">
-                {counter.not_sure}
-              </div>
-              <div className="text-gray-600 mt-2">Pending Review</div>
+          <div className="counter-grid">
+            <div className="counter-card pending">
+              <div className="counter-number">{counter.not_sure}</div>
+              <div className="counter-label">Pending Review</div>
             </div>
-            <div className="bg-white rounded-lg shadow p-6">
-              <div className="text-3xl font-bold text-green-600">
-                {counter.approved}
-              </div>
-              <div className="text-gray-600 mt-2">Approved</div>
+            <div className="counter-card approved">
+              <div className="counter-number">{counter.approved}</div>
+              <div className="counter-label">Approved</div>
             </div>
-            <div className="bg-white rounded-lg shadow p-6">
-              <div className="text-3xl font-bold text-red-600">
-                {counter.rejected}
-              </div>
-              <div className="text-gray-600 mt-2">Rejected</div>
+            <div className="counter-card rejected">
+              <div className="counter-number">{counter.rejected}</div>
+              <div className="counter-label">Rejected</div>
             </div>
           </div>
         )}
 
         {/* First Preference Recruits */}
-        <div className="bg-white rounded-lg shadow-lg p-6 mb-8">
-          <h2 className="text-2xl font-bold text-gray-800 mb-4">
+        <div className="domain-section">
+          <h2 className="domain-section-title">
             First Preference Recruits ({firstPreferenceRecruits.length})
           </h2>
 
           {firstPreferenceRecruits.length === 0 ? (
-            <p className="text-gray-500">No recruits in first preference</p>
+            <p className="no-recruits-message">
+              No recruits in first preference
+            </p>
           ) : (
             <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead className="bg-gray-100 border-b">
+              <table className="recruits-table">
+                <thead>
                   <tr>
-                    <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">
-                      Name
-                    </th>
-                    <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">
-                      SRN
-                    </th>
-                    <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">
-                      Status
-                    </th>
-                    <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">
-                      Interview
-                    </th>
-                    <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">
-                      Action
-                    </th>
+                    <th>Name</th>
+                    <th>SRN</th>
+                    <th>Status</th>
+                    <th>Interview</th>
+                    <th>Action</th>
                   </tr>
                 </thead>
                 <tbody>
                   {firstPreferenceRecruits.map((recruit) => (
-                    <tr key={`first-${recruit.id}`} className="border-b hover:bg-gray-50">
-                      <td className="px-4 py-3 text-sm text-gray-800">
-                        {recruit.name}
-                      </td>
-                      <td className="px-4 py-3 text-sm text-gray-600">
-                        {recruit.srn}
-                      </td>
-                      <td className="px-4 py-3">
+                    <tr key={`first-${recruit.id}`}>
+                      <td>{recruit.name}</td>
+                      <td>{recruit.srn}</td>
+                      <td>
                         <span
-                          className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                            recruit.first_preference_status === "approved"
-                              ? "bg-green-100 text-green-800"
-                              : recruit.first_preference_status === "rejected"
-                                ? "bg-red-100 text-red-800"
-                                : "bg-yellow-100 text-yellow-800"
-                          }`}
+                          className={`status-badge ${recruit.first_preference_status}`}
                         >
                           {recruit.first_preference_status}
                         </span>
                       </td>
-                      <td className="px-4 py-3 text-sm">
-                        {recruit.interview ? (
-                          <span className="text-green-600 font-semibold">
-                            ✓ Done
-                          </span>
-                        ) : (
-                          <span className="text-gray-500">Pending</span>
-                        )}
+                      <td>
+                        <span
+                          className={`interview-status ${recruit.interview ? "interview-done" : "interview-pending"}`}
+                        >
+                          {recruit.interview ? "Done" : "Pending"}
+                        </span>
                       </td>
-                      <td className="px-4 py-3">
+                      <td>
                         <Link
                           href={`/domain/${domain}/${recruit.id}`}
-                          className="px-3 py-1 bg-blue-600 text-white rounded text-sm hover:bg-blue-700 transition"
+                          className="action-button"
                         >
                           View Details
                         </Link>
@@ -275,64 +287,44 @@ export default function DomainDashboard() {
 
         {/* Second Preference Recruits */}
         {secondPreferenceRecruits.length > 0 && (
-          <div className="bg-white rounded-lg shadow-lg p-6">
-            <h2 className="text-2xl font-bold text-gray-800 mb-4">
+          <div className="domain-section">
+            <h2 className="domain-section-title">
               Second Preference Recruits ({secondPreferenceRecruits.length})
             </h2>
-            <p className="text-gray-600 mb-4 text-sm">
+            <p className="domain-section-subtitle">
               These candidates were rejected from their first preference domain
             </p>
 
             <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead className="bg-gray-100 border-b">
+              <table className="recruits-table">
+                <thead>
                   <tr>
-                    <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">
-                      Name
-                    </th>
-                    <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">
-                      SRN
-                    </th>
-                    <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">
-                      First Domain
-                    </th>
-                    <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">
-                      Status
-                    </th>
-                    <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">
-                      Action
-                    </th>
+                    <th>Name</th>
+                    <th>SRN</th>
+                    <th>First Domain</th>
+                    <th>Status</th>
+                    <th>Action</th>
                   </tr>
                 </thead>
                 <tbody>
                   {secondPreferenceRecruits.map((recruit) => (
-                    <tr key={`second-${recruit.second_preference_id || recruit.id}`} className="border-b hover:bg-gray-50">
-                      <td className="px-4 py-3 text-sm text-gray-800">
-                        {recruit.name}
-                      </td>
-                      <td className="px-4 py-3 text-sm text-gray-600">
-                        {recruit.srn}
-                      </td>
-                      <td className="px-4 py-3 text-sm text-gray-600">
-                        {recruit.first_preference_domain}
-                      </td>
-                      <td className="px-4 py-3">
+                    <tr
+                      key={`second-${recruit.second_preference_id || recruit.id}`}
+                    >
+                      <td>{recruit.name}</td>
+                      <td>{recruit.srn}</td>
+                      <td>{recruit.first_preference_domain}</td>
+                      <td>
                         <span
-                          className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                            recruit.second_preference_status === "approved"
-                              ? "bg-green-100 text-green-800"
-                              : recruit.second_preference_status === "rejected"
-                                ? "bg-red-100 text-red-800"
-                                : "bg-yellow-100 text-yellow-800"
-                          }`}
+                          className={`status-badge ${recruit.second_preference_status || "pending"}`}
                         >
                           {recruit.second_preference_status || "pending"}
                         </span>
                       </td>
-                      <td className="px-4 py-3">
+                      <td>
                         <Link
                           href={`/domain/${domain}/${recruit.id}`}
-                          className="px-3 py-1 bg-blue-600 text-white rounded text-sm hover:bg-blue-700 transition"
+                          className="action-button"
                         >
                           View Details
                         </Link>
