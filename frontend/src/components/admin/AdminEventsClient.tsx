@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react";
 import EventForm, { EventFormData } from "./EventForm";
-import EventDetailsPanel from "./EventDetailsPanel";
 
 interface EventSlug {
   id: string;
@@ -38,38 +37,34 @@ export default function AdminEventsClient() {
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
   const [error, setError] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
-  const [activeTab, setActiveTab] = useState<"add" | "view">("view");
 
   // Fetch all events
   const fetchEvents = async () => {
     try {
       setIsLoading(true);
-      const response = await fetch("/api/events", {
+      const response = await fetch("/api/events?ts=" + Date.now(), {
         method: "GET",
         headers: { "Content-Type": "application/json" },
         cache: "no-store",
       });
 
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
+      if (!response.ok) throw new Error("Failed to fetch events");
 
       const result = await response.json();
+      if (!result.success) throw new Error(result.error || "Failed to fetch events");
 
-      if (!result.success) {
-        throw new Error(result.error || "Failed to fetch events");
-      }
-
-      setEvents(result.data || []);
+      const filteredEvents = (result.data || []).filter((e: any) => e?.id);
+      setEvents(filteredEvents);
       setError("");
     } catch (err) {
+      console.error("Error fetching events:", err);
       setError(err instanceof Error ? err.message : "Failed to fetch events");
     } finally {
       setIsLoading(false);
     }
   };
 
-  // Handle form submission (add or update)
+  // Handle form submission
   const handleFormSubmit = async (formData: EventFormData) => {
     try {
       setIsSubmitting(true);
@@ -96,12 +91,9 @@ export default function AdminEventsClient() {
             .map((e) => (e?.id === editingEvent.id ? result.data : e))
             .filter((e) => e?.id)
         );
-        if (selectedEvent?.id === editingEvent.id) {
-          setSelectedEvent(result.data);
-        }
-        setSuccessMessage("Event updated successfully!");
+        setSelectedEvent(result.data);
+        setSuccessMessage("✅ Event updated successfully!");
         setEditingEvent(null);
-        setActiveTab("view");
       } else {
         // Create new event
         const payload = {
@@ -126,11 +118,9 @@ export default function AdminEventsClient() {
 
         setEvents((prev) => [result.data, ...prev]);
         setSelectedEvent(result.data);
-        setSuccessMessage("Event created successfully!");
-        setActiveTab("view");
+        setSuccessMessage("✅ Event created successfully!");
       }
 
-      // Clear success message after 3 seconds
       setTimeout(() => setSuccessMessage(""), 3000);
     } catch (err) {
       setError(err instanceof Error ? err.message : "An error occurred");
@@ -141,7 +131,7 @@ export default function AdminEventsClient() {
 
   // Handle delete event
   const handleDeleteEvent = async (id: string) => {
-    if (!confirm("Are you sure you want to delete this event and all related data?")) {
+    if (!confirm("Are you sure you want to delete this event?")) {
       return;
     }
 
@@ -149,22 +139,23 @@ export default function AdminEventsClient() {
       setIsDeletingId(id);
       const response = await fetch(`/api/events/${id}`, {
         method: "DELETE",
+        headers: { "Content-Type": "application/json" },
       });
 
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
       const result = await response.json();
-      if (!result.success) {
+      if (!response.ok || !result.success) {
         throw new Error(result.error || "Failed to delete event");
       }
 
-      setEvents((prev) => prev.filter((e) => e.id !== id));
+      setEvents((prev) => prev.filter((e) => e?.id !== id));
       if (selectedEvent?.id === id) {
         setSelectedEvent(null);
       }
-      setSuccessMessage("Event deleted successfully!");
+      if (editingEvent?.id === id) {
+        setEditingEvent(null);
+      }
+
+      setSuccessMessage("✅ Event deleted successfully!");
       setTimeout(() => setSuccessMessage(""), 3000);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to delete event");
@@ -173,308 +164,15 @@ export default function AdminEventsClient() {
     }
   };
 
-  // Handle edit event
-  const handleEditEvent = (event: Event) => {
-    setEditingEvent(event);
-    setSelectedEvent(null);
-    setActiveTab("add");
-  };
-
-  // Handle cancel edit
+  // Handle cancel
   const handleCancel = () => {
     setEditingEvent(null);
-    setError("");
   };
 
-  // Handle toggle registration
-  const handleToggleRegistration = async (
-    e: React.MouseEvent,
-    event: Event
-  ) => {
-    e.stopPropagation();
-
-    try {
-      setIsSubmitting(true);
-      const newStatus = !event.registration_enabled;
-
-      const response = await fetch(`/api/events/${event.id}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          registration_enabled: newStatus,
-        }),
-      });
-
-      const result = await response.json();
-      if (!response.ok) {
-        throw new Error(result.error || "Failed to toggle registration");
-      }
-      if (!result.success) {
-        throw new Error(result.error || "Failed to toggle registration");
-      }
-
-      setEvents((prev) =>
-        prev
-          .map((e) => (e?.id === event.id ? result.data : e))
-          .filter((e) => e?.id)
-      );
-      if (selectedEvent?.id === event.id) {
-        setSelectedEvent(result.data);
-      }
-
-      setSuccessMessage(
-        `Registration ${newStatus ? "enabled" : "disabled"} for this event`
-      );
-      setTimeout(() => setSuccessMessage(""), 3000);
-    } catch (err) {
-      setError(
-        err instanceof Error ? err.message : "Failed to toggle registration"
-      );
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
-  // Handle slug add
-  const handleAddSlug = async (slug: Omit<EventSlug, "id" | "event_id">) => {
-    if (!selectedEvent) return;
-
-    try {
-      setIsSubmitting(true);
-      const response = await fetch(`/api/events/${selectedEvent.id}/slugs`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(slug),
-      });
-
-      if (!response.ok) throw new Error("Failed to add slug");
-
-      const result = await response.json();
-      if (!result.success) throw new Error(result.error);
-
-      const updatedEvent: Event = {
-        ...selectedEvent,
-        event_slug: [...(selectedEvent.event_slug || []), result.data],
-      };
-
-      setSelectedEvent(updatedEvent);
-      setEvents((prev) =>
-        prev
-          .map((e) => (e?.id === selectedEvent.id ? updatedEvent : e))
-          .filter((e) => e?.id)
-      );
-
-      setSuccessMessage("Event information added successfully!");
-      setTimeout(() => setSuccessMessage(""), 3000);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to add slug");
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
-  // Handle slug update
-  const handleUpdateSlug = async (
-    slugId: string,
-    data: Partial<EventSlug>
-  ) => {
-    if (!selectedEvent) return;
-
-    try {
-      setIsSubmitting(true);
-      const response = await fetch(`/api/events/${selectedEvent.id}/slugs`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ slugId, ...data }),
-      });
-
-      if (!response.ok) throw new Error("Failed to update slug");
-
-      const result = await response.json();
-      if (!result.success) throw new Error(result.error);
-
-      const updatedEvent: Event = {
-        ...selectedEvent,
-        event_slug: (selectedEvent.event_slug || []).map((s) =>
-          s.id === slugId ? result.data : s
-        ),
-      };
-
-      setSelectedEvent(updatedEvent);
-      setEvents((prev) =>
-        prev
-          .map((e) => (e?.id === selectedEvent.id ? updatedEvent : e))
-          .filter((e) => e?.id)
-      );
-
-      setSuccessMessage("Event information updated successfully!");
-      setTimeout(() => setSuccessMessage(""), 3000);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to update slug");
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
-  // Handle slug delete
-  const handleDeleteSlug = async (slugId: string) => {
-    if (!confirm("Delete this event information?")) return;
-
-    if (!selectedEvent) return;
-
-    try {
-      setIsSubmitting(true);
-      const response = await fetch(`/api/events/${selectedEvent.id}/slugs`, {
-        method: "DELETE",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ slugId }),
-      });
-
-      if (!response.ok) throw new Error("Failed to delete slug");
-
-      const result = await response.json();
-      if (!result.success) throw new Error(result.error);
-
-      const updatedEvent: Event = {
-        ...selectedEvent,
-        event_slug: (selectedEvent.event_slug || []).filter((s) => s.id !== slugId),
-      };
-
-      setSelectedEvent(updatedEvent);
-      setEvents((prev) =>
-        prev
-          .map((e) => (e?.id === selectedEvent.id ? updatedEvent : e))
-          .filter((e) => e?.id)
-      );
-
-      setSuccessMessage("Event information deleted successfully!");
-      setTimeout(() => setSuccessMessage(""), 3000);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to delete slug");
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
-  // Handle poster add
-  const handleAddPoster = async (poster: Omit<Poster, "id" | "event_id">) => {
-    if (!selectedEvent) return;
-
-    try {
-      setIsSubmitting(true);
-      const response = await fetch(`/api/events/${selectedEvent.id}/posters`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(poster),
-      });
-
-      if (!response.ok) throw new Error("Failed to add poster");
-
-      const result = await response.json();
-      if (!result.success) throw new Error(result.error);
-
-      const updatedEvent: Event = {
-        ...selectedEvent,
-        posters: [...(selectedEvent.posters || []), result.data],
-      };
-
-      setSelectedEvent(updatedEvent);
-      setEvents((prev) =>
-        prev
-          .map((e) => (e?.id === selectedEvent.id ? updatedEvent : e))
-          .filter((e) => e?.id)
-      );
-
-      setSuccessMessage("Poster added successfully!");
-      setTimeout(() => setSuccessMessage(""), 3000);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to add poster");
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
-  // Handle poster update
-  const handleUpdatePoster = async (
-    posterId: string,
-    data: Partial<Poster>
-  ) => {
-    if (!selectedEvent) return;
-
-    try {
-      setIsSubmitting(true);
-      const response = await fetch(`/api/events/${selectedEvent.id}/posters`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ posterId, ...data }),
-      });
-
-      if (!response.ok) throw new Error("Failed to update poster");
-
-      const result = await response.json();
-      if (!result.success) throw new Error(result.error);
-
-      const updatedEvent: Event = {
-        ...selectedEvent,
-        posters: (selectedEvent.posters || []).map((p) =>
-          p.id === posterId ? result.data : p
-        ),
-      };
-
-      setSelectedEvent(updatedEvent);
-      setEvents((prev) =>
-        prev
-          .map((e) => (e?.id === selectedEvent.id ? updatedEvent : e))
-          .filter((e) => e?.id)
-      );
-
-      setSuccessMessage("Poster updated successfully!");
-      setTimeout(() => setSuccessMessage(""), 3000);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to update poster");
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
-  // Handle poster delete
-  const handleDeletePoster = async (posterId: string) => {
-    if (!confirm("Delete this poster?")) return;
-
-    if (!selectedEvent) return;
-
-    try {
-      setIsSubmitting(true);
-      const response = await fetch(`/api/events/${selectedEvent.id}/posters`, {
-        method: "DELETE",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ posterId }),
-      });
-
-      if (!response.ok) throw new Error("Failed to delete poster");
-
-      const result = await response.json();
-      if (!result.success) throw new Error(result.error);
-
-      const updatedEvent: Event = {
-        ...selectedEvent,
-        posters: (selectedEvent.posters || []).filter((p) => p.id !== posterId),
-      };
-
-      setSelectedEvent(updatedEvent);
-      setEvents((prev) =>
-        prev
-          .map((e) => (e?.id === selectedEvent.id ? updatedEvent : e))
-          .filter((e) => e?.id)
-      );
-
-      setSuccessMessage("Poster deleted successfully!");
-      setTimeout(() => setSuccessMessage(""), 3000);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to delete poster");
-    } finally {
-      setIsSubmitting(false);
-    }
+  // Handle edit
+  const handleEditEvent = (event: Event) => {
+    setEditingEvent(event);
+    setSelectedEvent(event);
   };
 
   useEffect(() => {
@@ -482,44 +180,23 @@ export default function AdminEventsClient() {
   }, []);
 
   return (
-    <main className="events-container">
-      <div className="events-wrapper">
-        <div className="events-header">
-          <div className="events-title-section">
-            <p className="events-label">Avyakta Admin</p>
-            <h1>Events Management</h1>
-            <p>Create, manage, and organize club events with detailed information and posters.</p>
+    <main className="events-admin-container">
+      <div className="events-admin-wrapper">
+        <div className="events-admin-header">
+          <div className="events-admin-title-section">
+            <p className="events-admin-label">Avyakta Admin</p>
+            <h1>📅 Events Management</h1>
+            <p>Create and manage events with details, images, and registration settings.</p>
           </div>
         </div>
 
         {error && <div className="alert alert-error">{error}</div>}
-        {successMessage && (
-          <div className="alert alert-success">{successMessage}</div>
-        )}
+        {successMessage && <div className="alert alert-success">{successMessage}</div>}
 
-        {/* Tabs */}
-        <div className="tabs-container">
-          <button
-            className={`tab-button ${activeTab === "add" ? "active" : ""}`}
-            onClick={() => setActiveTab("add")}
-          >
-            {editingEvent ? "✏️ Edit Event" : "➕ Add Event"}
-          </button>
-          <button
-            className={`tab-button ${activeTab === "view" ? "active" : ""}`}
-            onClick={() => {
-              setActiveTab("view");
-              setEditingEvent(null);
-            }}
-          >
-            📅 View Events ({events.length})
-          </button>
-        </div>
-
-        <div className="events-content">
-          {/* Add/Edit Section */}
-          {activeTab === "add" && (
-            <div className="section add-section">
+        <div className="events-admin-layout">
+          {/* Left: Form */}
+          <div className="events-admin-form-section">
+            <div className="form-card">
               <EventForm
                 event={editingEvent || undefined}
                 onSubmit={handleFormSubmit}
@@ -527,98 +204,204 @@ export default function AdminEventsClient() {
                 isLoading={isSubmitting}
               />
             </div>
-          )}
+          </div>
 
-          {/* View Section */}
-          {activeTab === "view" && (
-            <div className="section view-section">
-              <div className="events-grid">
-                <div className="events-list">
-                  <h3>Your Events</h3>
-                  {isLoading ? (
-                    <p className="loading">Loading events...</p>
-                  ) : events.length === 0 ? (
-                    <p className="empty-state">No events created yet. Create one to get started!</p>
-                  ) : (
-                    <div className="events-item-list">
-                      {events.filter((event) => event?.id).map((event) => (
-                        <div
-                          key={event.id}
-                          className={`event-item ${selectedEvent?.id === event.id ? "selected" : ""}`}
-                          onClick={() => setSelectedEvent(event)}
+          {/* Right: Events List */}
+          <div className="events-admin-list-section">
+            <div className="list-card">
+              <div className="list-header">
+                <h2>📋 Events List</h2>
+                <span className="event-count">{events.length}</span>
+              </div>
+
+              {isLoading ? (
+                <p className="loading">Loading events...</p>
+              ) : events.length === 0 ? (
+                <p className="empty-state">No events created yet. Create one using the form.</p>
+              ) : (
+                <div className="events-admin-item-list">
+                  {events.map((event) => (
+                    <div
+                      key={event.id}
+                      className={`events-admin-item ${selectedEvent?.id === event.id ? "selected" : ""}`}
+                      onClick={() => setSelectedEvent(event)}
+                    >
+                      <div className="events-admin-item-content">
+                        <h4>{event.title}</h4>
+                        <p className="event-date">
+                          📅 {event.date ? new Date(event.date).toLocaleDateString() : "No date"}
+                        </p>
+                        <p className="event-desc">
+                          {event.description ? event.description.substring(0, 60) + "..." : "No description"}
+                        </p>
+                        <div className="event-status-badges">
+                          <span className={`status-badge ${event.registration_enabled ? "open" : "closed"}`}>
+                            {event.registration_enabled ? "📝 Registration Open" : "🔒 Registration Closed"}
+                          </span>
+                        </div>
+                      </div>
+
+                      <div className="events-admin-item-actions">
+                        <button
+                          className="btn-edit"
+                          onClick={() => handleEditEvent(event)}
+                          disabled={editingEvent?.id === event.id}
                         >
-                          <div className="event-item-content">
-                            <div className="event-item-header">
-                              <div className="event-item-left">
-                                <h4>{event.title}</h4>
-                                {event.date && (
-                                  <p className="event-date">
-                                    📅 {new Date(event.date).toLocaleDateString()}
-                                  </p>
-                                )}
-                                <p className="event-info">
-                                  ℹ️ {event.event_slug?.length || 0} info items • 🖼️ {event.posters?.length || 0} posters
-                                </p>
-                              </div>
-                              <div className="event-item-registration">
-                                <div className={`registration-status-badge ${event.registration_enabled ? "enabled" : "disabled"}`}>
-                                  {event.registration_enabled ? (
-                                    <>
-                                      <span className="status-icon">📝</span>
-                                      <span className="status-text">Registration<br/>OPEN</span>
-                                    </>
-                                  ) : (
-                                    <>
-                                      <span className="status-icon">🔒</span>
-                                      <span className="status-text">Registration<br/>CLOSED</span>
-                                    </>
-                                  )}
-                                </div>
+                          ✏️
+                        </button>
+                        <button
+                          className="btn-delete"
+                          onClick={() => handleDeleteEvent(event.id)}
+                          disabled={isDeletingId === event.id}
+                        >
+                          {isDeletingId === event.id ? "⏳" : "🗑️"}
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Detail Panel */}
+          {selectedEvent && !editingEvent && (
+            <div className="events-details-section">
+              <div className="details-card">
+                <div className="details-header">
+                  <h2>📋 Event Details</h2>
+                  <button
+                    className="btn-close-details"
+                    onClick={() => setSelectedEvent(null)}
+                  >
+                    ✕
+                  </button>
+                </div>
+
+                <div className="details-content">
+                  {/* Basic Info */}
+                  <div className="detail-section">
+                    <h3>Basic Information</h3>
+                    <div className="detail-item">
+                      <label>Title:</label>
+                      <p>{selectedEvent.title}</p>
+                    </div>
+                    <div className="detail-item">
+                      <label>Description:</label>
+                      <p>{selectedEvent.description || "No description"}</p>
+                    </div>
+                    <div className="detail-item">
+                      <label>Date:</label>
+                      <p>
+                        📅{" "}
+                        {selectedEvent.date
+                          ? new Date(selectedEvent.date).toLocaleDateString()
+                          : "No date set"}
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Cover Image */}
+                  {selectedEvent.image_url && (
+                    <div className="detail-section">
+                      <h3>Cover Image</h3>
+                      <img
+                        src={selectedEvent.image_url}
+                        alt={selectedEvent.title}
+                        className="detail-image-preview"
+                      />
+                    </div>
+                  )}
+
+                  {/* Event Details (Slug) */}
+                  {selectedEvent.event_slug && selectedEvent.event_slug.length > 0 && (
+                    <div className="detail-section">
+                      <h3>Event Details</h3>
+                      {selectedEvent.event_slug.map((slug) => (
+                        <div key={slug.id}>
+                          <div className="detail-item">
+                            <label>More Description:</label>
+                            <p>{slug.more_description || "No additional description"}</p>
+                          </div>
+                          {slug.image_url && (
+                            <div className="detail-item">
+                              <label>Detail Images:</label>
+                              <div className="image-grid">
+                                {slug.image_url.split("|").map((url, idx) => (
+                                  <img
+                                    key={idx}
+                                    src={url.trim()}
+                                    alt={`Detail ${idx + 1}`}
+                                    className="detail-grid-image"
+                                  />
+                                ))}
                               </div>
                             </div>
-                          </div>
-                          <div className="event-item-actions">
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                handleEditEvent(event);
-                              }}
-                              className="btn-action btn-edit"
-                              disabled={isDeletingId === event.id}
-                            >
-                              ✏️
-                            </button>
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                handleDeleteEvent(event.id);
-                              }}
-                              className="btn-action btn-delete"
-                              disabled={isDeletingId === event.id}
-                            >
-                              {isDeletingId === event.id ? "..." : "🗑️"}
-                            </button>
-                          </div>
+                          )}
                         </div>
                       ))}
                     </div>
                   )}
-                </div>
 
-                {selectedEvent && (
-                  <div className="event-details">
-                    <EventDetailsPanel
-                      event={selectedEvent}
-                      onAddSlug={handleAddSlug}
-                      onUpdateSlug={handleUpdateSlug}
-                      onDeleteSlug={handleDeleteSlug}
-                      onAddPoster={handleAddPoster}
-                      onUpdatePoster={handleUpdatePoster}
-                      onDeletePoster={handleDeletePoster}
-                      isLoading={isSubmitting}
-                    />
+                  {/* Posters */}
+                  {selectedEvent.posters && selectedEvent.posters.length > 0 && (
+                    <div className="detail-section">
+                      <h3>Posters ({selectedEvent.posters.length})</h3>
+                      <div className="image-grid">
+                        {selectedEvent.posters.map((poster) => (
+                          <img
+                            key={poster.id}
+                            src={poster.poster_image_url}
+                            alt="Poster"
+                            className="detail-grid-image"
+                          />
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Registration Status */}
+                  <div className="detail-section">
+                    <h3>Registration Status</h3>
+                    <div className="detail-item">
+                      <label>Registration:</label>
+                      <p>
+                        <span
+                          className={`status-badge ${
+                            selectedEvent.registration_enabled ? "open" : "closed"
+                          }`}
+                        >
+                          {selectedEvent.registration_enabled
+                            ? "📝 Open for Registration"
+                            : "🔒 Closed for Registration"}
+                        </span>
+                      </p>
+                    </div>
+                    {selectedEvent.payment_image_required && (
+                      <div className="detail-item">
+                        <label>Payment Proof:</label>
+                        <p>💳 Required</p>
+                      </div>
+                    )}
                   </div>
-                )}
+
+                  {/* Action Buttons */}
+                  <div className="detail-actions">
+                    <button
+                      className="btn-edit-detail"
+                      onClick={() => handleEditEvent(selectedEvent)}
+                    >
+                      ✏️ Edit Event
+                    </button>
+                    <button
+                      className="btn-delete-detail"
+                      onClick={() => handleDeleteEvent(selectedEvent.id)}
+                      disabled={isDeletingId === selectedEvent.id}
+                    >
+                      {isDeletingId === selectedEvent.id ? "⏳ Deleting..." : "🗑️ Delete Event"}
+                    </button>
+                  </div>
+                </div>
               </div>
             </div>
           )}
@@ -626,45 +409,44 @@ export default function AdminEventsClient() {
       </div>
 
       <style jsx>{`
-        .events-container {
+        .events-admin-container {
           min-height: 100vh;
           padding: 20px;
-          background: linear-gradient(
-            135deg,
-            #f0f4f8 0%,
-            #f5f0e8 50%,
-            #f0f4f8 100%
-          );
+          background: linear-gradient(135deg, #f0f4f8 0%, #f5f0e8 50%, #f0f4f8 100%);
         }
 
-        .events-wrapper {
-          max-width: 1400px;
+        .events-admin-wrapper {
+          max-width: 1600px;
           margin: 0 auto;
         }
 
-        .events-header {
-          margin-bottom: 32px;
+        .events-admin-header {
+          margin-bottom: 24px;
         }
 
-        .events-label {
+        .events-admin-title-section {
+          margin-bottom: 16px;
+        }
+
+        .events-admin-label {
           margin: 0;
           font-size: 12px;
           font-weight: 600;
-          letter-spacing: 1px;
           text-transform: uppercase;
-          color: #9ca3af;
+          letter-spacing: 1px;
+          color: #6b7280;
         }
 
-        .events-title-section h1 {
-          margin: 4px 0 8px 0;
+        .events-admin-title-section h1 {
+          margin: 8px 0;
           font-size: 32px;
           font-weight: 700;
           color: #1f2937;
         }
 
-        .events-title-section p {
-          margin: 0;
-          font-size: 16px;
+        .events-admin-title-section p {
+          margin: 4px 0 0 0;
+          font-size: 14px;
           color: #6b7280;
         }
 
@@ -672,115 +454,103 @@ export default function AdminEventsClient() {
           padding: 12px 16px;
           border-radius: 6px;
           margin-bottom: 16px;
-          font-size: 14px;
+          font-size: 13px;
           font-weight: 500;
         }
 
         .alert-error {
           background-color: #fee2e2;
-          border: 1px solid #fca5a5;
           color: #991b1b;
+          border: 1px solid #fecaca;
         }
 
         .alert-success {
           background-color: #dcfce7;
-          border: 1px solid #86efac;
           color: #166534;
+          border: 1px solid #86efac;
         }
 
-        .tabs-container {
-          display: flex;
-          gap: 8px;
-          margin-bottom: 24px;
-        }
-
-        .tab-button {
-          padding: 12px 20px;
-          background-color: white;
-          border: 1px solid #e5e7eb;
-          border-radius: 6px;
-          font-size: 14px;
-          font-weight: 600;
-          cursor: pointer;
-          transition: all 0.2s;
-          color: #6b7280;
-        }
-
-        .tab-button:hover {
-          border-color: #d1d5db;
-          background-color: #f9fafb;
-        }
-
-        .tab-button.active {
-          background-color: #3b82f6;
-          color: white;
-          border-color: #3b82f6;
-        }
-
-        .events-content {
-          display: flex;
-          gap: 20px;
-        }
-
-        .section {
-          background: white;
-          border-radius: 8px;
-          box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-          overflow: hidden;
-        }
-
-        .add-section {
-          flex: 1;
-          padding: 24px;
-        }
-
-        .view-section {
-          flex: 1;
-          padding: 0;
-        }
-
-        .events-grid {
+        .events-admin-layout {
           display: grid;
           grid-template-columns: 1fr 1fr;
-          gap: 20px;
-          min-height: 600px;
+          gap: 24px;
+          min-height: 800px;
         }
 
-        .events-list {
-          border-right: 1px solid #e5e7eb;
-          padding: 20px;
+        .events-admin-form-section {
           display: flex;
           flex-direction: column;
         }
 
-        .events-list h3 {
-          margin: 0 0 16px 0;
-          font-size: 16px;
+        .form-card {
+          background: white;
+          border-radius: 8px;
+          box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+          overflow: hidden;
+        }
+
+        .events-admin-list-section {
+          display: flex;
+          flex-direction: column;
+        }
+
+        .list-card {
+          background: white;
+          border-radius: 8px;
+          box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+          display: flex;
+          flex-direction: column;
+          overflow: hidden;
+        }
+
+        .list-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          padding: 20px;
+          border-bottom: 1px solid #e5e7eb;
+          background: #f9fafb;
+        }
+
+        .list-header h2 {
+          margin: 0;
+          font-size: 18px;
           font-weight: 600;
           color: #1f2937;
         }
 
+        .event-count {
+          display: inline-block;
+          padding: 4px 10px;
+          background-color: #3b82f6;
+          color: white;
+          border-radius: 12px;
+          font-size: 12px;
+          font-weight: 600;
+        }
+
         .loading,
         .empty-state {
+          padding: 40px 20px;
           text-align: center;
           color: #9ca3af;
           font-size: 14px;
-          padding: 20px;
         }
 
-        .events-item-list {
+        .events-admin-item-list {
           flex: 1;
           overflow-y: auto;
           display: flex;
           flex-direction: column;
           gap: 8px;
+          padding: 12px;
         }
 
-        .event-item {
+        .events-admin-item {
           display: flex;
           justify-content: space-between;
           align-items: flex-start;
-          gap: 16px;
+          gap: 12px;
           padding: 12px;
           background: #f9fafb;
           border: 2px solid transparent;
@@ -789,137 +559,29 @@ export default function AdminEventsClient() {
           transition: all 0.2s;
         }
 
-        .event-item:hover {
+        .events-admin-item:hover {
           background: #f3f4f6;
           border-color: #e5e7eb;
         }
 
-        .event-item.selected {
+        .events-admin-item.selected {
           background: #eff6ff;
           border-color: #3b82f6;
         }
 
-        .event-item-content {
+        .events-admin-item-content {
           flex: 1;
           min-width: 0;
         }
 
-        .event-item-header {
-          display: flex;
-          justify-content: space-between;
-          align-items: flex-start;
-          gap: 16px;
-        }
-
-        .event-item-left {
-          flex: 1;
-          min-width: 0;
-        }
-
-        .event-item-content h4 {
-          margin: 0 0 6px 0;
-          font-size: 15px;
-          font-weight: 700;
+        .events-admin-item-content h4 {
+          margin: 0 0 4px 0;
+          font-size: 14px;
+          font-weight: 600;
           color: #1f2937;
+          white-space: nowrap;
           overflow: hidden;
           text-overflow: ellipsis;
-          white-space: nowrap;
-        }
-
-        .event-date {
-          margin: 0 0 4px 0;
-          font-size: 12px;
-          color: #6b7280;
-        }
-
-        .event-info {
-          margin: 0;
-          font-size: 12px;
-          color: #9ca3af;
-        }
-
-        .event-item-registration {
-          flex-shrink: 0;
-        }
-
-        .registration-status-badge {
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          justify-content: center;
-          gap: 4px;
-          padding: 8px 16px;
-          border-radius: 8px;
-          border: 2px solid;
-          min-width: 100px;
-          text-align: center;
-          font-weight: 600;
-          font-size: 11px;
-        }
-
-        .registration-status-badge.enabled {
-          background-color: #dcfce7;
-          border-color: #86efac;
-          color: #166534;
-        }
-
-        .registration-status-badge.disabled {
-          background-color: #fee2e2;
-          border-color: #fca5a5;
-          color: #991b1b;
-        }
-
-        .status-icon {
-          font-size: 18px;
-          line-height: 1;
-        }
-
-        .status-text {
-          font-size: 10px;
-          font-weight: 700;
-          letter-spacing: 0.5px;
-          line-height: 1.2;
-        }
-
-        .registration-badge {
-          display: none;
-        }
-
-        .btn-toggle-reg {
-          padding: 6px 8px;
-          border: 1px solid #e5e7eb;
-          border-radius: 4px;
-          cursor: pointer;
-          font-size: 16px;
-          transition: all 0.2s;
-          background-color: white;
-        }
-
-        .btn-toggle-reg.enabled {
-          background-color: #dcfce7;
-          color: #166534;
-          border-color: #86efac;
-        }
-
-        .btn-toggle-reg.enabled:hover:not(:disabled) {
-          background-color: #bbf7d0;
-          border-color: #4ade80;
-        }
-
-        .btn-toggle-reg.disabled {
-          background-color: #fee2e2;
-          color: #991b1b;
-          border-color: #fca5a5;
-        }
-
-        .btn-toggle-reg.disabled:hover:not(:disabled) {
-          background-color: #fecaca;
-          border-color: #f87171;
-        }
-
-        .btn-toggle-reg:disabled {
-          opacity: 0.6;
-          cursor: not-allowed;
         }
 
         .event-date {
@@ -928,91 +590,274 @@ export default function AdminEventsClient() {
           color: #6b7280;
         }
 
-        .event-info {
-          margin: 0;
-          font-size: 11px;
+        .event-desc {
+          margin: 0 0 6px 0;
+          font-size: 12px;
           color: #9ca3af;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          display: -webkit-box;
+          -webkit-line-clamp: 1;
+          -webkit-box-orient: vertical;
         }
 
-        .event-item-actions {
+        .event-status-badges {
           display: flex;
           gap: 6px;
-          margin-left: 8px;
+          flex-wrap: wrap;
         }
 
-        .btn-action {
-          padding: 6px 8px;
-          border: none;
-          border-radius: 4px;
-          cursor: pointer;
-          font-size: 16px;
-          transition: all 0.2s;
+        .status-badge {
+          display: inline-block;
+          padding: 3px 8px;
+          border-radius: 3px;
+          font-size: 11px;
+          font-weight: 600;
         }
 
-        .btn-edit {
-          background-color: #dbeafe;
-          color: #1e40af;
+        .status-badge.open {
+          background-color: #dcfce7;
+          color: #166534;
         }
 
-        .btn-edit:hover {
-          background-color: #bfdbfe;
-        }
-
-        .btn-delete {
+        .status-badge.closed {
           background-color: #fee2e2;
           color: #991b1b;
         }
 
-        .btn-delete:hover {
-          background-color: #fecaca;
+        .events-admin-item-actions {
+          display: flex;
+          gap: 6px;
         }
 
-        .btn-action:disabled {
+        .btn-edit,
+        .btn-delete {
+          padding: 6px 10px;
+          border: none;
+          border-radius: 4px;
+          font-size: 14px;
+          cursor: pointer;
+          transition: all 0.2s;
+          background: white;
+          border: 1px solid #d1d5db;
+        }
+
+        .btn-edit:hover:not(:disabled) {
+          background: #eff6ff;
+          border-color: #3b82f6;
+        }
+
+        .btn-delete:hover:not(:disabled) {
+          background: #fee2e2;
+          border-color: #fecaca;
+        }
+
+        .btn-edit:disabled,
+        .btn-delete:disabled {
           opacity: 0.5;
           cursor: not-allowed;
         }
 
-        .event-details {
-          padding: 20px;
-          display: flex;
-          flex-direction: column;
+        /* Detail Panel Styles */
+        .events-details-section {
+          grid-column: 2 / 3;
+          grid-row: 2 / 3;
+          overflow-y: auto;
+          max-height: calc(100vh - 140px);
+          padding: 0 12px;
         }
 
-        @media (max-width: 1024px) {
-          .events-grid {
+        .details-card {
+          background: white;
+          border-radius: 8px;
+          box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+          overflow: hidden;
+          border: 1px solid #e5e7eb;
+        }
+
+        .details-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          padding: 16px;
+          border-bottom: 1px solid #e5e7eb;
+          background: #f9fafb;
+        }
+
+        .details-header h2 {
+          margin: 0;
+          font-size: 18px;
+          font-weight: 600;
+          color: #1f2937;
+        }
+
+        .btn-close-details {
+          background: white;
+          border: 1px solid #d1d5db;
+          border-radius: 4px;
+          width: 32px;
+          height: 32px;
+          cursor: pointer;
+          font-size: 16px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          transition: all 0.2s;
+        }
+
+        .btn-close-details:hover {
+          background: #f3f4f6;
+          border-color: #9ca3af;
+        }
+
+        .details-content {
+          padding: 16px;
+          display: flex;
+          flex-direction: column;
+          gap: 16px;
+        }
+
+        .detail-section {
+          border-bottom: 1px solid #e5e7eb;
+          padding-bottom: 12px;
+        }
+
+        .detail-section:last-of-type {
+          border-bottom: none;
+        }
+
+        .detail-section h3 {
+          margin: 0 0 12px 0;
+          font-size: 14px;
+          font-weight: 600;
+          color: #374151;
+          text-transform: uppercase;
+          letter-spacing: 0.5px;
+        }
+
+        .detail-item {
+          margin-bottom: 10px;
+        }
+
+        .detail-item label {
+          display: block;
+          font-size: 12px;
+          font-weight: 600;
+          color: #6b7280;
+          margin-bottom: 4px;
+          text-transform: uppercase;
+          letter-spacing: 0.5px;
+        }
+
+        .detail-item p {
+          margin: 0;
+          font-size: 14px;
+          color: #1f2937;
+          line-height: 1.5;
+          word-break: break-word;
+        }
+
+        .detail-image-preview {
+          width: 100%;
+          max-height: 300px;
+          object-fit: cover;
+          border-radius: 6px;
+          border: 1px solid #e5e7eb;
+        }
+
+        .image-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+          gap: 8px;
+          margin-top: 8px;
+        }
+
+        .detail-grid-image {
+          width: 100%;
+          height: 120px;
+          object-fit: cover;
+          border-radius: 4px;
+          border: 1px solid #e5e7eb;
+          cursor: pointer;
+          transition: transform 0.2s;
+        }
+
+        .detail-grid-image:hover {
+          transform: scale(1.05);
+        }
+
+        .detail-actions {
+          display: flex;
+          gap: 8px;
+          margin-top: 12px;
+          padding-top: 12px;
+          border-top: 1px solid #e5e7eb;
+        }
+
+        .btn-edit-detail,
+        .btn-delete-detail {
+          flex: 1;
+          padding: 10px 12px;
+          border: none;
+          border-radius: 4px;
+          font-size: 13px;
+          font-weight: 600;
+          cursor: pointer;
+          transition: all 0.2s;
+        }
+
+        .btn-edit-detail {
+          background: #3b82f6;
+          color: white;
+        }
+
+        .btn-edit-detail:hover {
+          background: #2563eb;
+        }
+
+        .btn-delete-detail {
+          background: #ef4444;
+          color: white;
+        }
+
+        .btn-delete-detail:hover:not(:disabled) {
+          background: #dc2626;
+        }
+
+        .btn-delete-detail:disabled {
+          opacity: 0.7;
+          cursor: not-allowed;
+        }
+
+        @media (max-width: 1200px) {
+          .events-admin-layout {
             grid-template-columns: 1fr;
+            gap: 20px;
           }
 
-          .events-list {
-            border-right: none;
-            border-bottom: 1px solid #e5e7eb;
-            max-height: 300px;
+          .events-details-section {
+            grid-column: 1 / 2;
+            grid-row: 3 / 4;
+            max-height: 400px;
+            margin-top: 12px;
           }
         }
 
         @media (max-width: 768px) {
-          .events-container {
+          .events-admin-container {
             padding: 12px;
           }
 
-          .events-title-section h1 {
+          .events-admin-title-section h1 {
             font-size: 24px;
           }
 
-          .events-grid {
-            gap: 12px;
+          .events-admin-layout {
+            min-height: auto;
           }
 
-          .events-list {
-            padding: 12px;
-          }
-
-          .event-details {
-            padding: 12px;
-          }
-
-          .add-section {
-            padding: 12px;
+          .events-admin-item-list {
+            max-height: 400px;
           }
         }
       `}</style>

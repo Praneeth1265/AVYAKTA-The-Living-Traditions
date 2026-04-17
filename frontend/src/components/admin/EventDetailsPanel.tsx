@@ -24,6 +24,8 @@ interface Event {
   description: string | null;
   image_url: string | null;
   date: string | null;
+  registration_enabled?: boolean;
+  payment_image_required?: boolean;
   event_slug?: EventSlug[];
   posters?: Poster[];
 }
@@ -36,6 +38,7 @@ interface EventDetailsPanelProps {
   onAddPoster: (poster: Omit<Poster, "id" | "event_id">) => Promise<void>;
   onUpdatePoster: (posterId: string, data: Partial<Poster>) => Promise<void>;
   onDeletePoster: (posterId: string) => Promise<void>;
+  onToggleRegistration?: (event: Event, e: React.MouseEvent) => void;
   isLoading: boolean;
 }
 
@@ -47,9 +50,11 @@ export default function EventDetailsPanel({
   onAddPoster,
   onUpdatePoster,
   onDeletePoster,
+  onToggleRegistration,
   isLoading,
 }: EventDetailsPanelProps) {
   const [activeTab, setActiveTab] = useState<"slugs" | "posters">("slugs");
+  const [registrationToggling, setRegistrationToggling] = useState(false);
   const [slugFormData, setSlugFormData] = useState({
     more_description: "",
     image_url: "", // Main image URL (will store URLs separated by comma for multiple)
@@ -304,10 +309,71 @@ export default function EventDetailsPanel({
     setImageError("");
   };
 
+  const handleToggleRegistrationLocal = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    try {
+      setRegistrationToggling(true);
+      setImageError(""); // Clear any previous errors
+      const newStatus = !event.registration_enabled;
+
+      const response = await fetch(`/api/events/${event.id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          registration_enabled: newStatus,
+        }),
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.error || `HTTP ${response.status}`);
+      }
+      
+      if (!result.success) {
+        throw new Error(result.error || "Failed to toggle registration");
+      }
+
+      // Update the event object with new registration status
+      event.registration_enabled = newStatus;
+      
+      // Call the parent handler to update state if provided
+      if (onToggleRegistration) {
+        onToggleRegistration(event, e);
+      }
+      
+      // Clear success message after 2 seconds
+      setTimeout(() => {
+        setImageError("");
+      }, 2000);
+    } catch (error) {
+      console.error("Error toggling registration:", error);
+      setImageError(
+        error instanceof Error ? error.message : "Failed to toggle registration. Check browser console for details."
+      );
+    } finally {
+      setRegistrationToggling(false);
+    }
+  };
+
   return (
     <div className="event-details-panel">
       <div className="details-header">
-        <h3>📋 Event Details</h3>
+        <div className="header-top">
+          <h3>📋 Event Details</h3>
+          <div className="header-actions">
+            <button
+              onClick={handleToggleRegistrationLocal}
+              disabled={registrationToggling}
+              className={`btn-registration-toggle ${event.registration_enabled ? "enabled" : "disabled"}`}
+              title={event.registration_enabled ? "Click to disable registrations" : "Click to enable registrations"}
+            >
+              {registrationToggling ? "..." : event.registration_enabled ? "📝 OPEN" : "🔒 CLOSED"}
+            </button>
+          </div>
+        </div>
         <div className="tabs">
           <button
             className={`tab-btn ${activeTab === "slugs" ? "active" : ""}`}
@@ -327,6 +393,11 @@ export default function EventDetailsPanel({
       {/* Slugs Section */}
       {activeTab === "slugs" && (
         <div className="details-section">
+          {imageError && (
+            <div className="alert alert-error">
+              ⚠️ {imageError}
+            </div>
+          )}
           <form onSubmit={handleAddSlug} className="detail-form">
             <h4>{editingSlugId ? "Edit Event Information" : "Add Event Information"}</h4>
 
@@ -573,10 +644,19 @@ export default function EventDetailsPanel({
         .details-header {
           border-bottom: 1px solid #e5e7eb;
           padding: 16px;
+          display: flex;
+          flex-direction: column;
+          gap: 12px;
+        }
+
+        .header-top {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
         }
 
         .details-header h3 {
-          margin: 0 0 12px 0;
+          margin: 0;
           font-size: 16px;
           font-weight: 600;
           color: #1f2937;
@@ -607,6 +687,26 @@ export default function EventDetailsPanel({
 
         .details-section {
           padding: 16px;
+        }
+
+        .alert {
+          padding: 12px 16px;
+          border-radius: 4px;
+          margin-bottom: 16px;
+          font-size: 13px;
+          font-weight: 500;
+        }
+
+        .alert-error {
+          background-color: #fee2e2;
+          color: #991b1b;
+          border: 1px solid #fecaca;
+        }
+
+        .alert-success {
+          background-color: #dcfce7;
+          color: #166534;
+          border: 1px solid #86efac;
         }
 
         .detail-form {
@@ -927,6 +1027,43 @@ export default function EventDetailsPanel({
           padding: 6px;
           background: rgba(0, 0, 0, 0.7);
           justify-content: center;
+        }
+
+        .header-actions {
+          display: flex;
+          gap: 8px;
+          align-items: center;
+        }
+
+        .btn-registration-toggle {
+          padding: 8px 12px;
+          border: none;
+          border-radius: 4px;
+          font-size: 12px;
+          font-weight: 600;
+          cursor: pointer;
+          transition: all 0.2s;
+          white-space: nowrap;
+        }
+
+        .btn-registration-toggle.enabled {
+          background-color: #dcfce7;
+          color: #166534;
+          border: 1px solid #86efac;
+        }
+
+        .btn-registration-toggle.enabled:hover {
+          background-color: #bbf7d0;
+        }
+
+        .btn-registration-toggle.disabled {
+          background-color: #fee2e2;
+          color: #991b1b;
+          border: 1px solid #fecaca;
+        }
+
+        .btn-registration-toggle.disabled:hover {
+          background-color: #fecaca;
         }
 
         @media (max-width: 768px) {

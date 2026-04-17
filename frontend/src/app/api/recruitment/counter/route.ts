@@ -41,7 +41,7 @@ export async function PUT(request: NextRequest) {
     }
 
     if (flushAll) {
-      // Reset all domains
+      // Reset all domains - need a WHERE clause for safety
       const result = await retryWithBackoff(async () =>
         supabase
           .from("counter")
@@ -50,6 +50,7 @@ export async function PUT(request: NextRequest) {
             approved: 0,
             rejected: 0,
           })
+          .neq("domain", null)
           .select()
       );
 

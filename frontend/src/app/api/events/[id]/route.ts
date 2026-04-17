@@ -59,7 +59,7 @@ export async function PUT(
   try {
     const { id } = await params;
     const body = await request.json();
-    const { title, description, image_url, date, registration_enabled, payment_image_required } = body;
+    const { title, description, image_url, date, registration_enabled, payment_image_required, more_description, slug_image_url, poster_image_urls } = body;
 
     const updatePayload: EventUpdatePayload = {};
 
@@ -87,12 +87,11 @@ export async function PUT(
 
     let { data, error } = result;
 
-    // Backward compatible fallback when optional DB columns are not migrated yet
+    // If error is about missing columns, retry without those fields
     if (
       error &&
       (error.message.includes("registration_enabled") ||
-        error.message.includes("payment_image_required") ||
-        error.message.includes("schema cache"))
+        error.message.includes("payment_image_required"))
     ) {
       const fallbackPayload = { ...updatePayload };
       delete fallbackPayload.registration_enabled;
@@ -117,6 +116,130 @@ export async function PUT(
     }
 
     if (error) throw new Error(error.message);
+
+    // Handle slug update
+    if (data && data.length > 0 && (more_description !== undefined || slug_image_url !== undefined)) {
+      const eventId = data[0].id;
+      const existingSlug = data[0].event_slug?.[0];
+
+      if (existingSlug) {
+        // Update existing slug
+        const slugUpdatePayload: any = {};
+        if (more_description !== undefined) {
+          slugUpdatePayload.more_description = more_description;
+        }
+        if (slug_image_url !== undefined) {
+          slugUpdatePayload.image_url = slug_image_url;
+        }
+
+        const slugUpdateResult = await retryWithBackoff(async () =>
+          supabase
+            .from("event_slug")
+            .update(slugUpdatePayload)
+            .eq("id", existingSlug.id)
+        );
+
+        if (slugUpdateResult.error) {
+          console.warn("Warning: Failed to update event slug:", slugUpdateResult.error);
+        }
+      } else if (more_description || slug_image_url) {
+        // Create new slug if it doesn't exist
+        const slugPayload: any = {
+          event_id: eventId,
+        };
+
+        if (more_description) {
+          slugPayload.more_description = more_description;
+        }
+        if (slug_image_url) {
+          slugPayload.image_url = slug_image_url;
+        }
+
+        const slugCreateResult = await retryWithBackoff(async () =>
+          supabase
+            .from("event_slug")
+            .insert([slugPayload])
+        );
+
+        if (slugCreateResult.error) {
+          console.warn("Warning: Failed to create event slug:", slugCreateResult.error);
+        }
+      }
+
+      // Re-fetch the event with updated slug data
+      const refetchResult = await retryWithBackoff(async () =>
+        supabase
+          .from("events")
+          .select(
+            `
+            *,
+            event_slug(*),
+            posters(*)
+          `
+          )
+          .eq("id", eventId)
+          .single()
+      );
+
+      if (refetchResult.data) {
+        data[0] = refetchResult.data;
+      }
+    }
+
+    // Handle poster update/create
+    if (data && data.length > 0 && poster_image_urls !== undefined) {
+      const eventId = data[0].id;
+      const posterImages = poster_image_urls.split("|").filter((url: string) => url.trim());
+
+      // Delete existing posters
+      const deleteResult = await retryWithBackoff(async () =>
+        supabase
+          .from("posters")
+          .delete()
+          .eq("event_id", eventId)
+      );
+
+      if (deleteResult.error) {
+        console.warn("Warning: Failed to delete old posters:", deleteResult.error);
+      }
+
+      // Create new posters if any provided
+      if (posterImages.length > 0) {
+        const posterPayloads = posterImages.map((poster_image_url: string) => ({
+          event_id: eventId,
+          poster_image_url: poster_image_url.trim(),
+        }));
+
+        const createResult = await retryWithBackoff(async () =>
+          supabase
+            .from("posters")
+            .insert(posterPayloads)
+        );
+
+        if (createResult.error) {
+          console.warn("Warning: Failed to create event posters:", createResult.error);
+        }
+      }
+
+      // Re-fetch the event with all updated data
+      const refetchResult = await retryWithBackoff(async () =>
+        supabase
+          .from("events")
+          .select(
+            `
+            *,
+            event_slug(*),
+            posters(*)
+          `
+          )
+          .eq("id", eventId)
+          .single()
+      );
+
+      if (refetchResult.data) {
+        data[0] = refetchResult.data;
+      }
+    }
 
     return NextResponse.json({ success: true, data: data?.[0] });
   } catch (error) {

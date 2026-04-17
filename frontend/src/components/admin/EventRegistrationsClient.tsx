@@ -9,17 +9,15 @@ interface Event {
   image_url: string | null;
   date: string | null;
   registration_enabled?: boolean;
-  payment_image_required?: boolean;
 }
 
 export default function EventRegistrationsClient() {
   const [events, setEvents] = useState<Event[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [togglingId, setTogglingId] = useState<string | null>(null);
   const [error, setError] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
 
-  // Fetch all events
   const fetchEvents = async () => {
     try {
       setIsLoading(true);
@@ -29,17 +27,11 @@ export default function EventRegistrationsClient() {
         cache: "no-store",
       });
 
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
+      if (!response.ok) throw new Error("Failed to fetch events");
 
       const result = await response.json();
+      if (!result.success) throw new Error(result.error || "Failed to fetch events");
 
-      if (!result.success) {
-        throw new Error(result.error || "Failed to fetch events");
-      }
-
-      console.log("Events fetched:", result.data);
       setEvents(result.data || []);
       setError("");
     } catch (err) {
@@ -50,13 +42,19 @@ export default function EventRegistrationsClient() {
     }
   };
 
-  // Handle toggle registration
   const handleToggleRegistration = async (event: Event) => {
     try {
-      setIsSubmitting(true);
+      setTogglingId(event.id);
       const newStatus = !event.registration_enabled;
 
-      console.log(`Toggling registration for event ${event.id} to ${newStatus}`);
+      // Immediately update UI
+      setEvents((prev) =>
+        prev.map((e) =>
+          e.id === event.id
+            ? { ...e, registration_enabled: newStatus }
+            : e
+        )
+      );
 
       const response = await fetch(`/api/events/${event.id}`, {
         method: "PUT",
@@ -67,30 +65,33 @@ export default function EventRegistrationsClient() {
       });
 
       const result = await response.json();
-      console.log("API Response:", result);
 
-      if (!response.ok) {
-        throw new Error(result.error || "Failed to toggle registration");
-      }
-      if (!result.success) {
+      if (!response.ok || !result.success) {
+        // Revert on error
+        setEvents((prev) =>
+          prev.map((e) =>
+            e.id === event.id
+              ? { ...e, registration_enabled: !newStatus }
+              : e
+          )
+        );
         throw new Error(result.error || "Failed to toggle registration");
       }
 
       setSuccessMessage(
-        `Registration ${newStatus ? "enabled" : "disabled"} for ${event.title}`
+        `✅ Registration ${newStatus ? "enabled" : "disabled"} for ${event.title}`
       );
-
-      // Refetch all events to ensure we have the latest data
-      await fetchEvents();
-      
       setTimeout(() => setSuccessMessage(""), 3000);
+      
+      // Re-fetch to verify server state
+      setTimeout(() => {
+        fetchEvents();
+      }, 1000);
     } catch (err) {
-      console.error("Error toggling registration:", err);
-      setError(
-        err instanceof Error ? err.message : "Failed to toggle registration"
-      );
+      setError(err instanceof Error ? err.message : "Failed to toggle registration");
+      setTimeout(() => setError(""), 3000);
     } finally {
-      setIsSubmitting(false);
+      setTogglingId(null);
     }
   };
 
@@ -102,78 +103,60 @@ export default function EventRegistrationsClient() {
     <main className="registrations-container">
       <div className="registrations-wrapper">
         <div className="registrations-header">
-          <div className="registrations-title-section">
-            <p className="registrations-label">Avyakta Admin</p>
-            <h1>Event Registrations Management</h1>
-            <p>Enable or disable event registrations for each event.</p>
-          </div>
+          <h1>📋 Event Registration Management</h1>
+          <p>Enable or disable registrations for each event</p>
         </div>
 
         {error && <div className="alert alert-error">{error}</div>}
-        {successMessage && (
-          <div className="alert alert-success">{successMessage}</div>
-        )}
+        {successMessage && <div className="alert alert-success">{successMessage}</div>}
 
-        <div className="registrations-content">
-          <div className="registrations-section">
-            {isLoading ? (
-              <p className="loading">Loading events...</p>
-            ) : events.length === 0 ? (
-              <p className="empty-state">No events found. Create an event first.</p>
-            ) : (
-              <div className="registrations-grid">
-                {events.filter((e) => e?.id).map((event) => (
-                  <div
-                    key={event.id}
-                    className={`registration-card ${event.registration_enabled ? "enabled" : "disabled"}`}
-                  >
-                    <div className="card-header">
-                      <div className="card-title-section">
-                        <h3>{event.title}</h3>
-                        {event.date && (
-                          <p className="card-date">
-                            📅 {new Date(event.date).toLocaleDateString()}
-                          </p>
-                        )}
-                      </div>
-                      <div className={`status-indicator ${event.registration_enabled ? "active" : ""}`}>
-                        {event.registration_enabled ? "🔵" : "⭕"}
-                      </div>
-                    </div>
-
-                    <div className="card-body">
-                      <div className="current-status">
-                        <span className="status-label">Current Status:</span>
-                        <span
-                          className={`status-value ${event.registration_enabled ? "enabled" : "disabled"}`}
-                        >
+        <div className="events-table">
+          {isLoading ? (
+            <p className="loading">Loading events...</p>
+          ) : events.length === 0 ? (
+            <p className="empty-state">No events found</p>
+          ) : (
+            <div className="table-wrapper">
+              <table className="events-list-table">
+                <thead>
+                  <tr>
+                    <th>Event Title</th>
+                    <th>Date</th>
+                    <th>Status</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {events.map((event) => (
+                    <tr key={event.id} className={event.registration_enabled ? "enabled" : "disabled"}>
+                      <td className="event-title">{event.title}</td>
+                      <td className="event-date">
+                        {event.date ? new Date(event.date).toLocaleDateString() : "No date"}
+                      </td>
+                      <td className="event-status">
+                        <span className={`status-badge ${event.registration_enabled ? "open" : "closed"}`}>
                           {event.registration_enabled ? "📝 OPEN" : "🔒 CLOSED"}
                         </span>
-                      </div>
-
-                      {event.description && (
-                        <p className="card-description">{event.description}</p>
-                      )}
-                    </div>
-
-                    <div className="card-footer">
-                      <button
-                        onClick={() => handleToggleRegistration(event)}
-                        className={`btn-toggle ${event.registration_enabled ? "close" : "open"}`}
-                        disabled={isSubmitting}
-                      >
-                        {event.registration_enabled ? (
-                          <>🔒 Close Registration</>
-                        ) : (
-                          <>📝 Open Registration</>
-                        )}
-                      </button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
+                      </td>
+                      <td className="event-action">
+                        <button
+                          onClick={() => handleToggleRegistration(event)}
+                          disabled={togglingId === event.id}
+                          className={`btn-toggle ${event.registration_enabled ? "disable" : "enable"}`}
+                        >
+                          {togglingId === event.id
+                            ? "..."
+                            : event.registration_enabled
+                            ? "🔒 Disable"
+                            : "🔓 Enable"}
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
         </div>
       </div>
 
@@ -190,289 +173,189 @@ export default function EventRegistrationsClient() {
         }
 
         .registrations-header {
-          background: white;
-          padding: 30px;
-          margin-bottom: 20px;
-          border-radius: 8px;
-          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-        }
-
-        .registrations-title-section {
-          margin: 0;
-        }
-
-        .registrations-label {
-          margin: 0 0 8px 0;
-          font-size: 12px;
-          font-weight: 600;
-          color: #6b7280;
-          text-transform: uppercase;
-          letter-spacing: 0.5px;
+          margin-bottom: 24px;
         }
 
         .registrations-header h1 {
           margin: 0 0 8px 0;
-          font-size: 28px;
+          font-size: 32px;
           font-weight: 700;
           color: #1f2937;
         }
 
         .registrations-header p {
           margin: 0;
-          color: #6b7280;
           font-size: 14px;
+          color: #6b7280;
         }
 
         .alert {
-          padding: 16px;
-          border-radius: 8px;
-          margin-bottom: 20px;
+          padding: 12px 16px;
+          border-radius: 4px;
+          margin-bottom: 16px;
+          font-size: 13px;
           font-weight: 500;
         }
 
         .alert-error {
           background-color: #fee2e2;
           color: #991b1b;
-          border-left: 4px solid #dc2626;
+          border: 1px solid #fecaca;
         }
 
         .alert-success {
           background-color: #dcfce7;
           color: #166534;
-          border-left: 4px solid #16a34a;
+          border: 1px solid #86efac;
         }
 
-        .registrations-content {
-          animation: fadeIn 0.3s ease-in-out;
+        .events-table {
+          background: white;
+          border-radius: 8px;
+          box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+          overflow: hidden;
         }
 
-        @keyframes fadeIn {
-          from {
-            opacity: 0;
-            transform: translateY(10px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
+        .table-wrapper {
+          overflow-x: auto;
         }
 
-        .registrations-section {
-          animation: slideDown 0.3s ease-out;
+        .events-list-table {
+          width: 100%;
+          border-collapse: collapse;
         }
 
-        @keyframes slideDown {
-          from {
-            opacity: 0;
-            transform: translateY(-10px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
+        .events-list-table thead {
+          background: #f3f4f6;
+          border-bottom: 2px solid #e5e7eb;
+        }
+
+        .events-list-table th {
+          padding: 12px 16px;
+          text-align: left;
+          font-size: 13px;
+          font-weight: 600;
+          color: #374151;
+          text-transform: uppercase;
+          letter-spacing: 0.5px;
+        }
+
+        .events-list-table td {
+          padding: 12px 16px;
+          border-bottom: 1px solid #e5e7eb;
+          font-size: 14px;
+          color: #1f2937;
+        }
+
+        .events-list-table tbody tr:hover {
+          background-color: #f9fafb;
+        }
+
+        .events-list-table tbody tr.enabled {
+          background-color: #f0fdf4;
+        }
+
+        .events-list-table tbody tr.disabled {
+          background-color: #fef2f2;
+        }
+
+        .event-title {
+          font-weight: 600;
+          color: #1f2937;
+        }
+
+        .event-date {
+          color: #6b7280;
+          font-size: 13px;
+        }
+
+        .event-status {
+          text-align: center;
+        }
+
+        .status-badge {
+          display: inline-block;
+          padding: 6px 12px;
+          border-radius: 4px;
+          font-size: 12px;
+          font-weight: 600;
+        }
+
+        .status-badge.open {
+          background-color: #dcfce7;
+          color: #166534;
+        }
+
+        .status-badge.closed {
+          background-color: #fee2e2;
+          color: #991b1b;
+        }
+
+        .event-action {
+          text-align: center;
+        }
+
+        .btn-toggle {
+          padding: 8px 12px;
+          border: none;
+          border-radius: 4px;
+          font-size: 12px;
+          font-weight: 600;
+          cursor: pointer;
+          transition: all 0.2s;
+          white-space: nowrap;
+        }
+
+        .btn-toggle.enable {
+          background-color: #dcfce7;
+          color: #166534;
+          border: 1px solid #86efac;
+        }
+
+        .btn-toggle.enable:hover:not(:disabled) {
+          background-color: #bbf7d0;
+        }
+
+        .btn-toggle.disable {
+          background-color: #fee2e2;
+          color: #991b1b;
+          border: 1px solid #fecaca;
+        }
+
+        .btn-toggle.disable:hover:not(:disabled) {
+          background-color: #fecaca;
+        }
+
+        .btn-toggle:disabled {
+          opacity: 0.5;
+          cursor: not-allowed;
         }
 
         .loading,
         .empty-state {
+          padding: 40px;
           text-align: center;
           color: #9ca3af;
           font-size: 14px;
-          padding: 40px 20px;
-        }
-
-        .registrations-grid {
-          display: grid;
-          grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-          gap: 20px;
-        }
-
-        .registration-card {
-          background: white;
-          border-radius: 12px;
-          padding: 20px;
-          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-          transition: all 0.3s ease;
-          border-left: 4px solid;
-        }
-
-        .registration-card.enabled {
-          border-left-color: #10b981;
-          background: linear-gradient(135deg, #ffffff 0%, #f0fdf4 100%);
-        }
-
-        .registration-card.disabled {
-          border-left-color: #ef4444;
-          background: linear-gradient(135deg, #ffffff 0%, #fef2f2 100%);
-        }
-
-        .registration-card:hover {
-          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-          transform: translateY(-2px);
-        }
-
-        .card-header {
-          display: flex;
-          justify-content: space-between;
-          align-items: flex-start;
-          margin-bottom: 16px;
-          padding-bottom: 16px;
-          border-bottom: 1px solid #e5e7eb;
-        }
-
-        .card-title-section {
-          flex: 1;
-        }
-
-        .card-header h3 {
-          margin: 0 0 6px 0;
-          font-size: 16px;
-          font-weight: 700;
-          color: #1f2937;
-        }
-
-        .card-date {
-          margin: 0;
-          font-size: 13px;
-          color: #6b7280;
-        }
-
-        .status-indicator {
-          font-size: 24px;
-          line-height: 1;
-          animation: pulse 2s infinite;
-        }
-
-        .status-indicator.active {
-          color: #10b981;
-        }
-
-        @keyframes pulse {
-          0%, 100% {
-            opacity: 1;
-          }
-          50% {
-            opacity: 0.5;
-          }
-        }
-
-        .card-body {
-          margin-bottom: 16px;
-        }
-
-        .current-status {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          margin-bottom: 12px;
-          padding: 12px;
-          background: #f9fafb;
-          border-radius: 6px;
-        }
-
-        .status-label {
-          font-weight: 600;
-          color: #6b7280;
-          font-size: 13px;
-        }
-
-        .status-value {
-          font-weight: 700;
-          font-size: 14px;
-          padding: 4px 12px;
-          border-radius: 4px;
-        }
-
-        .status-value.enabled {
-          background-color: #dcfce7;
-          color: #166534;
-        }
-
-        .status-value.disabled {
-          background-color: #fee2e2;
-          color: #991b1b;
-        }
-
-        .card-description {
-          margin: 0;
-          font-size: 13px;
-          color: #6b7280;
-          line-height: 1.5;
-          overflow: hidden;
-          text-overflow: ellipsis;
-          display: -webkit-box;
-          -webkit-line-clamp: 2;
-          -webkit-box-orient: vertical;
-        }
-
-        .card-footer {
-          display: flex;
-          gap: 8px;
-        }
-
-        .btn-toggle {
-          flex: 1;
-          padding: 12px;
-          border: none;
-          border-radius: 6px;
-          font-size: 14px;
-          font-weight: 600;
-          cursor: pointer;
-          transition: all 0.3s ease;
-          white-space: nowrap;
-        }
-
-        .btn-toggle.open {
-          background-color: #dcfce7;
-          color: #166534;
-          border: 2px solid #86efac;
-        }
-
-        .btn-toggle.open:hover:not(:disabled) {
-          background-color: #bbf7d0;
-          border-color: #4ade80;
-          transform: translateY(-2px);
-        }
-
-        .btn-toggle.close {
-          background-color: #fee2e2;
-          color: #991b1b;
-          border: 2px solid #fca5a5;
-        }
-
-        .btn-toggle.close:hover:not(:disabled) {
-          background-color: #fecaca;
-          border-color: #f87171;
-          transform: translateY(-2px);
-        }
-
-        .btn-toggle:disabled {
-          opacity: 0.6;
-          cursor: not-allowed;
         }
 
         @media (max-width: 768px) {
-          .registrations-container {
-            padding: 12px;
+          .registrations-wrapper {
+            padding: 0;
           }
 
-          .registrations-header {
-            padding: 20px;
+          .events-list-table {
+            font-size: 12px;
           }
 
-          .registrations-header h1 {
-            font-size: 22px;
-          }
-
-          .registrations-grid {
-            grid-template-columns: 1fr;
-          }
-
-          .card-footer {
-            flex-direction: column;
+          .events-list-table th,
+          .events-list-table td {
+            padding: 8px 12px;
           }
 
           .btn-toggle {
-            width: 100%;
+            padding: 6px 10px;
+            font-size: 11px;
           }
         }
       `}</style>

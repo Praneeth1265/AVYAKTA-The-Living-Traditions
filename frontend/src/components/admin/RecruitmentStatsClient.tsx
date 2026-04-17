@@ -102,14 +102,8 @@ export default function RecruitmentStatsClient() {
 
       if (!response.ok) throw new Error("Failed to flush counters");
 
-      setCounters((prev) =>
-        prev.map((counter) => ({
-          ...counter,
-          not_sure: 0,
-          approved: 0,
-          rejected: 0,
-        }))
-      );
+      // Refresh data from server to confirm the flush was successful
+      await fetchData();
 
       setSuccess("All domain counters have been reset");
       setTimeout(() => setSuccess(""), 3000);

@@ -16,6 +16,11 @@ type EventWritePayload = {
   payment_image_required?: boolean;
 };
 
+type SlugData = {
+  more_description?: string;
+  slug_image_url?: string;
+};
+
 // GET - Fetch all events with related data
 export async function GET(_request: NextRequest) {
   try {
@@ -49,7 +54,7 @@ export async function GET(_request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { title, description, image_url, date, registration_enabled, payment_image_required } = body;
+    const { title, description, image_url, date, registration_enabled, payment_image_required, more_description, slug_image_url, poster_image_urls } = body;
 
     if (!title?.trim()) {
       return NextResponse.json(
@@ -120,6 +125,77 @@ export async function POST(request: NextRequest) {
     }
 
     if (error) throw new Error(error.message);
+
+    // Create slug if provided
+    if (data && data.length > 0 && (more_description || slug_image_url)) {
+      const eventId = data[0].id;
+      const slugPayload: any = {
+        event_id: eventId,
+      };
+
+      if (more_description) {
+        slugPayload.more_description = more_description;
+      }
+      if (slug_image_url) {
+        slugPayload.image_url = slug_image_url;
+      }
+
+      const slugResult = await retryWithBackoff(async () =>
+        supabase
+          .from("event_slug")
+          .insert([slugPayload])
+      );
+
+      if (slugResult.error) {
+        console.warn("Warning: Failed to create event slug:", slugResult.error);
+        // Don't throw, just warn - event was created successfully
+      }
+    }
+
+    // Create posters if provided
+    if (data && data.length > 0 && poster_image_urls) {
+      const eventId = data[0].id;
+      const posterImages = poster_image_urls.split("|").filter((url: string) => url.trim());
+
+      if (posterImages.length > 0) {
+        const posterPayloads = posterImages.map((poster_image_url: string) => ({
+          event_id: eventId,
+          poster_image_url: poster_image_url.trim(),
+        }));
+
+        const posterResult = await retryWithBackoff(async () =>
+          supabase
+            .from("posters")
+            .insert(posterPayloads)
+        );
+
+        if (posterResult.error) {
+          console.warn("Warning: Failed to create event posters:", posterResult.error);
+          // Don't throw, just warn - event was created successfully
+        }
+      }
+    }
+
+    // Re-fetch the event with all related data
+    if (data && data.length > 0) {
+      const refetchResult = await retryWithBackoff(async () =>
+        supabase
+          .from("events")
+          .select(
+            `
+            *,
+            event_slug(*),
+            posters(*)
+          `
+          )
+          .eq("id", data[0].id)
+          .single()
+      );
+
+      if (refetchResult.data) {
+        data[0] = refetchResult.data;
+      }
+    }
 
     return NextResponse.json(
       { success: true, data: data?.[0] },

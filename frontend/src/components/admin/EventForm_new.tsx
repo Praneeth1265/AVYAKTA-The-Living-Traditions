@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { compressImage, validateImage } from "../../lib/utils/imageOptimizer";
 
 interface Event {
@@ -15,10 +15,6 @@ interface Event {
     id: string;
     more_description: string | null;
     image_url: string | null;
-  }>;
-  posters?: Array<{
-    id: string;
-    poster_image_url: string;
   }>;
 }
 
@@ -38,7 +34,6 @@ export interface EventFormData {
   payment_image_required?: boolean;
   more_description?: string;
   slug_image_url?: string;
-  poster_image_urls?: string; // pipe-separated for multiple
 }
 
 export default function EventForm({
@@ -58,7 +53,6 @@ export default function EventForm({
     payment_image_required: event?.payment_image_required ?? false,
     more_description: eventSlug?.more_description || "",
     slug_image_url: eventSlug?.image_url || "",
-    poster_image_urls: event?.posters?.map(p => p.poster_image_url).join("|") || "",
   });
   const [imagePreview, setImagePreview] = useState<string>(
     event?.image_url || ""
@@ -66,32 +60,8 @@ export default function EventForm({
   const [slugImagePreviews, setSlugImagePreviews] = useState<string[]>(
     eventSlug?.image_url ? eventSlug.image_url.split("|").filter(Boolean) : []
   );
-  const [posterImagePreviews, setPosterImagePreviews] = useState<string[]>(
-    event?.posters?.map(p => p.poster_image_url) || []
-  );
   const [imageError, setImageError] = useState<string>("");
   const [isCompressing, setIsCompressing] = useState(false);
-
-  // Update form data when event prop changes (for editing)
-  useEffect(() => {
-    if (event) {
-      const eventSlug = event?.event_slug?.[0];
-      setFormData({
-        title: event?.title || "",
-        description: event?.description || "",
-        image_url: event?.image_url || "",
-        date: event?.date || "",
-        registration_enabled: event?.registration_enabled ?? true,
-        payment_image_required: event?.payment_image_required ?? false,
-        more_description: eventSlug?.more_description || "",
-        slug_image_url: eventSlug?.image_url || "",
-        poster_image_urls: event?.posters?.map(p => p.poster_image_url).join("|") || "",
-      });
-      setImagePreview(event?.image_url || "");
-      setSlugImagePreviews(eventSlug?.image_url ? eventSlug.image_url.split("|").filter(Boolean) : []);
-      setPosterImagePreviews(event?.posters?.map(p => p.poster_image_url) || []);
-    }
-  }, [event]);
 
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -188,55 +158,6 @@ export default function EventForm({
     }));
   };
 
-  const handlePosterImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files ? Array.from(e.target.files) : [];
-    if (files.length === 0) return;
-
-    setImageError("");
-    setIsCompressing(true);
-
-    try {
-      const compressedImages: string[] = [];
-
-      for (const file of files) {
-        const validation = validateImage(file, 10);
-        if (!validation.valid) {
-          throw new Error(validation.error || "Invalid image");
-        }
-
-        const compressed = await compressImage(file, {
-          maxWidth: 1920,
-          maxHeight: 1920,
-          quality: 0.7,
-          maxSizeKB: 300,
-        });
-        compressedImages.push(compressed);
-      }
-
-      setPosterImagePreviews((prev) => [...prev, ...compressedImages]);
-      setFormData((prev) => ({
-        ...prev,
-        poster_image_urls: [...prev.poster_image_urls?.split("|").filter(Boolean) || [], ...compressedImages].join("|"),
-      }));
-    } catch (error) {
-      setImageError(
-        error instanceof Error ? error.message : "Failed to process image"
-      );
-    } finally {
-      setIsCompressing(false);
-    }
-  };
-
-  const removePosterImage = (index: number) => {
-    setPosterImagePreviews((prev) => prev.filter((_, i) => i !== index));
-    const images = formData.poster_image_urls?.split("|").filter(Boolean) || [];
-    images.splice(index, 1);
-    setFormData((prev) => ({
-      ...prev,
-      poster_image_urls: images.join("|"),
-    }));
-  };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     await onSubmit(formData);
@@ -250,11 +171,9 @@ export default function EventForm({
         payment_image_required: false,
         more_description: "",
         slug_image_url: "",
-        poster_image_urls: "",
       });
       setImagePreview("");
       setSlugImagePreviews([]);
-      setPosterImagePreviews([]);
     }
   };
 
@@ -432,45 +351,6 @@ export default function EventForm({
         </div>
       </div>
 
-      {/* Event Posters */}
-      <div className="form-section">
-        <h3>📰 Event Posters</h3>
-
-        <div className="form-group">
-          <label htmlFor="posters">Poster Images</label>
-          <div className="image-upload-group">
-            <input
-              id="posters"
-              type="file"
-              accept="image/*"
-              multiple
-              onChange={handlePosterImageChange}
-              disabled={isLoading || isCompressing}
-              className="file-input"
-            />
-            <p className="help-text">Upload promotional posters for this event</p>
-            
-            {posterImagePreviews.length > 0 && (
-              <div className="poster-images-grid">
-                {posterImagePreviews.map((preview, index) => (
-                  <div key={index} className="poster-image-card">
-                    <img src={preview} alt={`Poster ${index + 1}`} />
-                    <button
-                      type="button"
-                      onClick={() => removePosterImage(index)}
-                      disabled={isLoading || isCompressing}
-                      className="btn-remove-poster-image"
-                    >
-                      ✕
-                    </button>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
-
       <div className="form-actions">
         <button type="submit" disabled={isLoading || isCompressing} className="btn-submit">
           {isLoading ? "Saving..." : event ? "Update Event" : "Create Event"}
@@ -641,44 +521,6 @@ export default function EventForm({
           padding: 2px 6px;
           font-size: 11px;
           cursor: pointer;
-        }
-
-        .poster-images-grid {
-          display: grid;
-          grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-          gap: 12px;
-          margin-top: 12px;
-        }
-
-        .poster-image-card {
-          position: relative;
-          border-radius: 4px;
-          overflow: hidden;
-          background: #f3f4f6;
-          border: 2px solid #e5e7eb;
-        }
-
-        .poster-image-card img {
-          width: 100%;
-          height: 160px;
-          object-fit: cover;
-        }
-
-        .btn-remove-poster-image {
-          position: absolute;
-          top: 4px;
-          right: 4px;
-          background: rgba(220, 38, 38, 0.9);
-          color: white;
-          border: none;
-          border-radius: 3px;
-          padding: 4px 8px;
-          font-size: 12px;
-          cursor: pointer;
-        }
-
-        .btn-remove-poster-image:hover:not(:disabled) {
-          background: rgba(220, 38, 38, 1);
         }
 
         .form-actions {
