@@ -11,21 +11,7 @@ env:
   SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
 
 jobs:
-  install:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '24'
-          cache: 'npm'
-          cache-dependency-path: frontend/package-lock.json
-
-      - name: Install dependencies
-        run: cd frontend && npm ci
-
   quality:
-    needs: install
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -52,7 +38,7 @@ jobs:
           esac
 
   build-and-e2e:
-    needs: [install, quality]
+    needs: quality
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4

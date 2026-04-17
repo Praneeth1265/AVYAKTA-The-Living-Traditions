@@ -1,11 +1,12 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
   recruitmentSchema,
   RECRUITMENT_BRANCHES,
+  RECRUITMENT_DOMAINS,
   RecruitmentFormData,
 } from "../../lib/validators/recruitment";
 
@@ -28,8 +29,19 @@ export default function RecruitmentForm() {
     handleSubmit,
     formState: { errors },
     reset,
+    control,
   } = useForm<RecruitmentFormData>({
     resolver: zodResolver(recruitmentSchema),
+  });
+
+  const selectedFirstPreference = useWatch({
+    control,
+    name: "first_preference_domain",
+  });
+
+  const selectedSecondDomain = useWatch({
+    control,
+    name: "second_domain_preference",
   });
 
   const addLinkInput = () => setLinkInputs([...linkInputs, ""]);
@@ -160,30 +172,61 @@ export default function RecruitmentForm() {
           )}
         </div>
 
-        {/* Domain Field */}
+        {/* First Domain Preference Field */}
         <div>
           <label className="block text-sm font-medium mb-1">
-            Domain <span className="text-red-500">*</span>
+            First Domain Preference<span className="text-red-500">*</span>
           </label>
           <select
-            {...register("domain")}
+            {...register("first_preference_domain")}
             className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
             <option value="">Select your domain of interest</option>
-            <option value="Technical">Technical</option>
-            <option value="Design">Design</option>
-            <option value="Event Management">Event Management</option>
-            <option value="Ethics and Discipline">Ethics and Discipline</option>
-            <option value="Media and Visibility">Media and Visibility</option>
-            <option value="Logistics and Operations">
-              Logistics and Operations
-            </option>
-            <option value="Marketing">Marketing</option>
-            <option value="Finance">Finance</option>
+            {RECRUITMENT_DOMAINS.map((domain) => (
+              <option
+                key={domain}
+                value={domain}
+                disabled={domain === selectedSecondDomain}
+              >
+                {domain}
+              </option>
+            ))}
           </select>
-          {errors.domain && (
-            <p className="text-red-500 text-sm mt-1">{errors.domain.message}</p>
+          {errors.first_preference_domain && (
+            <p className="text-red-500 text-sm mt-1">
+              {errors.first_preference_domain.message}
+            </p>
           )}
+        </div>
+
+        {/* Second Domain Preference Field */}
+        <div>
+          <label className="block text-sm font-medium mb-1">
+            Second Domain Preference (Optional)
+          </label>
+          <select
+            {...register("second_domain_preference")}
+            className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+          >
+            <option value="">Select secondary domain (optional)</option>
+            {RECRUITMENT_DOMAINS.map((domain) => (
+              <option
+                key={domain}
+                value={domain}
+                disabled={domain === selectedFirstPreference}
+              >
+                {domain}
+              </option>
+            ))}
+          </select>
+          {errors.second_domain_preference && (
+            <p className="text-red-500 text-sm mt-1">
+              {errors.second_domain_preference.message}
+            </p>
+          )}
+          <p className="text-gray-500 text-xs mt-1">
+            If interested in another domain, select it here. This is optional.
+          </p>
         </div>
 
         {/* SRN Field */}
