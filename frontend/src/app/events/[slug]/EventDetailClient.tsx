@@ -12,7 +12,11 @@ type EventDetailClientProps = {
 
 const reveal = {
   hidden: { opacity: 0, y: 24 },
-  show: { opacity: 1, y: 0, transition: { duration: 0.72, ease: [0.22, 1, 0.36, 1] as const } },
+  show: {
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.72, ease: [0.22, 1, 0.36, 1] as const },
+  },
 };
 
 const heroParticles = [
@@ -54,7 +58,11 @@ export default function EventDetailClient({ event }: EventDetailClientProps) {
               key={index}
               className="absolute h-2.5 w-2.5 rounded-full bg-[#C9A84C]/80"
               style={{ left: particle.left, top: particle.top }}
-              animate={{ y: [0, -22, 0], opacity: [0.35, 1, 0.35], scale: [0.75, 1.14, 0.75] }}
+              animate={{
+                y: [0, -22, 0],
+                opacity: [0.35, 1, 0.35],
+                scale: [0.75, 1.14, 0.75],
+              }}
               transition={{
                 repeat: Infinity,
                 ease: "easeInOut",
@@ -73,14 +81,22 @@ export default function EventDetailClient({ event }: EventDetailClientProps) {
           className="relative mx-auto grid w-full max-w-6xl gap-8 md:grid-cols-[1.1fr_0.9fr] md:items-end"
         >
           <div>
-            <p className="text-xs uppercase tracking-[0.24em] text-[#C9A84C]">Event Details</p>
-            <h1 className="mt-4 font-serif text-4xl leading-tight md:text-6xl">{event.title}</h1>
+            <p className="text-xs uppercase tracking-[0.24em] text-[#C9A84C]">
+              Event Details
+            </p>
+            <h1 className="mt-4 font-serif text-4xl leading-tight md:text-6xl">
+              {event.title}
+            </h1>
             <p className="mt-4 max-w-2xl text-sm leading-7 text-[#F5F0E8]/86 md:text-base">
               {event.description}
             </p>
             <div className="mt-6 flex flex-wrap items-center gap-3 text-xs uppercase tracking-[0.12em]">
-              <span className="rounded-full bg-[#92791B] px-3 py-1.5 text-white">{event.status}</span>
-              <span className="rounded-full border border-[#C9A84C]/70 px-3 py-1.5 text-[#F5F0E8]">{event.domain}</span>
+              <span className="rounded-full bg-[#92791B] px-3 py-1.5 text-white">
+                {event.status}
+              </span>
+              <span className="rounded-full border border-[#C9A84C]/70 px-3 py-1.5 text-[#F5F0E8]">
+                {event.domain}
+              </span>
             </div>
           </div>
 
@@ -88,7 +104,9 @@ export default function EventDetailClient({ event }: EventDetailClientProps) {
             whileHover={{ y: -6, scale: 1.02 }}
             className="rounded-2xl border border-[#C9A84C]/55 bg-black/35 p-5"
           >
-            <p className="text-xs uppercase tracking-[0.18em] text-[#C9A84C]">Event Date</p>
+            <p className="text-xs uppercase tracking-[0.18em] text-[#C9A84C]">
+              Event Date
+            </p>
             <p className="mt-3 text-sm text-[#F5F0E8]">{event.date}</p>
           </motion.div>
         </motion.div>
@@ -105,15 +123,17 @@ export default function EventDetailClient({ event }: EventDetailClientProps) {
         >
           <h2 className="text-2xl font-semibold text-[#92791B]">Highlights</h2>
           <ul className="mt-4 space-y-3 text-sm leading-7 text-[#1C1C1C]/86">
-            {event.highlights.length > 0 ? event.highlights.map((point) => (
-              <motion.li
-                key={point}
-                whileHover={{ x: 4 }}
-                className="rounded-xl border border-[#C9A84C]/25 bg-[#F9F5EE] px-4 py-3"
-              >
-                {point}
-              </motion.li>
-            )) : (
+            {event.highlights.length > 0 ? (
+              event.highlights.map((point) => (
+                <motion.li
+                  key={point}
+                  whileHover={{ x: 4 }}
+                  className="rounded-xl border border-[#C9A84C]/25 bg-[#F9F5EE] px-4 py-3"
+                >
+                  {point}
+                </motion.li>
+              ))
+            ) : (
               <li className="rounded-xl border border-[#C9A84C]/25 bg-[#F9F5EE] px-4 py-3 text-[#1C1C1C]/72">
                 Highlights will be published soon.
               </li>
@@ -129,20 +149,24 @@ export default function EventDetailClient({ event }: EventDetailClientProps) {
           whileHover={{ y: -6 }}
           className="rounded-2xl border border-[#C9A84C]/40 bg-white p-6 shadow-[0_18px_40px_rgba(40,22,6,0.12)]"
         >
-          <h2 className="text-2xl font-semibold text-[#92791B]">Schedule Snapshot</h2>
+          <h2 className="text-2xl font-semibold text-[#92791B]">
+            Schedule Snapshot
+          </h2>
           <div className="mt-4 space-y-3">
-            {event.timeline.length > 0 ? event.timeline.map((slot) => (
-              <motion.div
-                key={`${slot.time}-${slot.label}`}
-                whileHover={{ scale: 1.015 }}
-                className="flex items-center justify-between gap-4 rounded-xl border border-[#C9A84C]/25 bg-[#F9F5EE] px-4 py-3"
-              >
-                <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[#8B1A1A]">
-                  {slot.time}
-                </p>
-                <p className="text-sm text-[#1C1C1C]/84">{slot.label}</p>
-              </motion.div>
-            )) : (
+            {event.timeline.length > 0 ? (
+              event.timeline.map((slot) => (
+                <motion.div
+                  key={`${slot.time}-${slot.label}`}
+                  whileHover={{ scale: 1.015 }}
+                  className="flex items-center justify-between gap-4 rounded-xl border border-[#C9A84C]/25 bg-[#F9F5EE] px-4 py-3"
+                >
+                  <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[#8B1A1A]">
+                    {slot.time}
+                  </p>
+                  <p className="text-sm text-[#1C1C1C]/84">{slot.label}</p>
+                </motion.div>
+              ))
+            ) : (
               <div className="rounded-xl border border-[#C9A84C]/25 bg-[#F9F5EE] px-4 py-3 text-sm text-[#1C1C1C]/72">
                 Detailed schedule will be updated shortly.
               </div>
@@ -159,7 +183,9 @@ export default function EventDetailClient({ event }: EventDetailClientProps) {
           variants={reveal}
           className="mx-auto flex w-full max-w-6xl flex-col gap-4 md:flex-row md:items-center md:justify-between"
         >
-          <p className="text-sm text-[#F5F0E8]/86">Explore more events or register your interest.</p>
+          <p className="text-sm text-[#F5F0E8]/86">
+            Explore more events or register your interest.
+          </p>
           <div className="flex flex-wrap gap-3">
             <Link
               href="/events"

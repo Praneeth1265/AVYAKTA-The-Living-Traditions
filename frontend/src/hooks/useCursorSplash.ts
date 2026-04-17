@@ -36,7 +36,12 @@ export function useCursorSplash() {
       return;
     }
 
-    const spawnSplash = (x: number, y: number, count: number, burst = false) => {
+    const spawnSplash = (
+      x: number,
+      y: number,
+      count: number,
+      burst = false,
+    ) => {
       const now = performance.now();
       const next = Array.from({ length: count }, () => {
         const angle = Math.random() * Math.PI * 2;

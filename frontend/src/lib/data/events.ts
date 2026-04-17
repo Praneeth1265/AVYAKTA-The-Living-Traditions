@@ -107,7 +107,8 @@ function mapRowToEvent(row: {
   slug_image_url: string | null;
   poster_image_url: string | null;
 }): EventItem {
-  const baseDescription = row.description?.trim() || "Details will be announced soon.";
+  const baseDescription =
+    row.description?.trim() || "Details will be announced soon.";
   const parsed = parseEventDetails({
     description: baseDescription,
     moreDescription: row.more_description,
@@ -212,12 +213,17 @@ export async function getEventsFromDb(): Promise<EventItem[]> {
 
     return Array.from(deduped.values());
   } catch (error) {
-    console.warn("[events] Database unavailable, serving empty event list.", error);
+    console.warn(
+      "[events] Database unavailable, serving empty event list.",
+      error,
+    );
     return [];
   }
 }
 
-export async function getEventBySlugFromDb(slug: string): Promise<EventItem | null> {
+export async function getEventBySlugFromDb(
+  slug: string,
+): Promise<EventItem | null> {
   try {
     const rows = await fetchRawEventRows();
 
@@ -230,7 +236,10 @@ export async function getEventBySlugFromDb(slug: string): Promise<EventItem | nu
 
     return null;
   } catch (error) {
-    console.warn(`[events] Database unavailable for slug lookup: ${slug}`, error);
+    console.warn(
+      `[events] Database unavailable for slug lookup: ${slug}`,
+      error,
+    );
     return null;
   }
 }

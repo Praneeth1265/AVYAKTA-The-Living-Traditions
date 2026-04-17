@@ -24,7 +24,11 @@ const statusClasses: Record<EventStatus, string> = {
 
 const reveal = {
   hidden: { opacity: 0, y: 24 },
-  show: { opacity: 1, y: 0, transition: { duration: 0.65, ease: [0.22, 1, 0.36, 1] as const } },
+  show: {
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.65, ease: [0.22, 1, 0.36, 1] as const },
+  },
 };
 
 const gridReveal = {
@@ -47,7 +51,9 @@ const heroParticles = [
   { left: "90%", top: "74%", delay: 0.3, duration: 7.6 },
 ];
 
-export default function EventsPageClient({ initialEvents }: EventsPageClientProps) {
+export default function EventsPageClient({
+  initialEvents,
+}: EventsPageClientProps) {
   const [activeFilter, setActiveFilter] = useState<"all" | EventStatus>("all");
   const listRef = useRef<HTMLDivElement | null>(null);
   const { scrollYProgress } = useScroll();
@@ -94,7 +100,11 @@ export default function EventsPageClient({ initialEvents }: EventsPageClientProp
               key={index}
               className="absolute h-2.5 w-2.5 rounded-full bg-[#C9A84C]/80"
               style={{ left: particle.left, top: particle.top }}
-              animate={{ y: [0, -20, 0], opacity: [0.35, 1, 0.35], scale: [0.75, 1.15, 0.75] }}
+              animate={{
+                y: [0, -20, 0],
+                opacity: [0.35, 1, 0.35],
+                scale: [0.75, 1.15, 0.75],
+              }}
               transition={{
                 repeat: Infinity,
                 ease: "easeInOut",
@@ -112,11 +122,15 @@ export default function EventsPageClient({ initialEvents }: EventsPageClientProp
           style={{ y: heroY, scale: heroScale }}
           className="relative mx-auto max-w-6xl"
         >
-          <p className="text-xs uppercase tracking-[0.28em] text-[#C9A84C]">Events</p>
-          <h1 className="mt-4 font-serif text-5xl leading-tight md:text-7xl">Avyakta Event Calendar</h1>
+          <p className="text-xs uppercase tracking-[0.28em] text-[#C9A84C]">
+            Events
+          </p>
+          <h1 className="mt-4 font-serif text-5xl leading-tight md:text-7xl">
+            Avyakta Event Calendar
+          </h1>
           <p className="mt-5 max-w-2xl text-sm leading-8 text-[#F5F0E8]/82 md:text-base">
-            Explore upcoming showcases and archived cultural moments curated by the Avyakta
-            collective.
+            Explore upcoming showcases and archived cultural moments curated by
+            the Avyakta collective.
           </p>
         </motion.div>
       </section>
@@ -129,8 +143,12 @@ export default function EventsPageClient({ initialEvents }: EventsPageClientProp
           variants={reveal}
           transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1] }}
         >
-          <p className="text-xs uppercase tracking-[0.22em] text-[#737955]">Filter Section</p>
-          <h2 className="mt-3 text-2xl font-semibold text-[#92791B] md:text-3xl">Browse by Status</h2>
+          <p className="text-xs uppercase tracking-[0.22em] text-[#737955]">
+            Filter Section
+          </p>
+          <h2 className="mt-3 text-2xl font-semibold text-[#92791B] md:text-3xl">
+            Browse by Status
+          </h2>
 
           <div className="mt-6 flex flex-wrap gap-6">
             {filterOptions.map((filter) => {
@@ -143,7 +161,9 @@ export default function EventsPageClient({ initialEvents }: EventsPageClientProp
                   onClick={() => setActiveFilter(filter.key)}
                   whileTap={{ scale: 0.96 }}
                   className={`relative pb-2 text-sm font-semibold uppercase tracking-[0.15em] transition ${
-                    isActive ? "text-[#92791B]" : "text-[#1C1C1C]/78 hover:text-[#92791B]"
+                    isActive
+                      ? "text-[#92791B]"
+                      : "text-[#1C1C1C]/78 hover:text-[#92791B]"
                   }`}
                 >
                   {filter.label}
@@ -158,7 +178,13 @@ export default function EventsPageClient({ initialEvents }: EventsPageClientProp
           </div>
         </motion.div>
 
-        <motion.div className="mt-10" variants={gridReveal} initial="hidden" animate="show" key={activeFilter}>
+        <motion.div
+          className="mt-10"
+          variants={gridReveal}
+          initial="hidden"
+          animate="show"
+          key={activeFilter}
+        >
           <div
             ref={listRef}
             className="max-h-[72vh] space-y-3 overflow-y-auto pr-2 [scrollbar-width:thin] [scrollbar-color:#92791B_transparent] md:space-y-4"
@@ -173,7 +199,10 @@ export default function EventsPageClient({ initialEvents }: EventsPageClientProp
                 <Link href={`/events/${event.slug}`} className="block">
                   <div className="relative flex min-h-[178px] flex-col md:min-h-[190px] md:flex-row">
                     <div className="relative h-40 shrink-0 md:h-auto md:w-[32%]">
-                      <div className="absolute inset-0" style={{ backgroundImage: event.poster }} />
+                      <div
+                        className="absolute inset-0"
+                        style={{ backgroundImage: event.poster }}
+                      />
                       <div className="absolute inset-0 bg-gradient-to-t from-[#1C1C1C]/88 via-[#1C1C1C]/35 to-transparent" />
 
                       <div className="absolute left-3 top-3">
@@ -191,14 +220,20 @@ export default function EventsPageClient({ initialEvents }: EventsPageClientProp
 
                     <div className="relative flex flex-1 flex-col justify-between bg-gradient-to-br from-[#1C1C1C] via-[#25140F] to-[#1A1A1A] px-4 py-4 text-[#F5F0E8] md:px-5 md:py-5">
                       <div className="flex items-start justify-between gap-3">
-                        <h3 className="text-xl font-semibold leading-tight md:text-2xl">{event.title}</h3>
+                        <h3 className="text-xl font-semibold leading-tight md:text-2xl">
+                          {event.title}
+                        </h3>
                         <span className="shrink-0 rounded-full bg-black/35 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-[#F5F0E8]">
                           {event.domain}
                         </span>
                       </div>
 
-                      <p className="mt-2 line-clamp-2 text-sm text-[#F5F0E8]/84">{event.subtitle}</p>
-                      <p className="mt-2 text-[11px] uppercase tracking-[0.12em] text-[#C9A84C] md:text-xs">{event.date}</p>
+                      <p className="mt-2 line-clamp-2 text-sm text-[#F5F0E8]/84">
+                        {event.subtitle}
+                      </p>
+                      <p className="mt-2 text-[11px] uppercase tracking-[0.12em] text-[#C9A84C] md:text-xs">
+                        {event.date}
+                      </p>
 
                       <div className="mt-4 flex items-center justify-between gap-3">
                         <span className="inline-block w-fit rounded-full border border-[#C9A84C]/80 bg-black/30 px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.12em] text-[#F5F0E8] md:text-xs">
@@ -207,8 +242,12 @@ export default function EventsPageClient({ initialEvents }: EventsPageClientProp
                       </div>
 
                       <div className="pointer-events-none absolute inset-0 hidden translate-y-2 bg-[#120C09]/92 px-5 py-5 opacity-0 transition duration-300 group-hover:translate-y-0 group-hover:opacity-100 md:block">
-                        <p className="text-xs uppercase tracking-[0.18em] text-[#C9A84C]">Quick Info</p>
-                        <p className="mt-3 line-clamp-2 text-sm text-[#F5F0E8]/88">{event.description}</p>
+                        <p className="text-xs uppercase tracking-[0.18em] text-[#C9A84C]">
+                          Quick Info
+                        </p>
+                        <p className="mt-3 line-clamp-2 text-sm text-[#F5F0E8]/88">
+                          {event.description}
+                        </p>
                         <ul className="mt-4 space-y-1 text-xs text-[#F5F0E8]/86">
                           {event.highlights.slice(0, 2).map((point) => (
                             <li key={point}>• {point}</li>
@@ -242,8 +281,12 @@ export default function EventsPageClient({ initialEvents }: EventsPageClientProp
           className="mx-auto flex w-full max-w-6xl flex-col items-start justify-between gap-6 md:flex-row md:items-center"
         >
           <div>
-            <p className="text-xs uppercase tracking-[0.24em] text-[#C9A84C]">Call To Action</p>
-            <h2 className="mt-3 text-3xl font-semibold">Want to host or volunteer at an event?</h2>
+            <p className="text-xs uppercase tracking-[0.24em] text-[#C9A84C]">
+              Call To Action
+            </p>
+            <h2 className="mt-3 text-3xl font-semibold">
+              Want to host or volunteer at an event?
+            </h2>
           </div>
 
           <Link

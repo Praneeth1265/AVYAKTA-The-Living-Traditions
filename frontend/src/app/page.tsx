@@ -1,7 +1,13 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { motion, useMotionValue, useScroll, useSpring, useTransform } from "framer-motion";
+import {
+  motion,
+  useMotionValue,
+  useScroll,
+  useSpring,
+  useTransform,
+} from "framer-motion";
 import Link from "next/link";
 type CursorSplash = {
   id: number;
@@ -25,15 +31,18 @@ const domains = [
 const timeline = [
   {
     year: "2026",
-    milestone: "Founding season with inaugural orientation showcase and open mics.",
+    milestone:
+      "Founding season with inaugural orientation showcase and open mics.",
   },
   {
     year: "2027",
-    milestone: "Large-scale collaborative productions across stage, design, and media.",
+    milestone:
+      "Large-scale collaborative productions across stage, design, and media.",
   },
   {
     year: "2028",
-    milestone: "Expanded campus outreach with curated festivals and mentorship circles.",
+    milestone:
+      "Expanded campus outreach with curated festivals and mentorship circles.",
   },
 ];
 
@@ -97,7 +106,12 @@ export default function HomePage() {
       return;
     }
 
-    const spawnSplash = (x: number, y: number, count: number, burst = false) => {
+    const spawnSplash = (
+      x: number,
+      y: number,
+      count: number,
+      burst = false,
+    ) => {
       const now = performance.now();
       const next = Array.from({ length: count }, () => {
         const angle = Math.random() * Math.PI * 2;
@@ -194,11 +208,17 @@ export default function HomePage() {
     },
   };
 
-  const sectionTransition = { duration: 0.9, ease: [0.22, 1, 0.36, 1] as const };
+  const sectionTransition = {
+    duration: 0.9,
+    ease: [0.22, 1, 0.36, 1] as const,
+  };
 
   return (
     <main className="overflow-x-hidden bg-[#F5F0E8] text-[#1C1C1C]">
-      <div aria-hidden className="pointer-events-none fixed inset-0 z-[58] hidden md:block">
+      <div
+        aria-hidden
+        className="pointer-events-none fixed inset-0 z-[58] hidden md:block"
+      >
         {splashes.map((item) => (
           <motion.span
             key={item.id}
@@ -217,7 +237,10 @@ export default function HomePage() {
               scale: [0.45, 1, 1.1, 0.55],
               opacity: [0, 0.95, 0.55, 0],
             }}
-            transition={{ duration: (item.life / 1000) * 1.1, ease: [0.22, 1, 0.36, 1] }}
+            transition={{
+              duration: (item.life / 1000) * 1.1,
+              ease: [0.22, 1, 0.36, 1],
+            }}
           />
         ))}
       </div>
@@ -226,7 +249,10 @@ export default function HomePage() {
         aria-hidden
         className="pointer-events-none fixed left-0 top-0 z-[60] hidden h-48 w-48 rounded-full bg-[radial-gradient(circle,rgba(249,115,22,0.5)_0%,rgba(249,115,22,0.22)_35%,rgba(249,115,22,0)_72%)] blur-2xl mix-blend-multiply md:block"
         style={{ x: leadX, y: leadY, translateX: "-50%", translateY: "-50%" }}
-        animate={{ opacity: cursorVisible ? 0.8 : 0, scale: cursorVisible ? 1 : 0.65 }}
+        animate={{
+          opacity: cursorVisible ? 0.8 : 0,
+          scale: cursorVisible ? 1 : 0.65,
+        }}
         transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
       />
 
@@ -234,7 +260,10 @@ export default function HomePage() {
         aria-hidden
         className="pointer-events-none fixed left-0 top-0 z-[59] hidden h-72 w-72 rounded-full bg-[radial-gradient(circle,rgba(251,146,60,0.32)_0%,rgba(251,146,60,0.16)_45%,rgba(251,146,60,0)_75%)] blur-3xl md:block"
         style={{ x: trailX, y: trailY, translateX: "-50%", translateY: "-50%" }}
-        animate={{ opacity: cursorVisible ? 0.55 : 0, scale: cursorVisible ? 1 : 0.72 }}
+        animate={{
+          opacity: cursorVisible ? 0.55 : 0,
+          scale: cursorVisible ? 1 : 0.72,
+        }}
         transition={{ duration: 0.58, ease: [0.22, 1, 0.36, 1] }}
       />
 
@@ -276,11 +305,45 @@ export default function HomePage() {
 
         {/* Kolam */}
         <div className="pointer-events-none absolute inset-0 flex items-center justify-center opacity-30">
-          <svg width="620" height="620" viewBox="0 0 220 220" className="animate-spin-slow" aria-hidden>
-            <circle cx="110" cy="110" r="98" stroke="#C9A84C" fill="none" strokeWidth="0.75" />
-            <circle cx="110" cy="110" r="78" stroke="#92791B" fill="none" strokeWidth="0.75" />
-            <circle cx="110" cy="110" r="58" stroke="#8B1A1A" fill="none" strokeWidth="0.75" />
-            <circle cx="110" cy="110" r="38" stroke="#1B5E3B" fill="none" strokeWidth="0.75" />
+          <svg
+            width="620"
+            height="620"
+            viewBox="0 0 220 220"
+            className="animate-spin-slow"
+            aria-hidden
+          >
+            <circle
+              cx="110"
+              cy="110"
+              r="98"
+              stroke="#C9A84C"
+              fill="none"
+              strokeWidth="0.75"
+            />
+            <circle
+              cx="110"
+              cy="110"
+              r="78"
+              stroke="#92791B"
+              fill="none"
+              strokeWidth="0.75"
+            />
+            <circle
+              cx="110"
+              cy="110"
+              r="58"
+              stroke="#8B1A1A"
+              fill="none"
+              strokeWidth="0.75"
+            />
+            <circle
+              cx="110"
+              cy="110"
+              r="38"
+              stroke="#1B5E3B"
+              fill="none"
+              strokeWidth="0.75"
+            />
           </svg>
         </div>
 
@@ -295,14 +358,18 @@ export default function HomePage() {
           style={{ y: heroY, scale: heroScale }}
           className="relative mx-auto max-w-4xl rounded-[2rem] border-2 border-[#C9A84C]/55 bg-[#1C1C1C]/65 px-6 py-10 text-center text-white shadow-[0_0_0_8px_rgba(201,168,76,0.18),0_30px_80px_rgba(0,0,0,0.45)] md:px-12 md:py-14"
         >
-          <p className="mb-4 text-xs uppercase tracking-[0.35em] text-[#C9A84C]">The Living Traditions</p>
-          <h1 className="font-serif text-5xl leading-none text-[#C9A84C] md:text-8xl">Avyakta</h1>
+          <p className="mb-4 text-xs uppercase tracking-[0.35em] text-[#C9A84C]">
+            The Living Traditions
+          </p>
+          <h1 className="font-serif text-5xl leading-none text-[#C9A84C] md:text-8xl">
+            Avyakta
+          </h1>
           <p className="mt-6 text-lg italic text-[#F5F0E8] md:text-2xl">
             Where culture breathes through creativity
           </p>
           <p className="mx-auto mt-6 max-w-2xl text-sm leading-8 text-[#F5F0E8]/85 md:text-base">
-            A cultural multi-domain collective where performance, craft, design, and technology
-            converge to produce unforgettable campus experiences.
+            A cultural multi-domain collective where performance, craft, design,
+            and technology converge to produce unforgettable campus experiences.
           </p>
 
           <div className="mt-10 flex flex-col items-center justify-center gap-3 sm:flex-row">
@@ -351,11 +418,18 @@ export default function HomePage() {
           animate={{ opacity: 1, y: 0 }}
           className="fixed bottom-4 right-4 z-50 w-[92%] rounded-2xl border border-[#C9A84C] bg-[#1B5E3B] p-4 text-white shadow-2xl sm:w-[380px]"
         >
-          <p className="text-xs uppercase tracking-[0.18em] text-[#C9A84C]">Announcement</p>
+          <p className="text-xs uppercase tracking-[0.18em] text-[#C9A84C]">
+            Announcement
+          </p>
           <h3 className="mt-1 text-lg font-semibold">Recruitments Open</h3>
-          <p className="mt-1 text-sm text-white/90">Applications are live for all domains this semester.</p>
+          <p className="mt-1 text-sm text-white/90">
+            Applications are live for all domains this semester.
+          </p>
           <div className="mt-3 flex items-center gap-3">
-            <Link href="/recruitment" className="rounded-md bg-[#C9A84C] px-3 py-2 text-sm font-medium text-black">
+            <Link
+              href="/recruitment"
+              className="rounded-md bg-[#C9A84C] px-3 py-2 text-sm font-medium text-black"
+            >
               Apply Now
             </Link>
             <button
@@ -380,12 +454,16 @@ export default function HomePage() {
           transition={sectionTransition}
           className="mx-auto max-w-5xl rounded-[2rem] border-2 border-[#C9A84C]/40 bg-white/70 px-6 py-12 text-center shadow-[0_18px_55px_rgba(40,22,6,0.15)] backdrop-blur-sm md:px-10"
         >
-          <p className="text-xs uppercase tracking-[0.24em] text-[#737955]">About Section</p>
-          <h2 className="mb-4 mt-3 text-3xl text-[#92791B] md:text-4xl">About Avyakta</h2>
+          <p className="text-xs uppercase tracking-[0.24em] text-[#737955]">
+            About Section
+          </p>
+          <h2 className="mb-4 mt-3 text-3xl text-[#92791B] md:text-4xl">
+            About Avyakta
+          </h2>
           <p className="mx-auto max-w-3xl leading-8 text-[#1C1C1C]/85">
-            Founded in 2026, Avyakta is a cultural collective that blends tradition with modern
-            creativity. It creates spaces for expression, collaboration, and immersive cultural
-            experiences.
+            Founded in 2026, Avyakta is a cultural collective that blends
+            tradition with modern creativity. It creates spaces for expression,
+            collaboration, and immersive cultural experiences.
           </p>
           <motion.div
             className="mt-8 grid gap-4 text-left md:grid-cols-3"
@@ -400,7 +478,9 @@ export default function HomePage() {
               className="rounded-2xl border border-[#C9A84C]/50 bg-[#FFF9EF] p-5 shadow-sm"
             >
               <h3 className="font-semibold text-[#1B5E3B]">Perform</h3>
-              <p className="mt-2 text-sm text-[#1C1C1C]/80">Dance, music, theatre, and stage expression.</p>
+              <p className="mt-2 text-sm text-[#1C1C1C]/80">
+                Dance, music, theatre, and stage expression.
+              </p>
             </motion.article>
             <motion.article
               variants={revealItem}
@@ -408,7 +488,9 @@ export default function HomePage() {
               className="rounded-2xl border border-[#C9A84C]/50 bg-[#FFF9EF] p-5 shadow-sm"
             >
               <h3 className="font-semibold text-[#1B5E3B]">Create</h3>
-              <p className="mt-2 text-sm text-[#1C1C1C]/80">Design, visuals, and storytelling across formats.</p>
+              <p className="mt-2 text-sm text-[#1C1C1C]/80">
+                Design, visuals, and storytelling across formats.
+              </p>
             </motion.article>
             <motion.article
               variants={revealItem}
@@ -416,7 +498,9 @@ export default function HomePage() {
               className="rounded-2xl border border-[#C9A84C]/50 bg-[#FFF9EF] p-5 shadow-sm"
             >
               <h3 className="font-semibold text-[#1B5E3B]">Lead</h3>
-              <p className="mt-2 text-sm text-[#1C1C1C]/80">Plan, manage, and deliver cultural experiences.</p>
+              <p className="mt-2 text-sm text-[#1C1C1C]/80">
+                Plan, manage, and deliver cultural experiences.
+              </p>
             </motion.article>
           </motion.div>
         </motion.div>
@@ -434,10 +518,17 @@ export default function HomePage() {
         >
           <div className="flex items-end justify-between gap-4">
             <div>
-              <p className="text-xs uppercase tracking-[0.24em] text-[#737955]">Events Section</p>
-              <h2 className="mb-1 mt-3 text-3xl text-[#92791B] md:text-4xl">Upcoming Events</h2>
+              <p className="text-xs uppercase tracking-[0.24em] text-[#737955]">
+                Events Section
+              </p>
+              <h2 className="mb-1 mt-3 text-3xl text-[#92791B] md:text-4xl">
+                Upcoming Events
+              </h2>
             </div>
-            <Link href="/events" className="text-sm font-medium text-[#1B5E3B] underline">
+            <Link
+              href="/events"
+              className="text-sm font-medium text-[#1B5E3B] underline"
+            >
               View all events
             </Link>
           </div>
@@ -459,9 +550,13 @@ export default function HomePage() {
                 <Link href={`/events/${event.slug}`} className="block">
                   <div className="h-40 bg-[linear-gradient(135deg,#c9a84c,#8b1a1a,#1b5e3b)] opacity-80" />
                   <div className="p-5">
-                    <p className="text-xs uppercase tracking-[0.14em] text-[#737955]">{event.type}</p>
+                    <p className="text-xs uppercase tracking-[0.14em] text-[#737955]">
+                      {event.type}
+                    </p>
                     <h3 className="mt-2 text-lg font-semibold">{event.name}</h3>
-                    <p className="mt-1 text-sm text-[#1C1C1C]/75">{event.date}</p>
+                    <p className="mt-1 text-sm text-[#1C1C1C]/75">
+                      {event.date}
+                    </p>
                     <p className="mt-3 text-xs font-semibold uppercase tracking-[0.12em] text-[#1B5E3B]">
                       Open event details →
                     </p>
@@ -483,10 +578,15 @@ export default function HomePage() {
           transition={sectionTransition}
           className="mx-auto max-w-3xl rounded-3xl border-2 border-[#C9A84C]/45 bg-[#FFF9EF] px-6 py-8 shadow-[0_12px_30px_rgba(73,44,8,0.12)]"
         >
-          <p className="text-xs uppercase tracking-[0.24em] text-[#737955]">Affiliation</p>
+          <p className="text-xs uppercase tracking-[0.24em] text-[#737955]">
+            Affiliation
+          </p>
           <p className="mt-3 text-lg text-[#1C1C1C]">
             A proud branch of{" "}
-            <Link href="/about-ira" className="font-semibold text-[#92791B] underline decoration-[#C9A84C]">
+            <Link
+              href="/about-ira"
+              className="font-semibold text-[#92791B] underline decoration-[#C9A84C]"
+            >
               Club IRA
             </Link>
           </p>
@@ -503,8 +603,12 @@ export default function HomePage() {
           transition={sectionTransition}
           className="mx-auto max-w-6xl"
         >
-          <p className="text-xs uppercase tracking-[0.24em] text-[#737955]">Timeline Section</p>
-          <h2 className="mb-8 mt-3 text-3xl text-[#92791B] md:text-4xl">Our Journey</h2>
+          <p className="text-xs uppercase tracking-[0.24em] text-[#737955]">
+            Timeline Section
+          </p>
+          <h2 className="mb-8 mt-3 text-3xl text-[#92791B] md:text-4xl">
+            Our Journey
+          </h2>
           <motion.div
             className="grid gap-4 md:grid-cols-3"
             variants={staggerContainer}
@@ -519,8 +623,12 @@ export default function HomePage() {
                 whileHover={{ y: -6, scale: 1.01 }}
                 className="rounded-2xl border-2 border-[#C9A84C]/45 bg-[#FFF9EF] p-5"
               >
-                <h3 className="text-xl font-semibold text-[#92791B]">{item.year}</h3>
-                <p className="mt-2 text-sm leading-7 text-[#1C1C1C]/80">{item.milestone}</p>
+                <h3 className="text-xl font-semibold text-[#92791B]">
+                  {item.year}
+                </h3>
+                <p className="mt-2 text-sm leading-7 text-[#1C1C1C]/80">
+                  {item.milestone}
+                </p>
               </motion.article>
             ))}
           </motion.div>
@@ -537,8 +645,12 @@ export default function HomePage() {
           transition={sectionTransition}
           className="mx-auto max-w-6xl"
         >
-          <p className="text-xs uppercase tracking-[0.24em] text-[#737955]">Domains Section</p>
-          <h2 className="mb-8 mt-3 text-3xl text-[#92791B] md:text-4xl">Explore Our Domains</h2>
+          <p className="text-xs uppercase tracking-[0.24em] text-[#737955]">
+            Domains Section
+          </p>
+          <h2 className="mb-8 mt-3 text-3xl text-[#92791B] md:text-4xl">
+            Explore Our Domains
+          </h2>
           <motion.div
             className="grid grid-cols-2 gap-4 md:grid-cols-4"
             variants={staggerContainer}
@@ -547,13 +659,21 @@ export default function HomePage() {
             viewport={{ once: false, amount: 0.25 }}
           >
             {domains.map((domain) => (
-              <motion.div key={domain.name} variants={revealItem} whileHover={{ y: -8, scale: 1.03 }}>
+              <motion.div
+                key={domain.name}
+                variants={revealItem}
+                whileHover={{ y: -8, scale: 1.03 }}
+              >
                 <Link
                   href="/recruitment"
                   className="block rounded-2xl border-2 border-[#737955]/45 bg-[#FFF9EF] p-6 text-center transition hover:border-[#92791B] hover:shadow-lg"
                 >
-                  <h3 className="text-base font-semibold text-[#1C1C1C]">{domain.name}</h3>
-                  <p className="mt-2 text-xs leading-6 text-[#1C1C1C]/75">{domain.detail}</p>
+                  <h3 className="text-base font-semibold text-[#1C1C1C]">
+                    {domain.name}
+                  </h3>
+                  <p className="mt-2 text-xs leading-6 text-[#1C1C1C]/75">
+                    {domain.detail}
+                  </p>
                 </Link>
               </motion.div>
             ))}
@@ -573,10 +693,17 @@ export default function HomePage() {
         >
           <div className="flex items-end justify-between gap-4">
             <div>
-              <p className="text-xs uppercase tracking-[0.24em] text-[#737955]">Gallery Section</p>
-              <h2 className="mb-1 mt-3 text-3xl text-[#92791B] md:text-4xl">Moments & Memories</h2>
+              <p className="text-xs uppercase tracking-[0.24em] text-[#737955]">
+                Gallery Section
+              </p>
+              <h2 className="mb-1 mt-3 text-3xl text-[#92791B] md:text-4xl">
+                Moments & Memories
+              </h2>
             </div>
-            <Link href="/gallery" className="text-sm font-medium text-[#1B5E3B] underline">
+            <Link
+              href="/gallery"
+              className="text-sm font-medium text-[#1B5E3B] underline"
+            >
               Open gallery
             </Link>
           </div>
@@ -595,7 +722,9 @@ export default function HomePage() {
                 whileHover={{ y: -8, scale: 1.02 }}
                 className="flex h-44 items-end rounded-2xl border-2 border-[#C9A84C]/35 bg-[linear-gradient(120deg,#f0e3c4,#d2dbc6,#f6eddd)] p-3"
               >
-                <p className="rounded-md bg-[#1C1C1C]/70 px-2 py-1 text-xs text-[#F5F0E8]">{title}</p>
+                <p className="rounded-md bg-[#1C1C1C]/70 px-2 py-1 text-xs text-[#F5F0E8]">
+                  {title}
+                </p>
               </motion.div>
             ))}
           </motion.div>
@@ -612,11 +741,15 @@ export default function HomePage() {
           transition={sectionTransition}
           className="mx-auto max-w-3xl rounded-3xl border-2 border-[#C9A84C]/50 bg-[#FFF9EF] px-8 py-12 shadow-[0_20px_55px_rgba(73,44,8,0.16)]"
         >
-          <p className="text-xs uppercase tracking-[0.24em] text-[#737955]">Recruitment Section</p>
-          <h2 className="mb-4 mt-3 text-3xl text-[#92791B] md:text-4xl">Become a Part of Avyakta</h2>
+          <p className="text-xs uppercase tracking-[0.24em] text-[#737955]">
+            Recruitment Section
+          </p>
+          <h2 className="mb-4 mt-3 text-3xl text-[#92791B] md:text-4xl">
+            Become a Part of Avyakta
+          </h2>
           <p className="mx-auto max-w-xl text-[#1C1C1C]/80">
-            If you are ready to perform, design, document, or organize, we would love to see you
-            in the next cohort.
+            If you are ready to perform, design, document, or organize, we would
+            love to see you in the next cohort.
           </p>
 
           <Link
