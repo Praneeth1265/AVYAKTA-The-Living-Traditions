@@ -237,15 +237,39 @@ export default function RecruitDetailsPage(): JSX.Element {
               {recruit.links && (
                 <div className="text-block">
                   <label className="info-label">Portfolio Links</label>
-                  <p className="info-value info-link">
-                    <a
-                      href={recruit.links}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
-                      {recruit.links}
-                    </a>
-                  </p>
+                  <div className="links-container">
+                    {(() => {
+                      try {
+                        const parsedLinks = JSON.parse(recruit.links);
+                        if (Array.isArray(parsedLinks)) {
+                          return parsedLinks.map((link, index) => (
+                            <div key={index} className="link-item">
+                              <a
+                                href={link}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                              >
+                                {link}
+                              </a>
+                            </div>
+                          ));
+                        }
+                      } catch {
+                        // If not valid JSON, treat as single URL
+                      }
+                      return (
+                        <div className="link-item">
+                          <a
+                            href={recruit.links}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                          >
+                            {recruit.links}
+                          </a>
+                        </div>
+                      );
+                    })()}
+                  </div>
                 </div>
               )}
             </section>
@@ -289,7 +313,7 @@ export default function RecruitDetailsPage(): JSX.Element {
                     htmlFor="approved"
                     className="radio-label-text approved"
                   >
-                    ✓ Approved - Move to next round
+                    ✓ Approved
                   </label>
                 </div>
 
@@ -323,7 +347,7 @@ export default function RecruitDetailsPage(): JSX.Element {
                     htmlFor="not_sure"
                     className="radio-label-text not-sure"
                   >
-                    ⊙ On Hold - Need more consideration
+                    ⊙ On Hold
                   </label>
                 </div>
               </div>

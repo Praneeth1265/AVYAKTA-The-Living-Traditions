@@ -822,6 +822,51 @@
   }
 }
 
+/* ============ PORTFOLIO LINKS CONTAINER ============ */
+
+.links-container {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+  margin-top: 0.75rem;
+}
+
+.link-item {
+  padding: 0.8rem;
+  background: linear-gradient(
+    135deg,
+    rgba(146, 121, 27, 0.06) 0%,
+    transparent 100%
+  );
+  border-left: 3px solid var(--bronze-gold);
+  border-radius: 6px;
+  transition: all 0.3s var(--transition-smooth);
+  animation: fadeInUp 0.6s ease-out;
+}
+
+.link-item:hover {
+  background: linear-gradient(
+    135deg,
+    rgba(146, 121, 27, 0.12) 0%,
+    transparent 100%
+  );
+  transform: translateX(4px);
+}
+
+.link-item a {
+  color: var(--bronze-gold);
+  text-decoration: none;
+  font-weight: 600;
+  word-break: break-all;
+  transition: all 0.3s var(--transition-smooth);
+  font-size: 0.95rem;
+}
+
+.link-item a:hover {
+  color: var(--charcoal-black);
+  text-decoration: underline;
+}
+
 /* ============ RESPONSIVE DESIGN ============ */
 
 @media (max-width: 1024px) {

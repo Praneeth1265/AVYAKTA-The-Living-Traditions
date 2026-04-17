@@ -3,6 +3,8 @@
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
 import { formatDomainFromUrl } from "@/lib/utils/domainFormatter";
 import { isValidDomain } from "@/lib/utils/domainValidator";
 import "../domain-dashboard.css";
@@ -47,8 +49,162 @@ export default function DomainDashboard() {
   const [indicator, setIndicator] = useState<Indicator | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string>("");
+  const [isPdfGenerating, setIsPdfGenerating] = useState(false);
 
   const displayDomainName = formatDomainFromUrl(domain);
+
+  const generatePDF = async () => {
+    if (!firstPreferenceRecruits.length && !secondPreferenceRecruits.length) {
+      alert("No recruitment data available to download");
+      return;
+    }
+
+    setIsPdfGenerating(true);
+    try {
+      const pdf = new jsPDF();
+      const pageWidth = pdf.internal.pageSize.getWidth();
+      const pageHeight = pdf.internal.pageSize.getHeight();
+      const margin = 15;
+      const bronzeGold = [146, 121, 27];
+      const deepCharcoal = [28, 28, 28];
+
+      pdf.setFontSize(20);
+      pdf.setTextColor(...bronzeGold);
+      pdf.text(
+        `${displayDomainName} Domain - Recruitment Report`,
+        pageWidth / 2,
+        margin + 10,
+        { align: "center" },
+      );
+
+      pdf.setFontSize(10);
+      pdf.setTextColor(...deepCharcoal);
+      pdf.text(
+        `Generated: ${new Date().toLocaleString()}`,
+        margin,
+        margin + 25,
+      );
+      pdf.text(
+        `Recruits: ${firstPreferenceRecruits.length + secondPreferenceRecruits.length}`,
+        margin,
+        margin + 32,
+      );
+
+      if (counter) {
+        pdf.setFontSize(11);
+        pdf.setTextColor(...bronzeGold);
+        pdf.text("Summary:", margin, margin + 42);
+
+        pdf.setFontSize(9);
+        pdf.setTextColor(...deepCharcoal);
+        let yPos = margin + 50;
+        pdf.text(`✓ Approved: ${counter.approved}`, margin + 5, yPos);
+        pdf.text(`✗ Rejected: ${counter.rejected}`, margin + 50, yPos);
+        yPos += 6;
+        pdf.text(`? Pending: ${counter.not_sure}`, margin + 5, yPos);
+      }
+
+      let currentY = margin + 70;
+
+      // First Preference Table
+      if (firstPreferenceRecruits.length > 0) {
+        pdf.setFontSize(12);
+        pdf.setTextColor(...bronzeGold);
+        pdf.text("First Preference Recruits", margin, currentY);
+        currentY += 8;
+
+        const firstPrefData = firstPreferenceRecruits.map((recruit) => [
+          recruit.name,
+          recruit.srn,
+          recruit.first_preference_status || "pending",
+          recruit.interview ? "Yes" : "No",
+        ]);
+
+        autoTable(pdf, {
+          head: [["Name", "SRN", "Status", "Interview"]],
+          body: firstPrefData,
+          startY: currentY,
+          headStyles: {
+            fillColor: bronzeGold,
+            textColor: [255, 255, 255],
+            fontStyle: "bold",
+            fontSize: 9,
+          },
+          bodyStyles: {
+            fontSize: 8,
+            textColor: deepCharcoal,
+          },
+          alternateRowStyles: {
+            fillColor: [242, 238, 230],
+          },
+          margin: { left: margin, right: margin, bottom: margin },
+        });
+
+        currentY =
+          (pdf as jsPDF & { lastAutoTable?: { finalY: number } }).lastAutoTable
+            ?.finalY || currentY + 10;
+      }
+
+      // Second Preference Table
+      if (secondPreferenceRecruits.length > 0) {
+        pdf.addPage();
+        let pageY = margin;
+
+        pdf.setFontSize(12);
+        pdf.setTextColor(...bronzeGold);
+        pdf.text("Second Preference Recruits", margin, pageY);
+        pageY += 8;
+
+        const secondPrefData = secondPreferenceRecruits.map((recruit) => [
+          recruit.name,
+          recruit.srn,
+          recruit.first_preference_domain,
+          recruit.second_preference_status || "pending",
+        ]);
+
+        autoTable(pdf, {
+          head: [["Name", "SRN", "First Domain", "Status"]],
+          body: secondPrefData,
+          startY: pageY,
+          headStyles: {
+            fillColor: bronzeGold,
+            textColor: [255, 255, 255],
+            fontStyle: "bold",
+            fontSize: 9,
+          },
+          bodyStyles: {
+            fontSize: 8,
+            textColor: deepCharcoal,
+          },
+          alternateRowStyles: {
+            fillColor: [242, 238, 230],
+          },
+          margin: { left: margin, right: margin, bottom: margin },
+        });
+      }
+
+      // Footer
+      const totalPages = (pdf.internal.pages?.length ?? 1) - 1;
+      for (let i = 1; i <= totalPages; i++) {
+        pdf.setPage(i);
+        pdf.setFontSize(8);
+        pdf.setTextColor(150, 150, 150);
+        pdf.text(`Page ${i} of ${totalPages}`, pageWidth / 2, pageHeight - 10, {
+          align: "center",
+        });
+      }
+
+      pdf.save(
+        `${displayDomainName.replace(/\s+/g, "_")}_Recruitment_Report_${new Date().toISOString().split("T")[0]}.pdf`,
+      );
+    } catch (err) {
+      alert(
+        `Error generating PDF: ${err instanceof Error ? err.message : "Unknown error"}`,
+      );
+    } finally {
+      setIsPdfGenerating(false);
+    }
+  };
 
   const handleIndicatorToggle = async () => {
     if (!indicator || indicator.indicator) return;
@@ -184,10 +340,37 @@ export default function DomainDashboard() {
       <div className="domain-dashboard-inner">
         {/* Header */}
         <div className="domain-header">
-          <h1 className="domain-title">{displayDomainName} Domain Dashboard</h1>
-          <p className="domain-subtitle">
-            Manage and review recruitment applications
-          </p>
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "flex-start",
+              gap: "30px",
+            }}
+          >
+            <div>
+              <h1 className="domain-title">
+                {displayDomainName} Domain Dashboard
+              </h1>
+              <p className="domain-subtitle">
+                Manage and review recruitment applications
+              </p>
+            </div>
+
+            {/* Download Button Container */}
+            <div className="download-button-container">
+              <div className="download-button-label"> Download Report</div>
+              <div className="download-button-content">
+                <button
+                  onClick={generatePDF}
+                  disabled={isPdfGenerating}
+                  className="download-pdf-button"
+                >
+                  {isPdfGenerating ? "⏳ Generating..." : "Download PDF"}
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
 
         {/* Rangoli Divider */}
