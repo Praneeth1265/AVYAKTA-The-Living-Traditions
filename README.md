@@ -1,4 +1,3 @@
-# IRA - The AVYAKTA Chapter 
 ## AVYAKTA – The Living Traditions
 
 A culturally rooted, vibrant website for Avyakta - a cultural multi-domain club that brings together students passionate about performing arts, design, technology, event management, and more.
