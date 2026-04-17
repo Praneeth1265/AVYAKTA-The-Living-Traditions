@@ -1,7 +1,20 @@
-interface Props {
-  params: { slug: string };
-}
+import { notFound } from "next/navigation";
+import { getEventBySlugFromDb } from "@/lib/data/events";
+import EventDetailClient from "./EventDetailClient";
 
-export default function EventDetailPage({ params }: Props) {
-  return <main>Event Detail: {params.slug}</main>;
+type Props = {
+  params: Promise<{ slug: string }>;
+};
+
+export const dynamic = "force-dynamic";
+
+export default async function EventDetailPage({ params }: Props) {
+  const { slug } = await params;
+  const event = await getEventBySlugFromDb(slug);
+
+  if (!event) {
+    notFound();
+  }
+
+  return <EventDetailClient event={event} />;
 }
