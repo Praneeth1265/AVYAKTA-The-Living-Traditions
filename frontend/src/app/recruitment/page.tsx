@@ -1,9 +1,14 @@
 import RecruitmentForm from "@/components/forms/RecruitmentForm";
+import bgImage from "@/components/forms/bg.jpeg";
+import bgFormsImage from "@/components/forms/bg-forms.jpeg";
 import "./recruitment.css";
 
 export default function RecruitmentPage() {
   return (
-    <main className="recruitment-page">
+    <main
+      className="recruitment-page"
+      style={{ backgroundImage: `url(${bgImage.src})` }}
+    >
       <div className="recruitment-inner">
         <div className="recruitment-header">
           <h1 className="recruitment-title">Join Avyakta</h1>
@@ -17,7 +22,7 @@ export default function RecruitmentPage() {
           <div className="rangoli-symbol"></div>
         </div>
 
-        <RecruitmentForm />
+        <RecruitmentForm bgImage={bgFormsImage.src} />
       </div>
     </main>
   );
