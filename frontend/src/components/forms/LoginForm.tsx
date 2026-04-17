@@ -64,13 +64,21 @@ export default function LoginForm() {
   };
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-0 w-full">
-      {error && <div className="login-error">{error}</div>}
+    <form onSubmit={handleSubmit(onSubmit)} className="w-full space-y-0 flex flex-col">
+      {error && (
+        <div className="mb-4 p-3 bg-red-100 border border-red-400 text-red-900 text-sm font-medium rounded-md animation-in fade-in slide-in-from-top-2">
+          {error}
+        </div>
+      )}
 
-      {successMessage && <div className="login-success">{successMessage}</div>}
+      {successMessage && (
+        <div className="mb-4 p-3 bg-green-100 border border-green-400 text-green-800 text-sm font-medium rounded-md animation-in fade-in slide-in-from-top-2">
+          {successMessage}
+        </div>
+      )}
 
-      <div className="login-form-group">
-        <label htmlFor="email" className="login-form-group-label">
+      <div className="mb-5">
+        <label htmlFor="email" className="block mb-2 text-sm font-medium text-gray-700">
           Email Address
         </label>
         <input
@@ -78,20 +86,22 @@ export default function LoginForm() {
           type="email"
           placeholder="Enter your email"
           {...register("email")}
-          className={`login-form-input ${
-            errors.email ? "border-[#8B1A1A]" : ""
-          }`}
+          className={`w-full px-3.5 py-3 text-sm bg-gray-50 border rounded-lg font-sans focus:outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-600/20 focus:bg-white transition-all ${
+            errors.email
+              ? "border-red-600 bg-red-50"
+              : "border-gray-300"
+          } disabled:bg-gray-200 disabled:cursor-not-allowed disabled:opacity-60`}
           disabled={isLoading}
         />
         {errors.email && (
-          <p className="text-xs text-[#8B1A1A] ml-1 mt-1">
+          <p className="text-xs font-medium text-red-600 mt-1.5">
             {errors.email.message}
           </p>
         )}
       </div>
 
-      <div className="login-form-group">
-        <label htmlFor="password" className="login-form-group-label">
+      <div className="mb-2">
+        <label htmlFor="password" className="block mb-2 text-sm font-medium text-gray-700">
           Password
         </label>
         <input
@@ -99,19 +109,25 @@ export default function LoginForm() {
           type="password"
           placeholder="Enter your password"
           {...register("password")}
-          className={`login-form-input ${
-            errors.password ? "border-[#8B1A1A]" : ""
-          }`}
+          className={`w-full px-3.5 py-3 text-sm bg-gray-50 border rounded-lg font-sans focus:outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-600/20 focus:bg-white transition-all ${
+            errors.password
+              ? "border-red-600 bg-red-50"
+              : "border-gray-300"
+          } disabled:bg-gray-200 disabled:cursor-not-allowed disabled:opacity-60`}
           disabled={isLoading}
         />
         {errors.password && (
-          <p className="text-xs text-[#8B1A1A] ml-1 mt-1">
+          <p className="text-xs font-medium text-red-600 mt-1.5">
             {errors.password.message}
           </p>
         )}
       </div>
 
-      <button type="submit" disabled={isLoading} className="login-submit-btn">
+      <button
+        type="submit"
+        disabled={isLoading}
+        className="w-full mt-2 px-4 py-3 bg-gradient-to-r from-blue-600 via-purple-600 to-purple-700 text-white text-base font-semibold rounded-lg shadow-lg hover:shadow-xl hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-70 disabled:cursor-not-allowed disabled:shadow-md transition-all duration-200"
+      >
         {isLoading ? "Signing in..." : "Enter"}
       </button>
     </form>

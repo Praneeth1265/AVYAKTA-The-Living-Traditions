@@ -13,6 +13,8 @@ export const events = pgTable("events", {
   description: text("description"),
   image_url: text("image_url"),
   date: date("date"),
+  registration_enabled: boolean("registration_enabled").default(true),
+  payment_image_required: boolean("payment_image_required").default(false),
 });
 
 export const event_slug = pgTable("event_slug", {

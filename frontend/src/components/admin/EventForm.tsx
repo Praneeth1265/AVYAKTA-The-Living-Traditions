@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import { compressImage, validateImage } from "../../lib/utils/imageOptimizer";
 
 interface Event {
   id: string;
@@ -8,6 +9,8 @@ interface Event {
   description: string | null;
   image_url: string | null;
   date: string | null;
+  registration_enabled?: boolean;
+  payment_image_required?: boolean;
 }
 
 interface EventFormProps {
@@ -22,6 +25,8 @@ export interface EventFormData {
   description: string;
   image_url: string;
   date: string;
+  registration_enabled?: boolean;
+  payment_image_required?: boolean;
 }
 
 export default function EventForm({
@@ -35,11 +40,15 @@ export default function EventForm({
     description: event?.description || "",
     image_url: event?.image_url || "",
     date: event?.date || "",
+    registration_enabled: event?.registration_enabled ?? true,
+    payment_image_required: event?.payment_image_required ?? false,
   });
   const [imagePreview, setImagePreview] = useState<string>(
     event?.image_url || ""
   );
   const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imageError, setImageError] = useState<string>("");
+  const [isCompressing, setIsCompressing] = useState(false);
 
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -51,24 +60,53 @@ export default function EventForm({
     }));
   };
 
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleToggleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setFormData((prev) => ({
+      ...prev,
+      registration_enabled: e.target.checked,
+    }));
+  };
+
+  const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      setImageFile(file);
+      setImageError("");
+      setIsCompressing(true);
 
-      // Create preview
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        const base64 = reader.result as string;
-        setImagePreview(base64);
+      try {
+        // Validate image
+        const validation = validateImage(file, 10);
+        if (!validation.valid) {
+          setImageError(validation.error || "Invalid image");
+          setIsCompressing(false);
+          return;
+        }
+
+        // Compress image
+        const compressed = await compressImage(file, {
+          maxWidth: 1920,
+          maxHeight: 1920,
+          quality: 0.7,
+          maxSizeKB: 300,
+        });
+
+        setImageFile(file);
+        setImagePreview(compressed);
         setFormData((prev) => ({
           ...prev,
-          image_url: base64,
+          image_url: compressed,
         }));
-      };
-      reader.readAsDataURL(file);
+      } catch (error) {
+        setImageError(
+          error instanceof Error ? error.message : "Failed to process image"
+        );
+      } finally {
+        setIsCompressing(false);
+      }
     }
   };
+
+
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -79,6 +117,8 @@ export default function EventForm({
         description: "",
         image_url: "",
         date: "",
+        registration_enabled: true,
+        payment_image_required: false,
       });
       setImagePreview("");
       setImageFile(null);
@@ -130,17 +170,50 @@ export default function EventForm({
         />
       </div>
 
+      <div className="form-group checkbox-group">
+        <label htmlFor="registration_enabled">
+          <input
+            id="registration_enabled"
+            type="checkbox"
+            checked={formData.registration_enabled ?? true}
+            onChange={handleToggleChange}
+            disabled={isLoading}
+            className="checkbox-input"
+          />
+          <span>Enable Registration for this Event</span>
+        </label>
+      </div>
+
+      <div className="form-group checkbox-group">
+        <label htmlFor="payment_image_required">
+          <input
+            id="payment_image_required"
+            type="checkbox"
+            checked={formData.payment_image_required ?? false}
+            onChange={(e) => setFormData((prev) => ({ ...prev, payment_image_required: e.target.checked }))}
+            disabled={isLoading || !formData.registration_enabled}
+            className="checkbox-input"
+          />
+          <span>Require Payment Proof for Registration</span>
+        </label>
+      </div>
+
       <div className="form-group">
-        <label htmlFor="image">Event Image</label>
+        <label htmlFor="image">Event Cover Image</label>
         <div className="image-upload-group">
           <input
             id="image"
             type="file"
             accept="image/*"
             onChange={handleImageChange}
-            disabled={isLoading}
+            disabled={isLoading || isCompressing}
             className="file-input"
           />
+          {imageError && (
+            <p className="help-text" style={{ color: "#dc2626" }}>
+              ⚠️ {imageError}
+            </p>
+          )}
           {imagePreview && (
             <div className="image-preview">
               <img src={imagePreview} alt="Preview" />
@@ -149,12 +222,13 @@ export default function EventForm({
                 onClick={() => {
                   setImagePreview("");
                   setImageFile(null);
+                  setImageError("");
                   setFormData((prev) => ({
                     ...prev,
                     image_url: "",
                   }));
                 }}
-                disabled={isLoading}
+                disabled={isLoading || isCompressing}
                 className="btn-remove-image"
               >
                 ✕ Remove Image
@@ -162,13 +236,12 @@ export default function EventForm({
             </div>
           )}
         </div>
-        <p className="help-text">Upload an image (PNG, JPG, GIF). Images are stored as base64 in database.</p>
       </div>
 
       <div className="form-actions">
         <button
           type="submit"
-          disabled={isLoading || !formData.title}
+          disabled={isLoading || isCompressing}
           className="btn-submit"
         >
           {isLoading ? "Saving..." : event ? "Update Event" : "Create Event"}
@@ -176,7 +249,7 @@ export default function EventForm({
         <button
           type="button"
           onClick={onCancel}
-          disabled={isLoading}
+          disabled={isLoading || isCompressing}
           className="btn-cancel"
         >
           Cancel
@@ -198,8 +271,33 @@ export default function EventForm({
           color: #1f2937;
         }
 
+        h3 {
+          margin: 16px 0 12px 0;
+          font-size: 16px;
+          font-weight: 600;
+          color: #374151;
+        }
+
         .form-group {
           margin-bottom: 20px;
+        }
+
+        .checkbox-group {
+          display: flex;
+          align-items: center;
+        }
+
+        .checkbox-group label {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          margin-bottom: 0;
+        }
+
+        .checkbox-input {
+          width: 18px;
+          height: 18px;
+          cursor: pointer;
         }
 
         label {
@@ -210,7 +308,8 @@ export default function EventForm({
           font-size: 14px;
         }
 
-        input,
+        input[type="text"],
+        input[type="date"],
         textarea {
           width: 100%;
           padding: 10px 12px;
@@ -219,9 +318,11 @@ export default function EventForm({
           font-size: 14px;
           font-family: inherit;
           transition: border-color 0.2s;
+          box-sizing: border-box;
         }
 
-        input:focus,
+        input[type="text"]:focus,
+        input[type="date"]:focus,
         textarea:focus {
           outline: none;
           border-color: #3b82f6;
@@ -246,6 +347,7 @@ export default function EventForm({
           cursor: pointer;
           padding: 20px;
           text-align: center;
+          background-color: #fafafa;
         }
 
         .file-input:hover:not(:disabled) {
@@ -302,6 +404,7 @@ export default function EventForm({
 
         .btn-submit,
         .btn-cancel {
+          flex: 1;
           padding: 10px 20px;
           border: none;
           border-radius: 6px;
@@ -312,7 +415,6 @@ export default function EventForm({
         }
 
         .btn-submit {
-          flex: 1;
           background-color: #3b82f6;
           color: white;
         }
@@ -327,7 +429,6 @@ export default function EventForm({
         }
 
         .btn-cancel {
-          flex: 1;
           background-color: #e5e7eb;
           color: #374151;
         }

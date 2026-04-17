@@ -1,5 +1,6 @@
 import { createClient } from "@supabase/supabase-js";
 import { NextRequest, NextResponse } from "next/server";
+import { retryWithBackoff } from "../../../../../lib/api/retry";
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -9,16 +10,19 @@ const supabase = createClient(
 // GET - Fetch all posters for an event
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { id } = params;
+    const { id } = await params;
 
-    const { data, error } = await supabase
-      .from("posters")
-      .select("*")
-      .eq("event_id", id);
+    const result = await retryWithBackoff(async () =>
+      supabase
+        .from("posters")
+        .select("*")
+        .eq("event_id", id)
+    );
 
+    const { data, error } = result;
     if (error) throw new Error(error.message);
 
     return NextResponse.json({ success: true, data: data || [] });
@@ -31,44 +35,70 @@ export async function GET(
   }
 }
 
-// POST - Create a new poster for an event
 export async function POST(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { id } = params;
+    const { id } = await params;
     const body = await request.json();
-    const { title, poster_image_url } = body;
+    let { poster_image_url } = body;
 
-    if (!title || !poster_image_url) {
-      return NextResponse.json(
-        { success: false, error: "Title and poster image are required" },
-        { status: 400 }
+    const result = await retryWithBackoff(async () =>
+      supabase
+        .from("posters")
+        .insert([
+          {
+            event_id: id,
+            poster_image_url,
+          },
+        ])
+        .select()
+    );
+
+    let { data, error } = result;
+
+    // If schema cache error, try alternative approach
+    if (error && (error.message?.includes("title") || error.message?.includes("schema cache") || (error as any).code === "PGRST204")) {
+      console.warn("Schema cache issue detected, retrying with refreshed connection:", error.message);
+      
+      // Wait a moment and retry
+      await new Promise(resolve => setTimeout(resolve, 500));
+      
+      const retryResult = await retryWithBackoff(async () =>
+        supabase
+          .from("posters")
+          .insert([
+            {
+              event_id: id,
+              poster_image_url,
+            },
+          ])
+          .select()
       );
+      
+      data = retryResult.data;
+      error = retryResult.error;
     }
 
-    const { data, error } = await supabase
-      .from("posters")
-      .insert([
-        {
-          event_id: id,
-          title,
-          poster_image_url,
-        },
-      ])
-      .select();
-
-    if (error) throw new Error(error.message);
+    if (error) {
+      console.error("Supabase poster error:", {
+        message: error.message,
+        code: (error as any).code,
+        details: (error as any).details,
+      });
+      throw new Error(error.message || "Failed to create poster");
+    }
 
     return NextResponse.json(
       { success: true, data: data?.[0] },
       { status: 201 }
     );
   } catch (error) {
-    console.error("Error creating poster:", error);
+    const errorMessage = error instanceof Error ? error.message : "Failed to create poster";
+    console.error("Error creating poster:", errorMessage);
     return NextResponse.json(
-      { success: false, error: "Failed to create poster" },
+      { success: false, error: errorMessage },
       { status: 500 }
     );
   }
@@ -77,11 +107,12 @@ export async function POST(
 // PUT - Update a poster
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    await params;
     const body = await request.json();
-    const { posterId, title, poster_image_url } = body;
+    const { posterId, poster_image_url } = body;
 
     if (!posterId) {
       return NextResponse.json(
@@ -90,15 +121,19 @@ export async function PUT(
       );
     }
 
-    const { data, error } = await supabase
-      .from("posters")
-      .update({
-        title,
-        poster_image_url,
-      })
-      .eq("id", posterId)
-      .select();
+    const updatePayload: any = {};
 
+    if (poster_image_url !== undefined) updatePayload.poster_image_url = poster_image_url;
+
+    const result = await retryWithBackoff(async () =>
+      supabase
+        .from("posters")
+        .update(updatePayload)
+        .eq("id", posterId)
+        .select()
+    );
+
+    const { data, error } = result;
     if (error) throw new Error(error.message);
 
     return NextResponse.json({ success: true, data: data?.[0] });
@@ -114,9 +149,10 @@ export async function PUT(
 // DELETE - Delete a poster
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    await params;
     const body = await request.json();
     const { posterId } = body;
 

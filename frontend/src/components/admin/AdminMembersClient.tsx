@@ -26,7 +26,6 @@ export default function AdminMembersClient() {
   const [error, setError] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
   const [activeTab, setActiveTab] = useState<"add" | "view">("view");
-  const [sortBy, setSortBy] = useState<"domain" | "role">("domain");
 
   // Fetch all members
   const fetchMembers = async () => {
@@ -169,18 +168,22 @@ export default function AdminMembersClient() {
     return acc;
   }, {} as Record<string, Member[]>);
 
-  // Group members by role
-  const membersByRole = members.reduce((acc, member) => {
-    if (!acc[member.role]) {
-      acc[member.role] = [];
-    }
-    acc[member.role].push(member);
-    return acc;
-  }, {} as Record<string, Member[]>);
-
-  // Get sorted keys
+  // Get sorted domains
   const sortedDomains = Object.keys(membersByDomain).sort();
-  const sortedRoles = Object.keys(membersByRole).sort();
+
+  // Calculate domain heads names and members count per domain
+  const domainStats = sortedDomains.map((domain) => {
+    const domainMembers = membersByDomain[domain];
+    const heads = domainMembers
+      .filter((m) => m.role === "domain_head")
+      .map((m) => m.name);
+    const memberCount = domainMembers.filter((m) => m.role === "members").length;
+    return {
+      domain,
+      heads,
+      memberCount,
+    };
+  });
 
   useEffect(() => {
     fetchMembers();
@@ -237,53 +240,52 @@ export default function AdminMembersClient() {
           {/* View Section */}
           {activeTab === "view" && (
             <div className="section view-section">
-              {/* Sorting Options */}
-              <div className="sort-controls">
-                <label htmlFor="sort-select">Sort by:</label>
-                <select
-                  id="sort-select"
-                  value={sortBy}
-                  onChange={(e) => setSortBy(e.target.value as "domain" | "role")}
-                  className="sort-select"
-                >
-                  <option value="domain">Domain</option>
-                  <option value="role">Role</option>
-                </select>
+              {/* Domain Statistics Cards */}
+              <div className="domain-stats-container">
+                {domainStats.map((stat) => (
+                  <div key={stat.domain} className="domain-card">
+                    <div className="card-header">
+                      <h3>{stat.domain}</h3>
+                    </div>
+                    <div className="card-stats">
+                      <div className="heads-section">
+                        <span className="section-label">👑 Heads</span>
+                        <div className="heads-list">
+                          {stat.heads.length > 0 ? (
+                            stat.heads.map((name, idx) => (
+                              <div key={idx} className="head-name">
+                                {name}
+                              </div>
+                            ))
+                          ) : (
+                            <div className="head-name empty">No heads assigned</div>
+                          )}
+                        </div>
+                      </div>
+                      <div className="members-count">
+                        <span className="section-label">👥 Members</span>
+                        <span className="count-value">{stat.memberCount}</span>
+                      </div>
+                    </div>
+                  </div>
+                ))}
               </div>
 
-              {/* Members Display */}
+              {/* Members Display by Domain */}
               <div className="members-by-category">
-                {sortBy === "domain" ? (
-                  // Sort by Domain
-                  sortedDomains.map((domain) => (
-                    <div key={domain} className="category-section">
-                      <h3 className="category-title">
-                        🏢 {domain} ({membersByDomain[domain].length})
-                      </h3>
-                      <MembersTable
-                        members={membersByDomain[domain]}
-                        onEdit={handleEditMember}
-                        onDelete={handleDeleteMember}
-                        isDeleting={isDeletingId}
-                      />
-                    </div>
-                  ))
-                ) : (
-                  // Sort by Role
-                  sortedRoles.map((role) => (
-                    <div key={role} className="category-section">
-                      <h3 className="category-title">
-                        👤 {role} ({membersByRole[role].length})
-                      </h3>
-                      <MembersTable
-                        members={membersByRole[role]}
-                        onEdit={handleEditMember}
-                        onDelete={handleDeleteMember}
-                        isDeleting={isDeletingId}
-                      />
-                    </div>
-                  ))
-                )}
+                {sortedDomains.map((domain) => (
+                  <div key={domain} className="category-section">
+                    <h3 className="category-title">
+                      🏢 {domain} ({membersByDomain[domain].length})
+                    </h3>
+                    <MembersTable
+                      members={membersByDomain[domain]}
+                      onEdit={handleEditMember}
+                      onDelete={handleDeleteMember}
+                      isDeleting={isDeletingId}
+                    />
+                  </div>
+                ))}
               </div>
             </div>
           )}
@@ -450,45 +452,6 @@ export default function AdminMembersClient() {
           color: #6b7280;
         }
 
-        .sort-controls {
-          display: flex;
-          align-items: center;
-          gap: 12px;
-          margin-bottom: 24px;
-          background: white;
-          padding: 16px;
-          border-radius: 8px;
-          box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-        }
-
-        .sort-controls label {
-          font-weight: 600;
-          color: #1f2937;
-          font-size: 14px;
-        }
-
-        .sort-select {
-          padding: 8px 12px;
-          border: 2px solid #e5e7eb;
-          border-radius: 6px;
-          background: white;
-          font-size: 14px;
-          font-weight: 500;
-          color: #1f2937;
-          cursor: pointer;
-          transition: border-color 0.2s;
-        }
-
-        .sort-select:hover {
-          border-color: #3b82f6;
-        }
-
-        .sort-select:focus {
-          outline: none;
-          border-color: #3b82f6;
-          box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-        }
-
         .members-by-category {
           display: flex;
           flex-direction: column;
@@ -509,6 +472,129 @@ export default function AdminMembersClient() {
           color: #1f2937;
           padding-bottom: 12px;
           border-bottom: 2px solid #e5e7eb;
+        }
+
+        .domain-stats-container {
+          display: grid;
+          grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+          gap: 16px;
+          margin-bottom: 32px;
+        }
+
+        .domain-card {
+          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+          border-radius: 12px;
+          padding: 20px;
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+          transition: all 0.3s ease;
+          color: white;
+        }
+
+        .domain-card:hover {
+          transform: translateY(-4px);
+          box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);
+        }
+
+        .card-header {
+          margin-bottom: 16px;
+        }
+
+        .card-header h3 {
+          margin: 0;
+          font-size: 18px;
+          font-weight: 700;
+          color: white;
+        }
+
+        .card-stats {
+          display: flex;
+          flex-direction: column;
+          gap: 16px;
+        }
+
+        .heads-section {
+          display: flex;
+          flex-direction: column;
+          gap: 8px;
+        }
+
+        .section-label {
+          font-size: 13px;
+          font-weight: 600;
+          opacity: 0.95;
+          text-transform: uppercase;
+          letter-spacing: 0.5px;
+        }
+
+        .heads-list {
+          display: flex;
+          flex-direction: column;
+          gap: 6px;
+        }
+
+        .head-name {
+          background: rgba(255, 255, 255, 0.15);
+          padding: 8px 12px;
+          border-radius: 6px;
+          font-size: 14px;
+          font-weight: 500;
+          word-break: break-word;
+        }
+
+        .head-name.empty {
+          opacity: 0.7;
+          font-style: italic;
+          font-size: 12px;
+        }
+
+        .members-count {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          padding: 12px 0;
+          border-top: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .count-value {
+          font-size: 24px;
+          font-weight: 700;
+          background: rgba(255, 255, 255, 0.2);
+          padding: 6px 16px;
+          border-radius: 6px;
+          min-width: 50px;
+          text-align: center;
+        }
+
+        .stat-item {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          padding: 8px 0;
+          border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .stat-item.total {
+          border-bottom: none;
+          border-top: 1px solid rgba(255, 255, 255, 0.3);
+          padding-top: 12px;
+          margin-top: 4px;
+          font-weight: 600;
+        }
+
+        .stat-label {
+          font-size: 13px;
+          font-weight: 500;
+          opacity: 0.95;
+        }
+
+        .stat-value {
+          font-size: 20px;
+          font-weight: 700;
+          background: rgba(255, 255, 255, 0.2);
+          padding: 4px 12px;
+          border-radius: 6px;
+          min-width: 40px;
+          text-align: center;
         }
 
         @media (max-width: 768px) {
@@ -535,6 +621,10 @@ export default function AdminMembersClient() {
 
           .tab-button {
             width: 100%;
+          }
+
+          .domain-stats-container {
+            grid-template-columns: 1fr;
           }
         }
       `}</style>

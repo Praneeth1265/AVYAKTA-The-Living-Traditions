@@ -1,11 +1,13 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import { compressImage, validateImage } from "../../lib/utils/imageOptimizer";
+import { parseImageUrls } from "../../lib/utils/storageUploader";
+import { uploadMultipleImages, deleteImageFromStorage } from "../../lib/utils/imageUploader";
 
 interface EventSlug {
   id: string;
   event_id: string;
-  title: string;
   more_description: string | null;
   image_url: string | null;
 }
@@ -13,7 +15,6 @@ interface EventSlug {
 interface Poster {
   id: string;
   event_id: string;
-  title: string;
   poster_image_url: string;
 }
 
@@ -50,110 +51,238 @@ export default function EventDetailsPanel({
 }: EventDetailsPanelProps) {
   const [activeTab, setActiveTab] = useState<"slugs" | "posters">("slugs");
   const [slugFormData, setSlugFormData] = useState({
-    title: "",
     more_description: "",
-    image_url: "",
+    image_url: "", // Main image URL (will store URLs separated by comma for multiple)
   });
   const [posterFormData, setPosterFormData] = useState({
-    title: "",
     poster_image_url: "",
   });
   const [editingSlugId, setEditingSlugId] = useState<string | null>(null);
   const [editingPosterId, setEditingPosterId] = useState<string | null>(null);
-  const [slugImagePreview, setSlugImagePreview] = useState<string>("");
+  const [slugImagePreviews, setSlugImagePreviews] = useState<string[]>([]);
   const [posterImagePreview, setPosterImagePreview] = useState<string>("");
+  const [posterBatchImages, setPosterBatchImages] = useState<string[]>([]);
+  const [imageError, setImageError] = useState("");
+  const [isProcessingImage, setIsProcessingImage] = useState(false);
+  const [isUploadingImages, setIsUploadingImages] = useState(false);
 
-  const handleSlugImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        const base64 = reader.result as string;
-        setSlugImagePreview(base64);
+  useEffect(() => {
+    setImageError("");
+    setPosterBatchImages([]);
+    setPosterImagePreview("");
+    setSlugImagePreviews([]);
+    setPosterFormData({
+      poster_image_url: "",
+    });
+    setSlugFormData({
+      more_description: "",
+      image_url: "",
+    });
+    setEditingPosterId(null);
+  }, [event.id]);
+
+  const handleSlugImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files ? Array.from(e.target.files) : [];
+    if (files.length === 0) return;
+
+    setImageError("");
+    setIsProcessingImage(true);
+
+    try {
+      const compressedImages: string[] = [];
+
+      for (const file of files) {
+        const validation = validateImage(file, 10);
+        if (!validation.valid) {
+          throw new Error(validation.error || "Invalid image");
+        }
+
+        const compressed = await compressImage(file, {
+          maxWidth: 1920,
+          maxHeight: 1920,
+          quality: 0.7,
+          maxSizeKB: 300,
+        });
+        compressedImages.push(compressed);
+      }
+
+      if (editingSlugId) {
+        // For editing: replace all images
+        setSlugImagePreviews(compressedImages);
         setSlugFormData((prev) => ({
           ...prev,
-          image_url: base64,
+          image_url: compressedImages.join("|"), // Store compressed images temporarily
         }));
-      };
-      reader.readAsDataURL(file);
+      } else {
+        // For adding: accumulate images
+        setSlugImagePreviews((prev) => [...prev, ...compressedImages]);
+        setSlugFormData((prev) => ({
+          ...prev,
+          image_url: [...prev.image_url.split("|").filter(Boolean), ...compressedImages].join("|"),
+        }));
+      }
+    } catch (error) {
+      setImageError(
+        error instanceof Error ? error.message : "Failed to process image"
+      );
+    } finally {
+      setIsProcessingImage(false);
     }
   };
 
-  const handlePosterImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        const base64 = reader.result as string;
-        setPosterImagePreview(base64);
+  const handlePosterImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files ? Array.from(e.target.files) : [];
+    if (files.length === 0) return;
+
+    setImageError("");
+    setIsProcessingImage(true);
+
+    try {
+      const compressedImages: string[] = [];
+
+      for (const file of files) {
+        const validation = validateImage(file, 10);
+        if (!validation.valid) {
+          throw new Error(validation.error || "Invalid image");
+        }
+
+        const compressed = await compressImage(file, {
+          maxWidth: 1920,
+          maxHeight: 1920,
+          quality: 0.7,
+          maxSizeKB: 300,
+        });
+        compressedImages.push(compressed);
+      }
+
+      if (editingPosterId) {
+        setPosterImagePreview(compressedImages[0]);
         setPosterFormData((prev) => ({
           ...prev,
-          poster_image_url: base64,
+          poster_image_url: compressedImages[0],
         }));
-      };
-      reader.readAsDataURL(file);
+        setPosterBatchImages([]);
+      } else {
+        setPosterBatchImages(compressedImages);
+        setPosterImagePreview(compressedImages[0]);
+        setPosterFormData((prev) => ({
+          ...prev,
+          poster_image_url: compressedImages[0],
+        }));
+      }
+    } catch (error) {
+      setImageError(
+        error instanceof Error ? error.message : "Failed to process image"
+      );
+    }
+    finally {
+      setIsProcessingImage(false);
     }
   };
 
   const handleAddSlug = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!slugFormData.title) return;
 
     try {
+      setIsUploadingImages(true);
+      
+      // Upload images to storage if they exist
+      let imageUrls: string[] = [];
+      if (slugImagePreviews.length > 0) {
+        imageUrls = await uploadMultipleImages(slugImagePreviews, {
+          bucket: "events",
+          folder: `event-${event.id}/slugs`,
+          fileName: `slug-${Date.now()}`,
+        });
+      }
+
+      const slugData = {
+        more_description: slugFormData.more_description,
+        image_url: imageUrls.length > 0 ? imageUrls.join("|") : "", // Store multiple URLs separated by |
+      };
+
       if (editingSlugId) {
-        await onUpdateSlug(editingSlugId, slugFormData);
+        await onUpdateSlug(editingSlugId, slugData);
         setEditingSlugId(null);
       } else {
-        await onAddSlug(slugFormData);
+        await onAddSlug(slugData);
       }
 
       setSlugFormData({
-        title: "",
         more_description: "",
         image_url: "",
       });
-      setSlugImagePreview("");
+      setSlugImagePreviews([]);
     } catch (error) {
+      setImageError(
+        error instanceof Error ? error.message : "Failed to upload images"
+      );
       console.error("Error saving slug:", error);
+    } finally {
+      setIsUploadingImages(false);
     }
   };
 
   const handleAddPoster = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!posterFormData.title || !posterFormData.poster_image_url) return;
+    if (!posterFormData.poster_image_url && posterBatchImages.length === 0) return;
 
     try {
-      if (editingPosterId) {
-        await onUpdatePoster(editingPosterId, posterFormData);
-        setEditingPosterId(null);
-      } else {
-        await onAddPoster(posterFormData);
+      setIsUploadingImages(true);
+      
+      const imagesToAdd = posterBatchImages.length > 0 ? posterBatchImages : [posterFormData.poster_image_url];
+
+      for (let i = 0; i < imagesToAdd.length; i++) {
+        const imageData = imagesToAdd[i];
+        
+        // Upload image to storage
+        const [imageUrl] = await uploadMultipleImages([imageData], {
+          bucket: "events",
+          folder: `event-${event.id}/posters`,
+          fileName: `poster-${Date.now()}-${i}`,
+        });
+
+        if (editingPosterId && i === 0) {
+          await onUpdatePoster(editingPosterId, {
+            poster_image_url: imageUrl,
+          });
+          setEditingPosterId(null);
+        } else {
+          await onAddPoster({
+            poster_image_url: imageUrl,
+          });
+        }
       }
 
       setPosterFormData({
-        title: "",
         poster_image_url: "",
       });
       setPosterImagePreview("");
+      setPosterBatchImages([]);
+      setImageError("");
     } catch (error) {
+      setImageError(
+        error instanceof Error ? error.message : "Failed to upload posters"
+      );
       console.error("Error saving poster:", error);
+    } finally {
+      setIsUploadingImages(false);
     }
   };
 
   const handleEditSlug = (slug: EventSlug) => {
     setEditingSlugId(slug.id);
+    const imageUrls = slug.image_url ? slug.image_url.split("|").filter(Boolean) : [];
     setSlugFormData({
-      title: slug.title,
       more_description: slug.more_description || "",
       image_url: slug.image_url || "",
     });
-    setSlugImagePreview(slug.image_url || "");
+    setSlugImagePreviews(imageUrls);
   };
 
   const handleEditPoster = (poster: Poster) => {
     setEditingPosterId(poster.id);
     setPosterFormData({
-      title: poster.title,
       poster_image_url: poster.poster_image_url,
     });
     setPosterImagePreview(poster.poster_image_url);
@@ -163,16 +292,16 @@ export default function EventDetailsPanel({
     setEditingSlugId(null);
     setEditingPosterId(null);
     setSlugFormData({
-      title: "",
       more_description: "",
       image_url: "",
     });
     setPosterFormData({
-      title: "",
       poster_image_url: "",
     });
-    setSlugImagePreview("");
+    setSlugImagePreviews([]);
     setPosterImagePreview("");
+    setPosterBatchImages([]);
+    setImageError("");
   };
 
   return (
@@ -203,27 +332,6 @@ export default function EventDetailsPanel({
 
             <div className="form-row">
               <div className="form-group">
-                <label htmlFor="slug-title">Title *</label>
-                <input
-                  id="slug-title"
-                  type="text"
-                  value={slugFormData.title}
-                  onChange={(e) =>
-                    setSlugFormData((prev) => ({
-                      ...prev,
-                      title: e.target.value,
-                    }))
-                  }
-                  placeholder="Event information title"
-                  required
-                  disabled={isLoading}
-                  maxLength={256}
-                />
-              </div>
-            </div>
-
-            <div className="form-row">
-              <div className="form-group">
                 <label htmlFor="slug-desc">Description</label>
                 <textarea
                   id="slug-desc"
@@ -244,18 +352,49 @@ export default function EventDetailsPanel({
 
             <div className="form-row">
               <div className="form-group">
-                <label htmlFor="slug-image">Image</label>
+                <label htmlFor="slug-image">Images (Multiple) *</label>
                 <input
                   id="slug-image"
                   type="file"
                   accept="image/*"
+                  multiple
                   onChange={handleSlugImageChange}
-                  disabled={isLoading}
+                  disabled={isLoading || isProcessingImage || isUploadingImages}
                   className="file-input"
                 />
-                {slugImagePreview && (
-                  <div className="image-preview-small">
-                    <img src={slugImagePreview} alt="Slug preview" />
+                {imageError && <p className="input-error">{imageError}</p>}
+                {!editingSlugId && slugImagePreviews.length > 1 && (
+                  <p className="selection-note">{slugImagePreviews.length} images selected</p>
+                )}
+                {slugImagePreviews.length > 0 && (
+                  <div className="image-preview-gallery">
+                    {slugImagePreviews.map((preview, index) => (
+                      <div key={index} className="preview-item">
+                        <img src={preview} alt={`Slug image ${index + 1}`} />
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setSlugImagePreviews((prev) =>
+                              prev.filter((_, i) => i !== index)
+                            );
+                            setSlugFormData((prev) => {
+                              const images = prev.image_url
+                                .split("|")
+                                .filter(Boolean);
+                              images.splice(index, 1);
+                              return {
+                                ...prev,
+                                image_url: images.join("|"),
+                              };
+                            });
+                          }}
+                          className="btn-remove-image-small"
+                          disabled={isLoading || isUploadingImages}
+                        >
+                          ✕
+                        </button>
+                      </div>
+                    ))}
                   </div>
                 )}
               </div>
@@ -264,10 +403,10 @@ export default function EventDetailsPanel({
             <div className="form-actions">
               <button
                 type="submit"
-                disabled={isLoading || !slugFormData.title}
+                disabled={isLoading || isUploadingImages}
                 className="btn-save"
               >
-                {isLoading ? "Saving..." : editingSlugId ? "Update" : "Add"}
+                {isLoading || isUploadingImages ? "Saving..." : editingSlugId ? "Update" : "Add"}
               </button>
               {editingSlugId && (
                 <button
@@ -288,34 +427,37 @@ export default function EventDetailsPanel({
               <div>
                 {event.event_slug.map((slug) => (
                   <div key={slug.id} className="item-card">
-                    <div className="item-header">
-                      <h5>{slug.title}</h5>
-                      <div className="item-actions">
-                        <button
-                          onClick={() => handleEditSlug(slug)}
-                          className="btn-small btn-edit"
-                          disabled={isLoading}
-                        >
-                          ✏️
-                        </button>
-                        <button
-                          onClick={() => onDeleteSlug(slug.id)}
-                          className="btn-small btn-delete"
-                          disabled={isLoading}
-                        >
-                          🗑️
-                        </button>
-                      </div>
+                    <div className="item-actions">
+                      <button
+                        onClick={() => handleEditSlug(slug)}
+                        className="btn-small btn-edit"
+                        disabled={isLoading}
+                      >
+                        ✏️
+                      </button>
+                      <button
+                        onClick={() => onDeleteSlug(slug.id)}
+                        className="btn-small btn-delete"
+                        disabled={isLoading}
+                      >
+                        🗑️
+                      </button>
                     </div>
                     {slug.more_description && (
                       <p className="item-desc">{slug.more_description}</p>
                     )}
                     {slug.image_url && (
-                      <img
-                        src={slug.image_url}
-                        alt={slug.title}
-                        className="item-image"
-                      />
+                      <div className="item-galleries">
+                        {slug.image_url.split("|").filter(Boolean).map((imageUrl, idx) => (
+                          <div key={idx} className="gallery-thumbnail">
+                            <img
+                              src={imageUrl}
+                              alt={`Event slug image ${idx + 1}`}
+                              className="item-image"
+                            />
+                          </div>
+                        ))}
+                      </div>
                     )}
                   </div>
                 ))}
@@ -335,36 +477,20 @@ export default function EventDetailsPanel({
 
             <div className="form-row">
               <div className="form-group">
-                <label htmlFor="poster-title">Poster Title *</label>
-                <input
-                  id="poster-title"
-                  type="text"
-                  value={posterFormData.title}
-                  onChange={(e) =>
-                    setPosterFormData((prev) => ({
-                      ...prev,
-                      title: e.target.value,
-                    }))
-                  }
-                  placeholder="Poster title"
-                  required
-                  disabled={isLoading}
-                  maxLength={256}
-                />
-              </div>
-            </div>
-
-            <div className="form-row">
-              <div className="form-group">
                 <label htmlFor="poster-image">Poster Image *</label>
                 <input
                   id="poster-image"
                   type="file"
                   accept="image/*"
+                  multiple={!editingPosterId}
                   onChange={handlePosterImageChange}
-                  disabled={isLoading}
+                  disabled={isLoading || isProcessingImage}
                   className="file-input"
                 />
+                {imageError && <p className="input-error">{imageError}</p>}
+                {!editingPosterId && posterBatchImages.length > 1 && (
+                  <p className="selection-note">{posterBatchImages.length} images selected</p>
+                )}
                 {posterImagePreview && (
                   <div className="image-preview-small">
                     <img src={posterImagePreview} alt="Poster preview" />
@@ -376,10 +502,15 @@ export default function EventDetailsPanel({
             <div className="form-actions">
               <button
                 type="submit"
-                disabled={isLoading || !posterFormData.title || !posterFormData.poster_image_url}
+                disabled={
+                  isLoading ||
+                  isProcessingImage ||
+                  isUploadingImages ||
+                  (!posterFormData.poster_image_url && posterBatchImages.length === 0)
+                }
                 className="btn-save"
               >
-                {isLoading ? "Saving..." : editingPosterId ? "Update" : "Add"}
+                {isLoading || isUploadingImages ? "Saving..." : editingPosterId ? "Update" : "Add"}
               </button>
               {editingPosterId && (
                 <button
@@ -402,27 +533,24 @@ export default function EventDetailsPanel({
                   <div key={poster.id} className="poster-card">
                     <img
                       src={poster.poster_image_url}
-                      alt={poster.title}
+                      alt={`Poster ${poster.id}`}
                       className="poster-image"
                     />
-                    <div className="poster-info">
-                      <h5>{poster.title}</h5>
-                      <div className="poster-actions">
-                        <button
-                          onClick={() => handleEditPoster(poster)}
-                          className="btn-small btn-edit"
-                          disabled={isLoading}
-                        >
-                          ✏️
-                        </button>
-                        <button
-                          onClick={() => onDeletePoster(poster.id)}
-                          className="btn-small btn-delete"
-                          disabled={isLoading}
-                        >
-                          🗑️
-                        </button>
-                      </div>
+                    <div className="poster-actions">
+                      <button
+                        onClick={() => handleEditPoster(poster)}
+                        className="btn-small btn-edit"
+                        disabled={isLoading}
+                      >
+                        ✏️
+                      </button>
+                      <button
+                        onClick={() => onDeletePoster(poster.id)}
+                        className="btn-small btn-delete"
+                        disabled={isLoading}
+                      >
+                        🗑️
+                      </button>
                     </div>
                   </div>
                 ))}
@@ -558,6 +686,82 @@ export default function EventDetailsPanel({
           height: auto;
           border-radius: 4px;
           object-fit: cover;
+        }
+
+        .image-preview-gallery {
+          display: grid;
+          grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+          gap: 8px;
+          margin-top: 8px;
+          padding: 8px;
+          background-color: #f9fafb;
+          border-radius: 4px;
+          border: 1px solid #e5e7eb;
+        }
+
+        .preview-item {
+          position: relative;
+          border-radius: 4px;
+          overflow: hidden;
+          background-color: white;
+          border: 1px solid #d1d5db;
+          aspect-ratio: 1;
+        }
+
+        .preview-item img {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+          display: block;
+        }
+
+        .btn-remove-image-small {
+          position: absolute;
+          top: 2px;
+          right: 2px;
+          padding: 2px 6px;
+          background-color: rgba(239, 68, 68, 0.9);
+          color: white;
+          border: none;
+          border-radius: 3px;
+          font-size: 11px;
+          cursor: pointer;
+          transition: all 0.2s;
+        }
+
+        .btn-remove-image-small:hover:not(:disabled) {
+          background-color: #dc2626;
+        }
+
+        .btn-remove-image-small:disabled {
+          background-color: #9ca3af;
+          cursor: not-allowed;
+        }
+
+        .item-galleries {
+          display: grid;
+          grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+          gap: 8px;
+          margin-top: 8px;
+        }
+
+        .gallery-thumbnail {
+          border-radius: 4px;
+          overflow: hidden;
+          background-color: #f9fafb;
+          border: 1px solid #e5e7eb;
+        }
+
+        .input-error {
+          margin-top: 6px;
+          font-size: 12px;
+          color: #dc2626;
+        }
+
+        .selection-note {
+          margin-top: 6px;
+          font-size: 12px;
+          color: #6b7280;
         }
 
         .form-actions {
@@ -706,6 +910,9 @@ export default function EventDetailsPanel({
           border: 1px solid #e5e7eb;
           border-radius: 6px;
           overflow: hidden;
+          position: relative;
+          display: flex;
+          flex-direction: column;
         }
 
         .poster-image {
@@ -714,23 +921,12 @@ export default function EventDetailsPanel({
           object-fit: cover;
         }
 
-        .poster-info {
-          padding: 8px;
-        }
-
-        .poster-info h5 {
-          margin: 0 0 6px 0;
-          font-size: 12px;
-          font-weight: 600;
-          color: #1f2937;
-          overflow: hidden;
-          text-overflow: ellipsis;
-          white-space: nowrap;
-        }
-
         .poster-actions {
           display: flex;
           gap: 4px;
+          padding: 6px;
+          background: rgba(0, 0, 0, 0.7);
+          justify-content: center;
         }
 
         @media (max-width: 768px) {

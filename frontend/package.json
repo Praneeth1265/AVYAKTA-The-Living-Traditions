@@ -3,21 +3,16 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev --webpack",
+    "dev": "next dev",
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "test": "echo \"No tests yet\"",
-    "db:push": "drizzle-kit push",
-    "db:studio": "drizzle-kit studio"
+    "test": "echo \"No tests yet\""
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",
     "@supabase/supabase-js": "^2.103.0",
-    "@types/bcryptjs": "^2.4.6",
-    "bcryptjs": "^3.0.3",
     "drizzle-orm": "^0.45.2",
-    "jose": "^6.2.2",
     "next": "16.2.3",
     "postgres": "^3.4.9",
     "react": "19.2.4",
@@ -31,7 +26,7 @@
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "dotenv": "^17.4.1",
-    "drizzle-kit": "^0.18.1",
+    "drizzle-kit": "^0.31.10",
     "eslint": "^9",
     "eslint-config-next": "16.2.3",
     "prettier": "^3.8.2",

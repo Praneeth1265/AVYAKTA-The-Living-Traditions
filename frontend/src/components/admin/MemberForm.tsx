@@ -95,15 +95,17 @@ export default function MemberForm({
 
         <div className="form-group">
           <label htmlFor="role">Role *</label>
-          <input
-            type="text"
+          <select
             id="role"
             name="role"
             value={formData.role}
-            onChange={handleChange}
-            placeholder="e.g., Lead, Member, Coordinator"
+            onChange={handleSelectChange}
             required
-          />
+          >
+            <option value="">Select a role</option>
+            <option value="domain_head">Domain Head</option>
+            <option value="members">Members</option>
+          </select>
         </div>
 
         {error && <div className="form-error">{error}</div>}

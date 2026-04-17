@@ -1,5 +1,6 @@
 import { createClient } from "@supabase/supabase-js";
 import { NextRequest, NextResponse } from "next/server";
+import { retryWithBackoff } from "../../../lib/api/retry";
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -9,8 +10,11 @@ const supabase = createClient(
 // GET - Fetch all members
 export async function GET(request: NextRequest) {
   try {
-    const { data, error } = await supabase.from("members").select("*");
+    const result = await retryWithBackoff(async () =>
+      supabase.from("members").select("*")
+    );
 
+    const { data, error } = result;
     if (error) throw new Error(error.message);
 
     return NextResponse.json({ success: true, data: data || [] });

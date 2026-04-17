@@ -4,10 +4,12 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import AdminMembersClient from "./AdminMembersClient";
 import AdminEventsClient from "./AdminEventsClient";
+import RecruitmentStatsClient from "./RecruitmentStatsClient";
+import EventRegistrationsClient from "./EventRegistrationsClient";
 
 export default function AdminDashboardClient() {
   const router = useRouter();
-  const [activeSection, setActiveSection] = useState<"members" | "events">("members");
+  const [activeSection, setActiveSection] = useState<"members" | "events" | "recruitment" | "registrations">("members");
 
   const handleLogout = async () => {
     await fetch("/api/auth/logout", { method: "POST" });
@@ -33,6 +35,18 @@ export default function AdminDashboardClient() {
               >
                 📅 Events
               </button>
+              <button
+                className={`nav-btn ${activeSection === "registrations" ? "active" : ""}`}
+                onClick={() => setActiveSection("registrations")}
+              >
+                🔐 Registrations
+              </button>
+              <button
+                className={`nav-btn ${activeSection === "recruitment" ? "active" : ""}`}
+                onClick={() => setActiveSection("recruitment")}
+              >
+                💼 Recruitment
+              </button>
             </nav>
           </div>
           <button
@@ -48,6 +62,8 @@ export default function AdminDashboardClient() {
       <main className="dashboard-main">
         {activeSection === "members" && <AdminMembersClient />}
         {activeSection === "events" && <AdminEventsClient />}
+        {activeSection === "registrations" && <EventRegistrationsClient />}
+        {activeSection === "recruitment" && <RecruitmentStatsClient />}
       </main>
 
       <style jsx>{`

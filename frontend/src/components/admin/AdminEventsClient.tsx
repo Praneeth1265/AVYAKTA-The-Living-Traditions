@@ -7,7 +7,6 @@ import EventDetailsPanel from "./EventDetailsPanel";
 interface EventSlug {
   id: string;
   event_id: string;
-  title: string;
   more_description: string | null;
   image_url: string | null;
 }
@@ -15,7 +14,6 @@ interface EventSlug {
 interface Poster {
   id: string;
   event_id: string;
-  title: string;
   poster_image_url: string;
 }
 
@@ -25,6 +23,8 @@ interface Event {
   description: string | null;
   image_url: string | null;
   date: string | null;
+  registration_enabled?: boolean;
+  payment_image_required?: boolean;
   event_slug?: EventSlug[];
   posters?: Poster[];
 }
@@ -83,17 +83,18 @@ export default function AdminEventsClient() {
           body: JSON.stringify(formData),
         });
 
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-
         const result = await response.json();
+        if (!response.ok) {
+          throw new Error(result.error || `HTTP error! status: ${response.status}`);
+        }
         if (!result.success) {
           throw new Error(result.error || "Failed to update event");
         }
 
         setEvents((prev) =>
-          prev.map((e) => (e.id === editingEvent.id ? result.data : e))
+          prev
+            .map((e) => (e?.id === editingEvent.id ? result.data : e))
+            .filter((e) => e?.id)
         );
         if (selectedEvent?.id === editingEvent.id) {
           setSelectedEvent(result.data);
@@ -103,22 +104,28 @@ export default function AdminEventsClient() {
         setActiveTab("view");
       } else {
         // Create new event
+        const payload = {
+          ...formData,
+          title: formData.title.trim(),
+          description: formData.description.trim(),
+        };
+
         const response = await fetch("/api/events", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(formData),
+          body: JSON.stringify(payload),
         });
 
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-
         const result = await response.json();
+        if (!response.ok) {
+          throw new Error(result.error || `HTTP error! status: ${response.status}`);
+        }
         if (!result.success) {
           throw new Error(result.error || "Failed to create event");
         }
 
         setEvents((prev) => [result.data, ...prev]);
+        setSelectedEvent(result.data);
         setSuccessMessage("Event created successfully!");
         setActiveTab("view");
       }
@@ -179,6 +186,55 @@ export default function AdminEventsClient() {
     setError("");
   };
 
+  // Handle toggle registration
+  const handleToggleRegistration = async (
+    e: React.MouseEvent,
+    event: Event
+  ) => {
+    e.stopPropagation();
+
+    try {
+      setIsSubmitting(true);
+      const newStatus = !event.registration_enabled;
+
+      const response = await fetch(`/api/events/${event.id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          registration_enabled: newStatus,
+        }),
+      });
+
+      const result = await response.json();
+      if (!response.ok) {
+        throw new Error(result.error || "Failed to toggle registration");
+      }
+      if (!result.success) {
+        throw new Error(result.error || "Failed to toggle registration");
+      }
+
+      setEvents((prev) =>
+        prev
+          .map((e) => (e?.id === event.id ? result.data : e))
+          .filter((e) => e?.id)
+      );
+      if (selectedEvent?.id === event.id) {
+        setSelectedEvent(result.data);
+      }
+
+      setSuccessMessage(
+        `Registration ${newStatus ? "enabled" : "disabled"} for this event`
+      );
+      setTimeout(() => setSuccessMessage(""), 3000);
+    } catch (err) {
+      setError(
+        err instanceof Error ? err.message : "Failed to toggle registration"
+      );
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   // Handle slug add
   const handleAddSlug = async (slug: Omit<EventSlug, "id" | "event_id">) => {
     if (!selectedEvent) return;
@@ -203,7 +259,9 @@ export default function AdminEventsClient() {
 
       setSelectedEvent(updatedEvent);
       setEvents((prev) =>
-        prev.map((e) => (e.id === selectedEvent.id ? updatedEvent : e))
+        prev
+          .map((e) => (e?.id === selectedEvent.id ? updatedEvent : e))
+          .filter((e) => e?.id)
       );
 
       setSuccessMessage("Event information added successfully!");
@@ -244,7 +302,9 @@ export default function AdminEventsClient() {
 
       setSelectedEvent(updatedEvent);
       setEvents((prev) =>
-        prev.map((e) => (e.id === selectedEvent.id ? updatedEvent : e))
+        prev
+          .map((e) => (e?.id === selectedEvent.id ? updatedEvent : e))
+          .filter((e) => e?.id)
       );
 
       setSuccessMessage("Event information updated successfully!");
@@ -282,7 +342,9 @@ export default function AdminEventsClient() {
 
       setSelectedEvent(updatedEvent);
       setEvents((prev) =>
-        prev.map((e) => (e.id === selectedEvent.id ? updatedEvent : e))
+        prev
+          .map((e) => (e?.id === selectedEvent.id ? updatedEvent : e))
+          .filter((e) => e?.id)
       );
 
       setSuccessMessage("Event information deleted successfully!");
@@ -318,7 +380,9 @@ export default function AdminEventsClient() {
 
       setSelectedEvent(updatedEvent);
       setEvents((prev) =>
-        prev.map((e) => (e.id === selectedEvent.id ? updatedEvent : e))
+        prev
+          .map((e) => (e?.id === selectedEvent.id ? updatedEvent : e))
+          .filter((e) => e?.id)
       );
 
       setSuccessMessage("Poster added successfully!");
@@ -359,7 +423,9 @@ export default function AdminEventsClient() {
 
       setSelectedEvent(updatedEvent);
       setEvents((prev) =>
-        prev.map((e) => (e.id === selectedEvent.id ? updatedEvent : e))
+        prev
+          .map((e) => (e?.id === selectedEvent.id ? updatedEvent : e))
+          .filter((e) => e?.id)
       );
 
       setSuccessMessage("Poster updated successfully!");
@@ -397,7 +463,9 @@ export default function AdminEventsClient() {
 
       setSelectedEvent(updatedEvent);
       setEvents((prev) =>
-        prev.map((e) => (e.id === selectedEvent.id ? updatedEvent : e))
+        prev
+          .map((e) => (e?.id === selectedEvent.id ? updatedEvent : e))
+          .filter((e) => e?.id)
       );
 
       setSuccessMessage("Poster deleted successfully!");
@@ -473,22 +541,41 @@ export default function AdminEventsClient() {
                     <p className="empty-state">No events created yet. Create one to get started!</p>
                   ) : (
                     <div className="events-item-list">
-                      {events.map((event) => (
+                      {events.filter((event) => event?.id).map((event) => (
                         <div
                           key={event.id}
                           className={`event-item ${selectedEvent?.id === event.id ? "selected" : ""}`}
                           onClick={() => setSelectedEvent(event)}
                         >
                           <div className="event-item-content">
-                            <h4>{event.title}</h4>
-                            {event.date && (
-                              <p className="event-date">
-                                📅 {new Date(event.date).toLocaleDateString()}
-                              </p>
-                            )}
-                            <p className="event-info">
-                              ℹ️ {event.event_slug?.length || 0} info items • 🖼️ {event.posters?.length || 0} posters
-                            </p>
+                            <div className="event-item-header">
+                              <div className="event-item-left">
+                                <h4>{event.title}</h4>
+                                {event.date && (
+                                  <p className="event-date">
+                                    📅 {new Date(event.date).toLocaleDateString()}
+                                  </p>
+                                )}
+                                <p className="event-info">
+                                  ℹ️ {event.event_slug?.length || 0} info items • 🖼️ {event.posters?.length || 0} posters
+                                </p>
+                              </div>
+                              <div className="event-item-registration">
+                                <div className={`registration-status-badge ${event.registration_enabled ? "enabled" : "disabled"}`}>
+                                  {event.registration_enabled ? (
+                                    <>
+                                      <span className="status-icon">📝</span>
+                                      <span className="status-text">Registration<br/>OPEN</span>
+                                    </>
+                                  ) : (
+                                    <>
+                                      <span className="status-icon">🔒</span>
+                                      <span className="status-text">Registration<br/>CLOSED</span>
+                                    </>
+                                  )}
+                                </div>
+                              </div>
+                            </div>
                           </div>
                           <div className="event-item-actions">
                             <button
@@ -692,7 +779,8 @@ export default function AdminEventsClient() {
         .event-item {
           display: flex;
           justify-content: space-between;
-          align-items: center;
+          align-items: flex-start;
+          gap: 16px;
           padding: 12px;
           background: #f9fafb;
           border: 2px solid transparent;
@@ -716,14 +804,122 @@ export default function AdminEventsClient() {
           min-width: 0;
         }
 
+        .event-item-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: flex-start;
+          gap: 16px;
+        }
+
+        .event-item-left {
+          flex: 1;
+          min-width: 0;
+        }
+
         .event-item-content h4 {
-          margin: 0 0 4px 0;
-          font-size: 14px;
-          font-weight: 600;
+          margin: 0 0 6px 0;
+          font-size: 15px;
+          font-weight: 700;
           color: #1f2937;
           overflow: hidden;
           text-overflow: ellipsis;
           white-space: nowrap;
+        }
+
+        .event-date {
+          margin: 0 0 4px 0;
+          font-size: 12px;
+          color: #6b7280;
+        }
+
+        .event-info {
+          margin: 0;
+          font-size: 12px;
+          color: #9ca3af;
+        }
+
+        .event-item-registration {
+          flex-shrink: 0;
+        }
+
+        .registration-status-badge {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          gap: 4px;
+          padding: 8px 16px;
+          border-radius: 8px;
+          border: 2px solid;
+          min-width: 100px;
+          text-align: center;
+          font-weight: 600;
+          font-size: 11px;
+        }
+
+        .registration-status-badge.enabled {
+          background-color: #dcfce7;
+          border-color: #86efac;
+          color: #166534;
+        }
+
+        .registration-status-badge.disabled {
+          background-color: #fee2e2;
+          border-color: #fca5a5;
+          color: #991b1b;
+        }
+
+        .status-icon {
+          font-size: 18px;
+          line-height: 1;
+        }
+
+        .status-text {
+          font-size: 10px;
+          font-weight: 700;
+          letter-spacing: 0.5px;
+          line-height: 1.2;
+        }
+
+        .registration-badge {
+          display: none;
+        }
+
+        .btn-toggle-reg {
+          padding: 6px 8px;
+          border: 1px solid #e5e7eb;
+          border-radius: 4px;
+          cursor: pointer;
+          font-size: 16px;
+          transition: all 0.2s;
+          background-color: white;
+        }
+
+        .btn-toggle-reg.enabled {
+          background-color: #dcfce7;
+          color: #166534;
+          border-color: #86efac;
+        }
+
+        .btn-toggle-reg.enabled:hover:not(:disabled) {
+          background-color: #bbf7d0;
+          border-color: #4ade80;
+        }
+
+        .btn-toggle-reg.disabled {
+          background-color: #fee2e2;
+          color: #991b1b;
+          border-color: #fca5a5;
+        }
+
+        .btn-toggle-reg.disabled:hover:not(:disabled) {
+          background-color: #fecaca;
+          border-color: #f87171;
+        }
+
+        .btn-toggle-reg:disabled {
+          opacity: 0.6;
+          cursor: not-allowed;
         }
 
         .event-date {
