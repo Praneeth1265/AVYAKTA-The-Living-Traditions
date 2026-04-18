@@ -1,86 +1,76 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { getSupabase } from "@/lib/supabase/client";
 import type { Member } from "@/types";
-import { useScrollReveal } from "@/hooks/useScrollReveal";
 import MandalaBg from "@/components/shared/MandalaBg";
 
-const SECTIONS: { key: Member["section"]; label: string }[] = [
-  { key: "founders", label: "Founders" },
-  { key: "faculty", label: "Faculty Advisors" },
-  { key: "current_core", label: "Core" },
-  { key: "previous_heads", label: "Previous Heads" },
-  { key: "previous_members", label: "Previous Members" },
+// ─── Mock data (replaced by Supabase when env vars are set) ───────────────────
+const MOCK: Member[] = [
+  { id: "1",  name: "Arjun Mehta",    role: "Founder & President", domain: "Leadership" },
+  { id: "2",  name: "Priya Sharma",   role: "Co-Founder",          domain: "Leadership" },
+  { id: "3",  name: "Dr. Kavitha Rao",role: "Faculty Advisor",     domain: "Faculty" },
+  { id: "4",  name: "Dr. Suresh Nair",role: "Faculty Advisor",     domain: "Faculty" },
+  { id: "5",  name: "Rohan Das",      role: "President",           domain: "Current Core" },
+  { id: "6",  name: "Ananya Pillai",  role: "Vice President",      domain: "Current Core" },
+  { id: "7",  name: "Vikram Nair",    role: "Head of Design",      domain: "Current Core" },
+  { id: "8",  name: "Kiran Reddy",    role: "Head of Tech",        domain: "Current Core" },
+  { id: "9",  name: "Sneha Iyer",     role: "President 2022–23",   domain: "Previous Heads" },
+  { id: "10", name: "Aditya Kumar",   role: "President 2021–22",   domain: "Previous Heads" },
+  { id: "11", name: "Meera Joshi",    role: "Core Member",         domain: "Previous Members" },
+  { id: "12", name: "Rahul Verma",    role: "Core Member",         domain: "Previous Members" },
 ];
 
-const MOCK_MEMBERS: Member[] = [
-  { id: "1", name: "Arjun Mehta", designation: "Founder & President", section: "founders", quote: "Culture is the soul of a community.", domain: "Leadership" },
-  { id: "2", name: "Priya Sharma", designation: "Co-Founder", section: "founders", quote: "Art speaks where words fail.", domain: "Design" },
-  { id: "3", name: "Dr. Kavitha Rao", designation: "Faculty Advisor", section: "faculty", quote: "Nurturing creativity is our greatest responsibility." },
-  { id: "4", name: "Rohan Das", designation: "President 2023–24", section: "previous_heads", year: "2023–24", domain: "Events" },
-  { id: "5", name: "Sneha Iyer", designation: "President 2022–23", section: "previous_heads", year: "2022–23", domain: "Performing Arts" },
-  { id: "6", name: "Vikram Nair", designation: "Head of Design", section: "current_core", domain: "Design" },
-  { id: "7", name: "Ananya Pillai", designation: "Head of Events", section: "current_core", domain: "Events" },
-  { id: "8", name: "Kiran Reddy", designation: "Head of Tech", section: "current_core", domain: "Technology" },
-  { id: "9", name: "Meera Joshi", designation: "Core Member", section: "previous_members", year: "2023–24" },
-  { id: "10", name: "Aditya Kumar", designation: "Core Member", section: "previous_members", year: "2023–24" },
-];
+// Section display order
+const SECTION_ORDER = ["Leadership", "Faculty", "Current Core", "Previous Heads", "Previous Members"];
 
+// ─── Page ─────────────────────────────────────────────────────────────────────
 export default function MembersPage() {
-  const [members, setMembers] = useState<Member[]>(MOCK_MEMBERS);
+  const [members, setMembers] = useState<Member[]>(MOCK);
   const [selected, setSelected] = useState<Member | null>(null);
 
   useEffect(() => {
     const db = getSupabase();
     if (!db) return;
-    db.from("members")
-      .select("*")
-      .then(({ data }: { data: Member[] | null }) => {
-        if (data && data.length > 0) setMembers(data);
-      });
+    db.from("members").select("*").then(({ data }: { data: Member[] | null }) => {
+      if (data && data.length > 0) setMembers(data);
+    });
   }, []);
 
-  const grouped = SECTIONS.reduce<Record<string, Member[]>>((acc, s) => {
-    acc[s.key] = members.filter((m) => m.section === s.key);
+  const grouped = SECTION_ORDER.reduce<Record<string, Member[]>>((acc, key) => {
+    const group = members.filter((m) => m.domain === key);
+    if (group.length) acc[key] = group;
     return acc;
-  }, {} as Record<string, Member[]>);
+  }, {});
+
+  // Also catch any domain not in SECTION_ORDER
+  members.forEach((m) => {
+    if (!SECTION_ORDER.includes(m.domain) && !grouped[m.domain]) {
+      grouped[m.domain] = members.filter((x) => x.domain === m.domain);
+    }
+  });
 
   return (
-    <main
-      className="relative min-h-screen overflow-hidden"
-      style={{
-        background: "linear-gradient(160deg, #e8a020 0%, #c8601a 60%, #a03010 100%)",
-      }}
-    >
-      {/* Mandala background texture */}
-      <MandalaBg />
+    <main className="relative min-h-screen overflow-hidden" style={{ background: "#1c1c1c" }}>
+      <MandalaBg variant="default" />
 
-      {/* Header */}
-      <section className="relative pt-16 pb-4 px-6 text-center">
-        <h1
-          className="text-6xl md:text-7xl font-bold tracking-wide"
-          style={{
-            fontFamily: "Cormorant Garamond, serif",
-            color: "#1a2a5e",
-            textShadow: "0 2px 8px rgba(0,0,0,0.15)",
-          }}
-        >
-          Meet The Team
-        </h1>
-      </section>
+      {/* Paisley texture overlay */}
+      <div
+        className="pointer-events-none fixed inset-0 z-0 opacity-[0.03]"
+        style={{
+          backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M30 5 Q42 18 30 30 Q18 18 30 5z' fill='%2392791b'/%3E%3Cpath d='M30 55 Q42 42 30 30 Q18 42 30 55z' fill='%2392791b'/%3E%3C/svg%3E")`,
+          backgroundSize: "60px 60px",
+        }}
+        aria-hidden="true"
+      />
 
-      {/* Sections */}
-      <div className="relative z-10 max-w-2xl mx-auto px-4 pb-24 space-y-12">
-        {SECTIONS.map(({ key, label }) =>
-          grouped[key]?.length > 0 ? (
-            <MemberSection
-              key={key}
-              label={label}
-              members={grouped[key]}
-              onSelect={setSelected}
-            />
-          ) : null
-        )}
+      {/* Hero */}
+      <HeroSection />
+
+      {/* Member sections */}
+      <div className="relative z-10 max-w-5xl mx-auto px-6 pb-32 space-y-20">
+        {Object.entries(grouped).map(([domain, group]) => (
+          <MemberSection key={domain} label={domain} members={group} onSelect={setSelected} />
+        ))}
       </div>
 
       {/* Modal */}
@@ -89,175 +79,281 @@ export default function MembersPage() {
   );
 }
 
-function MemberSection({
-  label,
-  members,
-  onSelect,
-}: {
-  label: string;
-  members: Member[];
-  onSelect: (m: Member) => void;
-}) {
-  const { ref, visible } = useScrollReveal<HTMLElement>();
+// ─── Hero ─────────────────────────────────────────────────────────────────────
+function HeroSection() {
+  return (
+    <section className="relative z-10 pt-24 pb-16 text-center px-4">
+      <p className="text-xs tracking-[0.5em] uppercase mb-4 font-medium" style={{ color: "#92791b" }}>
+        Avyakta
+      </p>
+      <h1
+        className="text-6xl md:text-7xl font-semibold mb-6"
+        style={{ fontFamily: "Cormorant Garamond, serif", color: "#f5f0e8", letterSpacing: "0.02em" }}
+      >
+        Meet The Team
+      </h1>
+      <p className="text-base max-w-md mx-auto" style={{ color: "#737955" }}>
+        The hearts and hands that make Avyakta what it is.
+      </p>
+
+      {/* Animated rangoli divider */}
+      <RangoliDivider />
+    </section>
+  );
+}
+
+// ─── Rangoli divider ──────────────────────────────────────────────────────────
+function RangoliDivider() {
+  const ref = useRef<HTMLDivElement>(null);
+  const [vis, setVis] = useState(false);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const io = new IntersectionObserver(([e]) => { if (e.isIntersecting) setVis(true); }, { threshold: 0.3 });
+    io.observe(el);
+    return () => io.disconnect();
+  }, []);
 
   return (
-    <section
-      ref={ref}
-      className="transition-all duration-700"
-      style={{
-        opacity: visible ? 1 : 0,
-        transform: visible ? "translateY(0)" : "translateY(28px)",
-      }}
-    >
-      <h2
-        className="text-3xl font-semibold mb-6 tracking-widest uppercase"
-        style={{ fontFamily: "Cormorant Garamond, serif", color: "#1a2a5e" }}
-      >
-        {label}
-      </h2>
-      <div className="grid grid-cols-2 gap-5">
-        {members.map((m) => (
-          <MemberCard key={m.id} member={m} onClick={() => onSelect(m)} />
+    <div ref={ref} className="flex items-center justify-center gap-4 mt-10" aria-hidden="true">
+      <div className="h-px flex-1 max-w-[160px] transition-all duration-1000"
+        style={{ background: "linear-gradient(to right, transparent, #92791b)", opacity: vis ? 1 : 0, transform: vis ? "scaleX(1)" : "scaleX(0)", transformOrigin: "right" }} />
+      <svg width="36" height="36" viewBox="0 0 40 40"
+        className="transition-all duration-700"
+        style={{ opacity: vis ? 1 : 0, transform: vis ? "rotate(0deg) scale(1)" : "rotate(-45deg) scale(0.5)", transitionDelay: "200ms" }}>
+        <circle cx="20" cy="20" r="3" fill="#92791b" />
+        <polygon points="20,3 23.5,16.5 37,20 23.5,23.5 20,37 16.5,23.5 3,20 16.5,16.5" fill="none" stroke="#92791b" strokeWidth="1.2" />
+        <polygon points="20,9 22,18 31,20 22,22 20,31 18,22 9,20 18,18" fill="none" stroke="#c9a84c" strokeWidth="0.7" opacity="0.7" />
+      </svg>
+      <div className="h-px flex-1 max-w-[160px] transition-all duration-1000"
+        style={{ background: "linear-gradient(to left, transparent, #92791b)", opacity: vis ? 1 : 0, transform: vis ? "scaleX(1)" : "scaleX(0)", transformOrigin: "left", transitionDelay: "100ms" }} />
+    </div>
+  );
+}
+
+// ─── Section ──────────────────────────────────────────────────────────────────
+function MemberSection({ label, members, onSelect }: {
+  label: string; members: Member[]; onSelect: (m: Member) => void;
+}) {
+  const ref = useRef<HTMLElement>(null);
+  const [vis, setVis] = useState(false);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const io = new IntersectionObserver(([e]) => { if (e.isIntersecting) setVis(true); }, { threshold: 0.1 });
+    io.observe(el);
+    return () => io.disconnect();
+  }, []);
+
+  return (
+    <section ref={ref}>
+      {/* Section label */}
+      <div className="flex items-center gap-4 mb-10">
+        <div className="h-px flex-1" style={{ background: "linear-gradient(to right, #92791b, transparent)" }} />
+        <h2
+          className="text-2xl font-semibold tracking-[0.2em] uppercase px-2"
+          style={{ fontFamily: "Cormorant Garamond, serif", color: "#c9a84c" }}
+        >
+          {label}
+        </h2>
+        <div className="h-px flex-1" style={{ background: "linear-gradient(to left, #92791b, transparent)" }} />
+      </div>
+
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-6">
+        {members.map((m, i) => (
+          <MemberCard
+            key={m.id}
+            member={m}
+            index={i}
+            sectionVisible={vis}
+            onClick={() => onSelect(m)}
+          />
         ))}
       </div>
     </section>
   );
 }
 
-function MemberCard({ member, onClick }: { member: Member; onClick: () => void }) {
+// ─── Card ─────────────────────────────────────────────────────────────────────
+function MemberCard({ member, index, sectionVisible, onClick }: {
+  member: Member; index: number; sectionVisible: boolean; onClick: () => void;
+}) {
+  const [hovered, setHovered] = useState(false);
+
   return (
     <button
       onClick={onClick}
-      className="group text-left transition-transform duration-300 hover:scale-[1.03] focus:outline-none"
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+      className="group text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-[#92791b] rounded-xl"
       aria-label={`View ${member.name}`}
+      style={{
+        opacity: sectionVisible ? 1 : 0,
+        transform: sectionVisible ? "translateY(0)" : "translateY(32px)",
+        transition: `opacity 0.6s ease ${index * 80}ms, transform 0.6s ease ${index * 80}ms`,
+      }}
     >
-      {/* Photo area */}
+      {/* Photo frame */}
       <div
-        className="w-full aspect-[3/4] rounded-t-sm overflow-hidden relative"
+        className="relative overflow-hidden rounded-t-xl"
         style={{
-          background: "linear-gradient(135deg, #8b1a1a 0%, #1c1c1c 100%)",
-          border: "3px solid #f5f0e8",
+          aspectRatio: "3/4",
+          background: "linear-gradient(160deg, #2a2a2a 0%, #1c1c1c 100%)",
+          border: `1px solid ${hovered ? "#92791b" : "rgba(146,121,27,0.25)"}`,
           borderBottom: "none",
+          transition: "border-color 0.3s ease",
+          boxShadow: hovered ? "0 0 24px rgba(146,121,27,0.3)" : "none",
         }}
       >
-        {member.image_url ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
-            src={member.image_url}
-            alt={member.name}
-            className="w-full h-full object-cover"
-          />
-        ) : (
-          <div className="w-full h-full flex items-end justify-center pb-4">
-            {/* Placeholder silhouette */}
-            <svg width="80" height="100" viewBox="0 0 80 100" fill="none" opacity="0.4">
-              <circle cx="40" cy="28" r="20" fill="#f5f0e8" />
-              <ellipse cx="40" cy="85" rx="32" ry="28" fill="#f5f0e8" />
-            </svg>
+        {/* Avatar initials */}
+        <div className="absolute inset-0 flex items-center justify-center">
+          <div
+            className="w-16 h-16 rounded-full flex items-center justify-center text-2xl font-semibold transition-transform duration-300"
+            style={{
+              background: "rgba(146,121,27,0.12)",
+              border: "1px solid rgba(146,121,27,0.3)",
+              color: "#c9a84c",
+              transform: hovered ? "scale(1.1)" : "scale(1)",
+            }}
+          >
+            {member.name.charAt(0)}
           </div>
-        )}
-        {/* Jaali hover overlay */}
+        </div>
+
+        {/* Jaali lattice overlay on hover */}
         <div
-          className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+          className="absolute inset-0 transition-opacity duration-400"
           style={{
-            background: "rgba(146,121,27,0.15)",
-            backgroundImage: `url("data:image/svg+xml,%3Csvg width='20' height='20' viewBox='0 0 20 20' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0 10 L10 0 L20 10 L10 20 Z' fill='none' stroke='rgba(201,168,76,0.4)' stroke-width='0.5'/%3E%3C/svg%3E")`,
+            opacity: hovered ? 1 : 0,
+            backgroundImage: `url("data:image/svg+xml,%3Csvg width='24' height='24' viewBox='0 0 24 24' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0 12 L12 0 L24 12 L12 24 Z' fill='none' stroke='rgba(201,168,76,0.25)' stroke-width='0.6'/%3E%3C/svg%3E")`,
           }}
+          aria-hidden="true"
+        />
+
+        {/* Gold shimmer line on hover */}
+        <div
+          className="absolute bottom-0 left-0 right-0 h-0.5 transition-all duration-500"
+          style={{
+            background: "linear-gradient(to right, transparent, #c9a84c, transparent)",
+            opacity: hovered ? 1 : 0,
+            transform: hovered ? "scaleX(1)" : "scaleX(0)",
+          }}
+          aria-hidden="true"
         />
       </div>
+
       {/* Name strip */}
       <div
-        className="px-3 py-2 text-center"
+        className="px-3 py-3 rounded-b-xl transition-all duration-300"
         style={{
-          background: "#f5f0e8",
-          border: "3px solid #f5f0e8",
+          background: hovered ? "rgba(146,121,27,0.12)" : "rgba(245,240,232,0.04)",
+          border: `1px solid ${hovered ? "#92791b" : "rgba(146,121,27,0.25)"}`,
           borderTop: "none",
         }}
       >
         <p
-          className="text-sm font-bold uppercase tracking-wide leading-tight"
-          style={{ color: "#1c1c1c", fontFamily: "Inter, sans-serif" }}
+          className="text-sm font-semibold leading-tight truncate"
+          style={{ color: "#f5f0e8", fontFamily: "Inter, sans-serif" }}
         >
           {member.name}
         </p>
-        <p className="text-xs mt-0.5" style={{ color: "#737955" }}>
-          {member.designation}
+        <p className="text-xs mt-0.5 truncate" style={{ color: "#737955" }}>
+          {member.role}
         </p>
       </div>
     </button>
   );
 }
 
+// ─── Modal ────────────────────────────────────────────────────────────────────
 function MemberModal({ member, onClose }: { member: Member; onClose: () => void }) {
+  // Close on Escape
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
+    window.addEventListener("keydown", handler);
+    return () => window.removeEventListener("keydown", handler);
+  }, [onClose]);
+
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center p-4"
-      style={{ background: "rgba(28,28,28,0.85)", backdropFilter: "blur(6px)" }}
+      style={{ background: "rgba(28,28,28,0.9)", backdropFilter: "blur(8px)" }}
       onClick={onClose}
       role="dialog"
       aria-modal="true"
       aria-label={`${member.name} profile`}
     >
       <div
-        className="relative rounded-2xl p-8 max-w-sm w-full text-center"
+        className="relative rounded-2xl p-10 max-w-sm w-full text-center overflow-hidden"
         style={{
-          background: "linear-gradient(160deg, #e8a020, #c8601a)",
-          border: "2px solid rgba(245,240,232,0.4)",
-          boxShadow: "0 0 40px rgba(0,0,0,0.4)",
-          animation: "fadeScaleIn 0.3s ease forwards",
+          background: "#1c1c1c",
+          border: "1px solid rgba(146,121,27,0.5)",
+          boxShadow: "0 0 60px rgba(146,121,27,0.2), 0 24px 48px rgba(0,0,0,0.6)",
+          animation: "modalIn 0.35s cubic-bezier(0.34,1.56,0.64,1) forwards",
         }}
         onClick={(e) => e.stopPropagation()}
       >
-        <MandalaBg />
+        {/* Decorative corner brackets */}
+        {[["top-3 left-3","border-t border-l"],["top-3 right-3","border-t border-r"],
+          ["bottom-3 left-3","border-b border-l"],["bottom-3 right-3","border-b border-r"]].map(([pos, border]) => (
+          <span key={pos} className={`absolute ${pos} w-5 h-5 ${border}`} style={{ borderColor: "#92791b" }} aria-hidden="true" />
+        ))}
+
+        {/* Mini mandala behind avatar */}
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/4 opacity-10" aria-hidden="true">
+          <svg width="160" height="160" viewBox="0 0 100 100">
+            <g fill="none" stroke="#92791b" strokeWidth="0.6" transform="translate(50,50)">
+              {[10,20,30,40,48].map(r => <circle key={r} r={r} />)}
+              {Array.from({length:12},(_,i)=>{
+                const rad=(i*2*Math.PI)/12;
+                return <line key={i} x1={0} y1={0} x2={+(Math.cos(rad)*48).toFixed(3)} y2={+(Math.sin(rad)*48).toFixed(3)} />;
+              })}
+            </g>
+          </svg>
+        </div>
+
         {/* Avatar */}
         <div
-          className="w-24 h-24 rounded-full mx-auto mb-4 overflow-hidden relative z-10"
-          style={{ border: "3px solid #f5f0e8", background: "linear-gradient(135deg, #8b1a1a, #1c1c1c)" }}
+          className="w-20 h-20 rounded-full mx-auto mb-5 flex items-center justify-center text-2xl font-bold relative z-10"
+          style={{
+            background: "rgba(146,121,27,0.1)",
+            border: "2px solid rgba(146,121,27,0.5)",
+            color: "#c9a84c",
+            boxShadow: "0 0 20px rgba(146,121,27,0.2)",
+          }}
         >
-          {member.image_url ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img src={member.image_url} alt={member.name} className="w-full h-full object-cover" />
-          ) : (
-            <div className="w-full h-full flex items-center justify-center text-2xl font-bold" style={{ color: "#f5f0e8" }}>
-              {member.name.charAt(0)}
-            </div>
-          )}
+          {member.name.charAt(0)}
         </div>
 
         <h3
-          className="text-2xl font-bold relative z-10"
-          style={{ fontFamily: "Cormorant Garamond, serif", color: "#1a2a5e" }}
+          className="text-2xl font-semibold mb-1 relative z-10"
+          style={{ fontFamily: "Cormorant Garamond, serif", color: "#f5f0e8" }}
         >
           {member.name}
         </h3>
-        <p className="text-sm font-semibold mt-1 relative z-10" style={{ color: "#1c1c1c" }}>
-          {member.designation}
+        <p className="text-sm mb-3 relative z-10" style={{ color: "#92791b" }}>
+          {member.role}
         </p>
-        {member.year && (
-          <p className="text-xs mt-1 relative z-10" style={{ color: "rgba(28,28,28,0.6)" }}>
-            {member.year}
-          </p>
-        )}
-        {member.domain && (
-          <span
-            className="inline-block mt-2 text-xs px-3 py-1 rounded-full relative z-10"
-            style={{ background: "rgba(26,42,94,0.15)", color: "#1a2a5e", border: "1px solid rgba(26,42,94,0.3)" }}
-          >
-            {member.domain}
-          </span>
-        )}
-        {member.quote && (
-          <p
-            className="text-sm italic mt-4 relative z-10"
-            style={{ fontFamily: "Playfair Display, serif", color: "rgba(28,28,28,0.75)" }}
-          >
-            &ldquo;{member.quote}&rdquo;
-          </p>
-        )}
+        <span
+          className="inline-block text-xs px-3 py-1 rounded-full relative z-10"
+          style={{
+            background: "rgba(27,94,59,0.15)",
+            color: "#1b5e3b",
+            border: "1px solid rgba(27,94,59,0.35)",
+          }}
+        >
+          {member.domain}
+        </span>
+
+        {/* Divider */}
+        <div className="my-5 h-px mx-8 relative z-10" style={{ background: "linear-gradient(to right, transparent, #92791b, transparent)" }} />
+
         <button
           onClick={onClose}
-          className="mt-6 text-xs tracking-widest uppercase relative z-10 transition-opacity hover:opacity-70"
-          style={{ color: "#1a2a5e" }}
+          className="relative z-10 text-xs tracking-[0.3em] uppercase transition-all duration-200 px-4 py-2 rounded-full"
+          style={{ color: "#737955", border: "1px solid rgba(115,121,85,0.3)" }}
+          onMouseEnter={e => { (e.currentTarget as HTMLElement).style.color = "#c9a84c"; (e.currentTarget as HTMLElement).style.borderColor = "rgba(201,168,76,0.5)"; }}
+          onMouseLeave={e => { (e.currentTarget as HTMLElement).style.color = "#737955"; (e.currentTarget as HTMLElement).style.borderColor = "rgba(115,121,85,0.3)"; }}
         >
           Close
         </button>
