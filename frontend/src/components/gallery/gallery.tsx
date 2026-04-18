@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 
 // ─── Color palette (from spec) ────────────────────────────────────────────────
 // Bronze Gold   #92791B  – Headings, CTAs, borders
@@ -106,13 +106,7 @@ const TICKER = [
 export default function GalleryPage() {
   const [activeTag, setActiveTag] = useState("All");
   const [lightbox, setLightbox] = useState<number | null>(null);
-  const [loaded, setLoaded] = useState(false);
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
-  const heroRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    setTimeout(() => setLoaded(true), 100);
-  }, []);
 
   useEffect(() => {
     const handler = (e: MouseEvent) => {
@@ -713,7 +707,7 @@ export default function GalleryPage() {
               position: "absolute", top: -10, left: 16,
               fontSize: 80, color: "rgba(139,26,26,0.15)",
               lineHeight: 1, userSelect: "none",
-            }}>"</div>
+            }}>{'"'}</div>
             <p style={{
               fontStyle: "italic",
               fontSize: 17,
