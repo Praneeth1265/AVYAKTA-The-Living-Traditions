@@ -387,13 +387,21 @@
   position: relative;
 }
 
+.form-input:hover,
+.form-textarea:hover,
+.form-select:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 20px rgba(146, 121, 27, 0.15);
+}
+
 .form-input:focus,
 .form-textarea:focus,
 .form-select:focus {
   outline: none;
   border-color: var(--bronze-gold);
   background: #fffdf8;
-  box-shadow: 0 0 0 3px rgba(146, 121, 27, 0.12);
+  box-shadow: 0 12px 28px rgba(146, 121, 27, 0.2);
+  transform: translateY(-6px);
 }
 
 .form-group:has(.form-error) .form-input,
@@ -407,13 +415,22 @@
   );
 }
 
+.form-group:has(.form-error) .form-input:hover,
+.form-group:has(.form-error) .form-textarea:hover,
+.form-group:has(.form-error) .form-select:hover {
+  border-color: var(--deep-crimson);
+  transform: translateY(-4px);
+  box-shadow: 0 8px 20px rgba(139, 26, 26, 0.12);
+}
+
 .form-group:has(.form-error) .form-input:focus,
 .form-group:has(.form-error) .form-textarea:focus,
 .form-group:has(.form-error) .form-select:focus {
   border-color: var(--deep-crimson);
   box-shadow:
-    0 0 0 3px rgba(139, 26, 26, 0.1),
+    0 12px 28px rgba(139, 26, 26, 0.15),
     inset 0 1px 3px rgba(0, 0, 0, 0.05);
+  transform: translateY(-6px);
 }
 
 .form-input::placeholder,
@@ -442,10 +459,6 @@
   background: var(--muted-warm-white);
   color: var(--dull-olive);
   padding: 0.5rem;
-}
-
-.form-select:hover {
-  border-color: var(--bronze-gold);
 }
 
 .form-select:invalid {
