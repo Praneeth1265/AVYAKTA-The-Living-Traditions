@@ -11,6 +11,9 @@ export const events = pgTable("events", {
   id: uuid("id").primaryKey().defaultRandom(),
   title: text("title").unique().notNull(),
   description: text("description"),
+  domain: text("domain").default("General").notNull(),
+  highlights: text("highlights"),
+  timeline: text("timeline"),
   image_url: text("image_url"),
   date: date("date"),
 });
