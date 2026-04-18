@@ -206,12 +206,7 @@ export default function EventDetailsPage() {
   >("about");
   const [registered, setRegistered] = useState(false);
   const [ripple, setRipple] = useState(false);
-  const [visible, setVisible] = useState(false);
   const heroRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    setVisible(true);
-  }, []);
 
   const handleRegister = () => {
     setRipple(true);
