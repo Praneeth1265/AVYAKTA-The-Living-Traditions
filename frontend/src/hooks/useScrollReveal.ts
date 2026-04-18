@@ -1,7 +1,9 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
 
-export function useScrollReveal<T extends HTMLElement = HTMLElement>(threshold = 0.15) {
+export function useScrollReveal<T extends HTMLElement = HTMLElement>(
+  threshold = 0.15,
+) {
   const ref = useRef<T>(null);
   const [visible, setVisible] = useState(false);
 
@@ -9,8 +11,10 @@ export function useScrollReveal<T extends HTMLElement = HTMLElement>(threshold =
     const el = ref.current;
     if (!el) return;
     const observer = new IntersectionObserver(
-      ([entry]) => { if (entry.isIntersecting) setVisible(true); },
-      { threshold }
+      ([entry]) => {
+        if (entry.isIntersecting) setVisible(true);
+      },
+      { threshold },
     );
     observer.observe(el);
     return () => observer.disconnect();
