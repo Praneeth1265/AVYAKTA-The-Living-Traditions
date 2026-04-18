@@ -299,12 +299,6 @@ export default function DomainDashboard() {
           <p className="text-gray-600 mb-6">
             The domain {displayDomainName} does not exist or is not available.
           </p>
-          <Link
-            href="/domain"
-            className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
-          >
-            Back to Domains
-          </Link>
         </div>
       </div>
     );
@@ -327,9 +321,6 @@ export default function DomainDashboard() {
         <div className="error-box">
           <h1 className="error-title">Error</h1>
           <p className="error-message">{error}</p>
-          <Link href="/domain" className="error-button">
-            Back to Domains
-          </Link>
         </div>
       </div>
     );
