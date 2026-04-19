@@ -34,6 +34,7 @@ export default function RecruitmentForm({ bgImage }: { bgImage?: string }) {
     control,
     watch,
     setValue,
+    clearErrors,
   } = useForm<RecruitmentFormData>({
     resolver: zodResolver(recruitmentSchema),
   });
@@ -267,9 +268,15 @@ export default function RecruitmentForm({ bgImage }: { bgImage?: string }) {
                       onClick={() => {
                         const currentValue = watch("first_preference_domain");
                         if (currentValue === domain) {
-                          setValue("first_preference_domain", "");
+                          // Deselect - reset form with undefined for this field
+                          const formData = watch();
+                          reset({
+                            ...formData,
+                            first_preference_domain: undefined,
+                          } as Partial<RecruitmentFormData>);
                         } else {
                           setValue("first_preference_domain", domain);
+                          clearErrors("first_preference_domain");
                         }
                       }}
                       className={`domain-chip ${
@@ -303,9 +310,15 @@ export default function RecruitmentForm({ bgImage }: { bgImage?: string }) {
                       onClick={() => {
                         const currentValue = watch("second_domain_preference");
                         if (currentValue === domain) {
-                          setValue("second_domain_preference", "");
+                          // Deselect - reset form with undefined for this field
+                          const formData = watch();
+                          reset({
+                            ...formData,
+                            second_domain_preference: undefined,
+                          } as Partial<RecruitmentFormData>);
                         } else {
                           setValue("second_domain_preference", domain);
+                          clearErrors("second_domain_preference");
                         }
                       }}
                       className={`domain-chip ${
@@ -429,7 +442,8 @@ export default function RecruitmentForm({ bgImage }: { bgImage?: string }) {
               {/* Why You Field */}
               <div className="form-group">
                 <label className="form-label">
-                  What Do You Bring? <span className="required">*</span>
+                  What Do You Bring To Table?{" "}
+                  <span className="required">*</span>
                 </label>
                 <textarea
                   {...register("why_you")}
