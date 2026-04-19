@@ -21,7 +21,7 @@ const DEFAULT_OPTIONS: ImageOptimizationOptions = {
  */
 export async function compressImage(
   file: File,
-  options: ImageOptimizationOptions = {}
+  options: ImageOptimizationOptions = {},
 ): Promise<string> {
   const config = { ...DEFAULT_OPTIONS, ...options };
 
@@ -44,10 +44,13 @@ export async function compressImage(
         let width = img.width;
         let height = img.height;
 
-        if (width > (config.maxWidth || 1920) || height > (config.maxHeight || 1920)) {
+        if (
+          width > (config.maxWidth || 1920) ||
+          height > (config.maxHeight || 1920)
+        ) {
           const ratio = Math.min(
             (config.maxWidth || 1920) / width,
-            (config.maxHeight || 1920) / height
+            (config.maxHeight || 1920) / height,
           );
           width *= ratio;
           height *= ratio;
@@ -67,11 +70,11 @@ export async function compressImage(
         do {
           base64 = canvas.toDataURL("image/jpeg", quality);
           const sizeKB = (base64.length * 3) / 4 / 1024; // Rough estimation
-          
+
           if (sizeKB <= (config.maxSizeKB || 500)) {
             break;
           }
-          
+
           quality -= 0.1;
         } while (quality > 0.1);
 
@@ -96,7 +99,10 @@ export async function compressImage(
 /**
  * Validate image file before processing
  */
-export function validateImage(file: File, maxSizeMB: number = 10): { valid: boolean; error?: string } {
+export function validateImage(
+  file: File,
+  maxSizeMB: number = 10,
+): { valid: boolean; error?: string } {
   const maxSizeBytes = maxSizeMB * 1024 * 1024;
 
   if (!file) {
@@ -108,7 +114,10 @@ export function validateImage(file: File, maxSizeMB: number = 10): { valid: bool
   }
 
   if (file.size > maxSizeBytes) {
-    return { valid: false, error: `File size must be less than ${maxSizeMB}MB` };
+    return {
+      valid: false,
+      error: `File size must be less than ${maxSizeMB}MB`,
+    };
   }
 
   return { valid: true };
@@ -119,7 +128,7 @@ export function validateImage(file: File, maxSizeMB: number = 10): { valid: bool
  */
 export async function compressMultipleImages(
   files: File[],
-  options: ImageOptimizationOptions = {}
+  options: ImageOptimizationOptions = {},
 ): Promise<string[]> {
   const results: string[] = [];
 

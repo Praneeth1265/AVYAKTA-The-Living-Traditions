@@ -32,7 +32,8 @@ export default function EventRegistrationsClient() {
       if (!response.ok) throw new Error("Failed to fetch events");
 
       const result = await response.json();
-      if (!result.success) throw new Error(result.error || "Failed to fetch events");
+      if (!result.success)
+        throw new Error(result.error || "Failed to fetch events");
 
       setEvents(result.data || []);
       setError("");
@@ -52,10 +53,8 @@ export default function EventRegistrationsClient() {
       // Immediately update UI
       setEvents((prev) =>
         prev.map((e) =>
-          e.id === event.id
-            ? { ...e, registration_status: newStatus }
-            : e
-        )
+          e.id === event.id ? { ...e, registration_status: newStatus } : e,
+        ),
       );
 
       const response = await fetch(`/api/events/${event.id}`, {
@@ -72,25 +71,25 @@ export default function EventRegistrationsClient() {
         // Revert on error
         setEvents((prev) =>
           prev.map((e) =>
-            e.id === event.id
-              ? { ...e, registration_status: !newStatus }
-              : e
-          )
+            e.id === event.id ? { ...e, registration_status: !newStatus } : e,
+          ),
         );
         throw new Error(result.error || "Failed to toggle registration");
       }
 
       setSuccessMessage(
-        `✅ Registration ${newStatus ? "opened" : "closed"} for ${event.title}`
+        `✅ Registration ${newStatus ? "opened" : "closed"} for ${event.title}`,
       );
       setTimeout(() => setSuccessMessage(""), 3000);
-      
+
       // Re-fetch to verify server state
       setTimeout(() => {
         fetchEvents();
       }, 1000);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to toggle registration");
+      setError(
+        err instanceof Error ? err.message : "Failed to toggle registration",
+      );
       setTimeout(() => setError(""), 3000);
     } finally {
       setTogglingId(null);
@@ -110,7 +109,9 @@ export default function EventRegistrationsClient() {
         </div>
 
         {error && <div className="alert alert-error">{error}</div>}
-        {successMessage && <div className="alert alert-success">{successMessage}</div>}
+        {successMessage && (
+          <div className="alert alert-success">{successMessage}</div>
+        )}
 
         <div className="events-table">
           {isLoading ? (
@@ -131,16 +132,21 @@ export default function EventRegistrationsClient() {
                 </thead>
                 <tbody>
                   {events.map((event) => (
-                    <tr key={event.id} className={event.registration_status ? "open" : "closed"}>
+                    <tr
+                      key={event.id}
+                      className={event.registration_status ? "open" : "closed"}
+                    >
                       <td className="event-title">{event.title}</td>
                       <td className="event-date">
-                        {event.date ? new Date(event.date).toLocaleDateString() : "No date"}
+                        {event.date
+                          ? new Date(event.date).toLocaleDateString()
+                          : "No date"}
                       </td>
-                      <td className="event-venue">
-                        {event.venue || "TBA"}
-                      </td>
+                      <td className="event-venue">{event.venue || "TBA"}</td>
                       <td className="event-status">
-                        <span className={`status-badge ${event.registration_status ? "open" : "closed"}`}>
+                        <span
+                          className={`status-badge ${event.registration_status ? "open" : "closed"}`}
+                        >
                           {event.registration_status ? "✅ OPEN" : "❌ CLOSED"}
                         </span>
                       </td>
@@ -153,8 +159,8 @@ export default function EventRegistrationsClient() {
                           {togglingId === event.id
                             ? "..."
                             : event.registration_status
-                            ? "🔒 Close"
-                            : "🔓 Open"}
+                              ? "🔒 Close"
+                              : "🔓 Open"}
                         </button>
                       </td>
                     </tr>
@@ -170,7 +176,12 @@ export default function EventRegistrationsClient() {
         .registrations-container {
           min-height: 100vh;
           padding: 20px;
-          background: linear-gradient(135deg, #f0f4f8 0%, #f5f0e8 50%, #f0f4f8 100%);
+          background: linear-gradient(
+            135deg,
+            #f0f4f8 0%,
+            #f5f0e8 50%,
+            #f0f4f8 100%
+          );
         }
 
         .registrations-wrapper {

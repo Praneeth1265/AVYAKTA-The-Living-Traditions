@@ -21,7 +21,6 @@ interface FormData {
 
 export default function AdminMembersClient() {
   const [members, setMembers] = useState<Member[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isDeletingId, setIsDeletingId] = useState<string | null>(null);
   const [editingMember, setEditingMember] = useState<Member | null>(null);
@@ -32,7 +31,6 @@ export default function AdminMembersClient() {
   // Fetch all members
   const fetchMembers = async () => {
     try {
-      setIsLoading(true);
       const response = await fetch("/api/members", {
         method: "GET",
         headers: { "Content-Type": "application/json" },
@@ -53,8 +51,6 @@ export default function AdminMembersClient() {
       setError("");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to fetch members");
-    } finally {
-      setIsLoading(false);
     }
   };
 
@@ -82,7 +78,7 @@ export default function AdminMembersClient() {
         }
 
         setMembers((prev) =>
-          prev.map((m) => (m.id === editingMember.id ? result.data : m))
+          prev.map((m) => (m.id === editingMember.id ? result.data : m)),
         );
         setSuccessMessage("Member updated successfully!");
         setEditingMember(null);
@@ -162,13 +158,16 @@ export default function AdminMembersClient() {
   };
 
   // Group members by domain
-  const membersByDomain = members.reduce((acc, member) => {
-    if (!acc[member.domain]) {
-      acc[member.domain] = [];
-    }
-    acc[member.domain].push(member);
-    return acc;
-  }, {} as Record<string, Member[]>);
+  const membersByDomain = members.reduce(
+    (acc, member) => {
+      if (!acc[member.domain]) {
+        acc[member.domain] = [];
+      }
+      acc[member.domain].push(member);
+      return acc;
+    },
+    {} as Record<string, Member[]>,
+  );
 
   // Get sorted domains
   const sortedDomains = Object.keys(membersByDomain).sort();
@@ -179,7 +178,9 @@ export default function AdminMembersClient() {
     const heads = domainMembers
       .filter((m) => m.role === "domain_head")
       .map((m) => m.name);
-    const memberCount = domainMembers.filter((m) => m.role === "members").length;
+    const memberCount = domainMembers.filter(
+      (m) => m.role === "members",
+    ).length;
     return {
       domain,
       heads,
@@ -260,7 +261,9 @@ export default function AdminMembersClient() {
                               </div>
                             ))
                           ) : (
-                            <div className="head-name empty">No heads assigned</div>
+                            <div className="head-name empty">
+                              No heads assigned
+                            </div>
                           )}
                         </div>
                       </div>
@@ -298,7 +301,12 @@ export default function AdminMembersClient() {
         .members-container {
           min-height: 100vh;
           padding: 20px;
-          background: linear-gradient(135deg, #f0f4f8 0%, #f5f0e8 50%, #f0f4f8 100%);
+          background: linear-gradient(
+            135deg,
+            #f0f4f8 0%,
+            #f5f0e8 50%,
+            #f0f4f8 100%
+          );
         }
 
         .members-wrapper {

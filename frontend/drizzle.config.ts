@@ -3,7 +3,7 @@ import path from "path";
 
 dotenv.config({ path: path.resolve(__dirname, ".env.local") });
 
-export default {
+const config = {
   schema: "./drizzle/schema.ts",
   out: "./drizzle/migrations",
   dialect: "postgresql",
@@ -11,3 +11,5 @@ export default {
     url: process.env.DATABASE_URL!,
   },
 };
+
+export default config;

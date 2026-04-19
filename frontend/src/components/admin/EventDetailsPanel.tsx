@@ -2,8 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { compressImage, validateImage } from "../../lib/utils/imageOptimizer";
-import { parseImageUrls } from "../../lib/utils/storageUploader";
-import { uploadMultipleImages, deleteImageFromStorage } from "../../lib/utils/imageUploader";
+import { uploadMultipleImages } from "../../lib/utils/imageUploader";
 
 interface EventSlug {
   id: string;
@@ -88,7 +87,9 @@ export default function EventDetailsPanel({
     setEditingPosterId(null);
   }, [event.id]);
 
-  const handleSlugImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleSlugImageChange = async (
+    e: React.ChangeEvent<HTMLInputElement>,
+  ) => {
     const files = e.target.files ? Array.from(e.target.files) : [];
     if (files.length === 0) return;
 
@@ -125,19 +126,24 @@ export default function EventDetailsPanel({
         setSlugImagePreviews((prev) => [...prev, ...compressedImages]);
         setSlugFormData((prev) => ({
           ...prev,
-          image_url: [...prev.image_url.split("|").filter(Boolean), ...compressedImages].join("|"),
+          image_url: [
+            ...prev.image_url.split("|").filter(Boolean),
+            ...compressedImages,
+          ].join("|"),
         }));
       }
     } catch (error) {
       setImageError(
-        error instanceof Error ? error.message : "Failed to process image"
+        error instanceof Error ? error.message : "Failed to process image",
       );
     } finally {
       setIsProcessingImage(false);
     }
   };
 
-  const handlePosterImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handlePosterImageChange = async (
+    e: React.ChangeEvent<HTMLInputElement>,
+  ) => {
     const files = e.target.files ? Array.from(e.target.files) : [];
     if (files.length === 0) return;
 
@@ -179,10 +185,9 @@ export default function EventDetailsPanel({
       }
     } catch (error) {
       setImageError(
-        error instanceof Error ? error.message : "Failed to process image"
+        error instanceof Error ? error.message : "Failed to process image",
       );
-    }
-    finally {
+    } finally {
       setIsProcessingImage(false);
     }
   };
@@ -192,7 +197,7 @@ export default function EventDetailsPanel({
 
     try {
       setIsUploadingImages(true);
-      
+
       // Upload images to storage if they exist
       let imageUrls: string[] = [];
       if (slugImagePreviews.length > 0) {
@@ -222,7 +227,7 @@ export default function EventDetailsPanel({
       setSlugImagePreviews([]);
     } catch (error) {
       setImageError(
-        error instanceof Error ? error.message : "Failed to upload images"
+        error instanceof Error ? error.message : "Failed to upload images",
       );
       console.error("Error saving slug:", error);
     } finally {
@@ -232,16 +237,20 @@ export default function EventDetailsPanel({
 
   const handleAddPoster = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!posterFormData.poster_image_url && posterBatchImages.length === 0) return;
+    if (!posterFormData.poster_image_url && posterBatchImages.length === 0)
+      return;
 
     try {
       setIsUploadingImages(true);
-      
-      const imagesToAdd = posterBatchImages.length > 0 ? posterBatchImages : [posterFormData.poster_image_url];
+
+      const imagesToAdd =
+        posterBatchImages.length > 0
+          ? posterBatchImages
+          : [posterFormData.poster_image_url];
 
       for (let i = 0; i < imagesToAdd.length; i++) {
         const imageData = imagesToAdd[i];
-        
+
         // Upload image to storage
         const [imageUrl] = await uploadMultipleImages([imageData], {
           bucket: "events",
@@ -269,7 +278,7 @@ export default function EventDetailsPanel({
       setImageError("");
     } catch (error) {
       setImageError(
-        error instanceof Error ? error.message : "Failed to upload posters"
+        error instanceof Error ? error.message : "Failed to upload posters",
       );
       console.error("Error saving poster:", error);
     } finally {
@@ -279,7 +288,9 @@ export default function EventDetailsPanel({
 
   const handleEditSlug = (slug: EventSlug) => {
     setEditingSlugId(slug.id);
-    const imageUrls = slug.image_url ? slug.image_url.split("|").filter(Boolean) : [];
+    const imageUrls = slug.image_url
+      ? slug.image_url.split("|").filter(Boolean)
+      : [];
     setSlugFormData({
       more_description: slug.more_description || "",
       image_url: slug.image_url || "",
@@ -333,19 +344,19 @@ export default function EventDetailsPanel({
       if (!response.ok) {
         throw new Error(result.error || `HTTP ${response.status}`);
       }
-      
+
       if (!result.success) {
         throw new Error(result.error || "Failed to toggle registration");
       }
 
       // Update the event object with new registration status
       event.registration_enabled = newStatus;
-      
+
       // Call the parent handler to update state if provided
       if (onToggleRegistration) {
         onToggleRegistration(event, e);
       }
-      
+
       // Clear success message after 2 seconds
       setTimeout(() => {
         setImageError("");
@@ -353,7 +364,9 @@ export default function EventDetailsPanel({
     } catch (error) {
       console.error("Error toggling registration:", error);
       setImageError(
-        error instanceof Error ? error.message : "Failed to toggle registration. Check browser console for details."
+        error instanceof Error
+          ? error.message
+          : "Failed to toggle registration. Check browser console for details.",
       );
     } finally {
       setRegistrationToggling(false);
@@ -370,9 +383,17 @@ export default function EventDetailsPanel({
               onClick={handleToggleRegistrationLocal}
               disabled={registrationToggling}
               className={`btn-registration-toggle ${event.registration_enabled ? "enabled" : "disabled"}`}
-              title={event.registration_enabled ? "Click to disable registrations" : "Click to enable registrations"}
+              title={
+                event.registration_enabled
+                  ? "Click to disable registrations"
+                  : "Click to enable registrations"
+              }
             >
-              {registrationToggling ? "..." : event.registration_enabled ? "📝 OPEN" : "🔒 CLOSED"}
+              {registrationToggling
+                ? "..."
+                : event.registration_enabled
+                  ? "📝 OPEN"
+                  : "🔒 CLOSED"}
             </button>
           </div>
         </div>
@@ -396,12 +417,14 @@ export default function EventDetailsPanel({
       {activeTab === "slugs" && (
         <div className="details-section">
           {imageError && (
-            <div className="alert alert-error">
-              ⚠️ {imageError}
-            </div>
+            <div className="alert alert-error">⚠️ {imageError}</div>
           )}
           <form onSubmit={handleAddSlug} className="detail-form">
-            <h4>{editingSlugId ? "Edit Event Information" : "Add Event Information"}</h4>
+            <h4>
+              {editingSlugId
+                ? "Edit Event Information"
+                : "Add Event Information"}
+            </h4>
 
             <div className="form-row">
               <div className="form-group">
@@ -437,7 +460,9 @@ export default function EventDetailsPanel({
                 />
                 {imageError && <p className="input-error">{imageError}</p>}
                 {!editingSlugId && slugImagePreviews.length > 1 && (
-                  <p className="selection-note">{slugImagePreviews.length} images selected</p>
+                  <p className="selection-note">
+                    {slugImagePreviews.length} images selected
+                  </p>
                 )}
                 {slugImagePreviews.length > 0 && (
                   <div className="image-preview-gallery">
@@ -448,7 +473,7 @@ export default function EventDetailsPanel({
                           type="button"
                           onClick={() => {
                             setSlugImagePreviews((prev) =>
-                              prev.filter((_, i) => i !== index)
+                              prev.filter((_, i) => i !== index),
                             );
                             setSlugFormData((prev) => {
                               const images = prev.image_url
@@ -479,7 +504,11 @@ export default function EventDetailsPanel({
                 disabled={isLoading || isUploadingImages}
                 className="btn-save"
               >
-                {isLoading || isUploadingImages ? "Saving..." : editingSlugId ? "Update" : "Add"}
+                {isLoading || isUploadingImages
+                  ? "Saving..."
+                  : editingSlugId
+                    ? "Update"
+                    : "Add"}
               </button>
               {editingSlugId && (
                 <button
@@ -521,15 +550,18 @@ export default function EventDetailsPanel({
                     )}
                     {slug.image_url && (
                       <div className="item-galleries">
-                        {slug.image_url.split("|").filter(Boolean).map((imageUrl, idx) => (
-                          <div key={idx} className="gallery-thumbnail">
-                            <img
-                              src={imageUrl}
-                              alt={`Event slug image ${idx + 1}`}
-                              className="item-image"
-                            />
-                          </div>
-                        ))}
+                        {slug.image_url
+                          .split("|")
+                          .filter(Boolean)
+                          .map((imageUrl, idx) => (
+                            <div key={idx} className="gallery-thumbnail">
+                              <img
+                                src={imageUrl}
+                                alt={`Event slug image ${idx + 1}`}
+                                className="item-image"
+                              />
+                            </div>
+                          ))}
                       </div>
                     )}
                   </div>
@@ -562,7 +594,9 @@ export default function EventDetailsPanel({
                 />
                 {imageError && <p className="input-error">{imageError}</p>}
                 {!editingPosterId && posterBatchImages.length > 1 && (
-                  <p className="selection-note">{posterBatchImages.length} images selected</p>
+                  <p className="selection-note">
+                    {posterBatchImages.length} images selected
+                  </p>
                 )}
                 {posterImagePreview && (
                   <div className="image-preview-small">
@@ -579,11 +613,16 @@ export default function EventDetailsPanel({
                   isLoading ||
                   isProcessingImage ||
                   isUploadingImages ||
-                  (!posterFormData.poster_image_url && posterBatchImages.length === 0)
+                  (!posterFormData.poster_image_url &&
+                    posterBatchImages.length === 0)
                 }
                 className="btn-save"
               >
-                {isLoading || isUploadingImages ? "Saving..." : editingPosterId ? "Update" : "Add"}
+                {isLoading || isUploadingImages
+                  ? "Saving..."
+                  : editingPosterId
+                    ? "Update"
+                    : "Add"}
               </button>
               {editingPosterId && (
                 <button

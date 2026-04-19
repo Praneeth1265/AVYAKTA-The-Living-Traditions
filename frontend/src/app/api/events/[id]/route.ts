@@ -4,7 +4,7 @@ import { retryWithBackoff } from "../../../../lib/api/retry";
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
+  process.env.SUPABASE_SERVICE_ROLE_KEY!,
 );
 
 type EventUpdatePayload = {
@@ -21,7 +21,7 @@ type EventUpdatePayload = {
 // GET - Fetch a single event
 export async function GET(
   request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ id: string }> },
 ) {
   try {
     const { id } = await params;
@@ -34,10 +34,10 @@ export async function GET(
           *,
           event_slug(*),
           posters(*)
-        `
+        `,
         )
         .eq("id", id)
-        .single()
+        .single(),
     );
 
     const { data, error } = result;
@@ -48,7 +48,7 @@ export async function GET(
     console.error("Error fetching event:", error);
     return NextResponse.json(
       { success: false, error: "Failed to fetch event" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -56,26 +56,42 @@ export async function GET(
 // PUT - Update an event
 export async function PUT(
   request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ id: string }> },
 ) {
   try {
     const { id } = await params;
     const body = await request.json();
-    const { title, description, image_url, date, venue, registration_enabled, registration_status, payment_image_required, more_description, slug_image_url, poster_image_urls } = body;
+    const {
+      title,
+      description,
+      image_url,
+      date,
+      venue,
+      registration_enabled,
+      registration_status,
+      payment_image_required,
+      more_description,
+      slug_image_url,
+      poster_image_urls,
+    } = body;
 
     const updatePayload: EventUpdatePayload = {};
 
     // Only add fields that are provided
     if (title !== undefined) updatePayload.title = title?.trim();
-    if (description !== undefined) updatePayload.description = description?.trim();
+    if (description !== undefined)
+      updatePayload.description = description?.trim();
     if (image_url !== undefined) updatePayload.image_url = image_url;
     if (date !== undefined) updatePayload.date = date;
     if (venue !== undefined) updatePayload.venue = venue?.trim() || null;
-    if (registration_enabled !== undefined) updatePayload.registration_enabled = registration_enabled;
-    if (registration_status !== undefined) updatePayload.registration_status = registration_status;
-    if (payment_image_required !== undefined) updatePayload.payment_image_required = payment_image_required;
+    if (registration_enabled !== undefined)
+      updatePayload.registration_enabled = registration_enabled;
+    if (registration_status !== undefined)
+      updatePayload.registration_status = registration_status;
+    if (payment_image_required !== undefined)
+      updatePayload.payment_image_required = payment_image_required;
 
-    let result = await retryWithBackoff(async () =>
+    const result = await retryWithBackoff(async () =>
       supabase
         .from("events")
         .update(updatePayload)
@@ -85,8 +101,8 @@ export async function PUT(
           *,
           event_slug(*),
           posters(*)
-        `
-        )
+        `,
+        ),
     );
 
     let { data, error } = result;
@@ -111,24 +127,28 @@ export async function PUT(
             *,
             event_slug(*),
             posters(*)
-          `
-          )
+          `,
+          ),
       );
 
-      data = fallbackResult.data;
-      error = fallbackResult.error;
+      data = fallbackResult.data as typeof data;
+      error = fallbackResult.error as typeof error;
     }
 
     if (error) throw new Error(error.message);
 
     // Handle slug update
-    if (data && data.length > 0 && (more_description !== undefined || slug_image_url !== undefined)) {
+    if (
+      data &&
+      data.length > 0 &&
+      (more_description !== undefined || slug_image_url !== undefined)
+    ) {
       const eventId = data[0].id;
       const existingSlug = data[0].event_slug?.[0];
 
       if (existingSlug) {
         // Update existing slug
-        const slugUpdatePayload: any = {};
+        const slugUpdatePayload: Record<string, unknown> = {};
         if (more_description !== undefined) {
           slugUpdatePayload.more_description = more_description;
         }
@@ -140,15 +160,18 @@ export async function PUT(
           supabase
             .from("event_slug")
             .update(slugUpdatePayload)
-            .eq("id", existingSlug.id)
+            .eq("id", existingSlug.id),
         );
 
         if (slugUpdateResult.error) {
-          console.warn("Warning: Failed to update event slug:", slugUpdateResult.error);
+          console.warn(
+            "Warning: Failed to update event slug:",
+            slugUpdateResult.error,
+          );
         }
       } else if (more_description || slug_image_url) {
         // Create new slug if it doesn't exist
-        const slugPayload: any = {
+        const slugPayload: Record<string, unknown> = {
           event_id: eventId,
         };
 
@@ -160,13 +183,14 @@ export async function PUT(
         }
 
         const slugCreateResult = await retryWithBackoff(async () =>
-          supabase
-            .from("event_slug")
-            .insert([slugPayload])
+          supabase.from("event_slug").insert([slugPayload]),
         );
 
         if (slugCreateResult.error) {
-          console.warn("Warning: Failed to create event slug:", slugCreateResult.error);
+          console.warn(
+            "Warning: Failed to create event slug:",
+            slugCreateResult.error,
+          );
         }
       }
 
@@ -179,10 +203,10 @@ export async function PUT(
             *,
             event_slug(*),
             posters(*)
-          `
+          `,
           )
           .eq("id", eventId)
-          .single()
+          .single(),
       );
 
       if (refetchResult.data) {
@@ -193,18 +217,20 @@ export async function PUT(
     // Handle poster update/create
     if (data && data.length > 0 && poster_image_urls !== undefined) {
       const eventId = data[0].id;
-      const posterImages = poster_image_urls.split("|").filter((url: string) => url.trim());
+      const posterImages = poster_image_urls
+        .split("|")
+        .filter((url: string) => url.trim());
 
       // Delete existing posters
       const deleteResult = await retryWithBackoff(async () =>
-        supabase
-          .from("posters")
-          .delete()
-          .eq("event_id", eventId)
+        supabase.from("posters").delete().eq("event_id", eventId),
       );
 
       if (deleteResult.error) {
-        console.warn("Warning: Failed to delete old posters:", deleteResult.error);
+        console.warn(
+          "Warning: Failed to delete old posters:",
+          deleteResult.error,
+        );
       }
 
       // Create new posters if any provided
@@ -215,13 +241,14 @@ export async function PUT(
         }));
 
         const createResult = await retryWithBackoff(async () =>
-          supabase
-            .from("posters")
-            .insert(posterPayloads)
+          supabase.from("posters").insert(posterPayloads),
         );
 
         if (createResult.error) {
-          console.warn("Warning: Failed to create event posters:", createResult.error);
+          console.warn(
+            "Warning: Failed to create event posters:",
+            createResult.error,
+          );
         }
       }
 
@@ -234,10 +261,10 @@ export async function PUT(
             *,
             event_slug(*),
             posters(*)
-          `
+          `,
           )
           .eq("id", eventId)
-          .single()
+          .single(),
       );
 
       if (refetchResult.data) {
@@ -250,7 +277,7 @@ export async function PUT(
     console.error("Error updating event:", error);
     return NextResponse.json(
       { success: false, error: "Failed to update event" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -258,13 +285,13 @@ export async function PUT(
 // DELETE - Delete an event (cascade deletes related records)
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ id: string }> },
 ) {
   try {
     const { id } = await params;
 
     const result = await retryWithBackoff(async () =>
-      supabase.from("events").delete().eq("id", id)
+      supabase.from("events").delete().eq("id", id),
     );
 
     const { error } = result;
@@ -275,7 +302,7 @@ export async function DELETE(
     console.error("Error deleting event:", error);
     return NextResponse.json(
       { success: false, error: "Failed to delete event" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

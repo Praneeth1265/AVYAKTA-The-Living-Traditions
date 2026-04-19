@@ -30,12 +30,16 @@ export default function EventsListClient() {
       if (!response.ok) throw new Error("Failed to fetch events");
 
       const result = await response.json();
-      if (!result.success) throw new Error(result.error || "Failed to fetch events");
+      if (!result.success)
+        throw new Error(result.error || "Failed to fetch events");
 
       // Ensure registration_status defaults to true if undefined
       const eventsWithDefaults = (result.data || []).map((event: Event) => ({
         ...event,
-        registration_status: event.registration_status !== undefined ? event.registration_status : true,
+        registration_status:
+          event.registration_status !== undefined
+            ? event.registration_status
+            : true,
       }));
 
       console.log("Fetched events with status:", eventsWithDefaults);
@@ -88,10 +92,7 @@ export default function EventsListClient() {
         ) : (
           <div className="events-grid">
             {events.map((event) => (
-              <div
-                key={event.id}
-                className="event-card"
-              >
+              <div key={event.id} className="event-card">
                 {event.image_url && (
                   <div className="event-image">
                     <img src={event.image_url} alt={event.title} />
@@ -103,7 +104,8 @@ export default function EventsListClient() {
 
                   {event.date && (
                     <p className="event-date">
-                      📅 {new Date(event.date).toLocaleDateString("en-US", {
+                      📅{" "}
+                      {new Date(event.date).toLocaleDateString("en-US", {
                         weekday: "short",
                         year: "numeric",
                         month: "short",
@@ -139,7 +141,12 @@ export default function EventsListClient() {
         .events-page-container {
           min-height: 100vh;
           padding: 20px;
-          background: linear-gradient(135deg, #f0f4f8 0%, #f5f0e8 50%, #f0f4f8 100%);
+          background: linear-gradient(
+            135deg,
+            #f0f4f8 0%,
+            #f5f0e8 50%,
+            #f0f4f8 100%
+          );
         }
 
         .events-wrapper {

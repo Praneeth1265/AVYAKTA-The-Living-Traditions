@@ -4,14 +4,14 @@ import { retryWithBackoff } from "../../../../lib/api/retry";
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
+  process.env.SUPABASE_SERVICE_ROLE_KEY!,
 );
 
 // GET - Fetch counter stats for all domains
-export async function GET(request: NextRequest) {
+export async function GET() {
   try {
     const result = await retryWithBackoff(async () =>
-      supabase.from("counter").select("*")
+      supabase.from("counter").select("*"),
     );
 
     const { data, error } = result;
@@ -22,7 +22,7 @@ export async function GET(request: NextRequest) {
     console.error("Error fetching counter stats:", error);
     return NextResponse.json(
       { success: false, error: "Failed to fetch counter stats" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -36,7 +36,7 @@ export async function PUT(request: NextRequest) {
     if (!domain && !flushAll) {
       return NextResponse.json(
         { success: false, error: "Domain or flushAll flag is required" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -51,7 +51,7 @@ export async function PUT(request: NextRequest) {
             rejected: 0,
           })
           .neq("domain", null)
-          .select()
+          .select(),
       );
 
       const { data, error } = result;
@@ -69,7 +69,7 @@ export async function PUT(request: NextRequest) {
             rejected: 0,
           })
           .eq("domain", domain)
-          .select()
+          .select(),
       );
 
       const { data, error } = result;
@@ -81,7 +81,7 @@ export async function PUT(request: NextRequest) {
     console.error("Error resetting counter:", error);
     return NextResponse.json(
       { success: false, error: "Failed to reset counter" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

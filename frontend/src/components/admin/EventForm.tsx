@@ -64,16 +64,17 @@ export default function EventForm({
     payment_image_required: event?.payment_image_required ?? false,
     more_description: eventSlug?.more_description || "",
     slug_image_url: eventSlug?.image_url || "",
-    poster_image_urls: event?.posters?.map(p => p.poster_image_url).join("|") || "",
+    poster_image_urls:
+      event?.posters?.map((p) => p.poster_image_url).join("|") || "",
   });
   const [imagePreview, setImagePreview] = useState<string>(
-    event?.image_url || ""
+    event?.image_url || "",
   );
   const [slugImagePreviews, setSlugImagePreviews] = useState<string[]>(
-    eventSlug?.image_url ? eventSlug.image_url.split("|").filter(Boolean) : []
+    eventSlug?.image_url ? eventSlug.image_url.split("|").filter(Boolean) : [],
   );
   const [posterImagePreviews, setPosterImagePreviews] = useState<string[]>(
-    event?.posters?.map(p => p.poster_image_url) || []
+    event?.posters?.map((p) => p.poster_image_url) || [],
   );
   const [imageError, setImageError] = useState<string>("");
   const [isCompressing, setIsCompressing] = useState(false);
@@ -93,16 +94,23 @@ export default function EventForm({
         payment_image_required: event?.payment_image_required ?? false,
         more_description: eventSlug?.more_description || "",
         slug_image_url: eventSlug?.image_url || "",
-        poster_image_urls: event?.posters?.map(p => p.poster_image_url).join("|") || "",
+        poster_image_urls:
+          event?.posters?.map((p) => p.poster_image_url).join("|") || "",
       });
       setImagePreview(event?.image_url || "");
-      setSlugImagePreviews(eventSlug?.image_url ? eventSlug.image_url.split("|").filter(Boolean) : []);
-      setPosterImagePreviews(event?.posters?.map(p => p.poster_image_url) || []);
+      setSlugImagePreviews(
+        eventSlug?.image_url
+          ? eventSlug.image_url.split("|").filter(Boolean)
+          : [],
+      );
+      setPosterImagePreviews(
+        event?.posters?.map((p) => p.poster_image_url) || [],
+      );
     }
   }, [event]);
 
   const handleInputChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
   ) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
@@ -139,7 +147,7 @@ export default function EventForm({
         }));
       } catch (error) {
         setImageError(
-          error instanceof Error ? error.message : "Failed to process image"
+          error instanceof Error ? error.message : "Failed to process image",
         );
       } finally {
         setIsCompressing(false);
@@ -147,7 +155,9 @@ export default function EventForm({
     }
   };
 
-  const handleSlugImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleSlugImageChange = async (
+    e: React.ChangeEvent<HTMLInputElement>,
+  ) => {
     const files = e.target.files ? Array.from(e.target.files) : [];
     if (files.length === 0) return;
 
@@ -175,11 +185,14 @@ export default function EventForm({
       setSlugImagePreviews((prev) => [...prev, ...compressedImages]);
       setFormData((prev) => ({
         ...prev,
-        slug_image_url: [...prev.slug_image_url?.split("|").filter(Boolean) || [], ...compressedImages].join("|"),
+        slug_image_url: [
+          ...(prev.slug_image_url?.split("|").filter(Boolean) || []),
+          ...compressedImages,
+        ].join("|"),
       }));
     } catch (error) {
       setImageError(
-        error instanceof Error ? error.message : "Failed to process image"
+        error instanceof Error ? error.message : "Failed to process image",
       );
     } finally {
       setIsCompressing(false);
@@ -196,7 +209,9 @@ export default function EventForm({
     }));
   };
 
-  const handlePosterImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handlePosterImageChange = async (
+    e: React.ChangeEvent<HTMLInputElement>,
+  ) => {
     const files = e.target.files ? Array.from(e.target.files) : [];
     if (files.length === 0) return;
 
@@ -224,11 +239,14 @@ export default function EventForm({
       setPosterImagePreviews((prev) => [...prev, ...compressedImages]);
       setFormData((prev) => ({
         ...prev,
-        poster_image_urls: [...prev.poster_image_urls?.split("|").filter(Boolean) || [], ...compressedImages].join("|"),
+        poster_image_urls: [
+          ...(prev.poster_image_urls?.split("|").filter(Boolean) || []),
+          ...compressedImages,
+        ].join("|"),
       }));
     } catch (error) {
       setImageError(
-        error instanceof Error ? error.message : "Failed to process image"
+        error instanceof Error ? error.message : "Failed to process image",
       );
     } finally {
       setIsCompressing(false);
@@ -386,8 +404,10 @@ export default function EventForm({
               disabled={isLoading || isCompressing}
               className="file-input"
             />
-            <p className="help-text">Upload multiple images for event details</p>
-            
+            <p className="help-text">
+              Upload multiple images for event details
+            </p>
+
             {slugImagePreviews.length > 0 && (
               <div className="slug-images-grid">
                 {slugImagePreviews.map((preview, index) => (
@@ -433,7 +453,12 @@ export default function EventForm({
               id="registration_status"
               type="checkbox"
               checked={formData.registration_status ?? true}
-              onChange={(e) => setFormData((prev) => ({ ...prev, registration_status: e.target.checked }))}
+              onChange={(e) =>
+                setFormData((prev) => ({
+                  ...prev,
+                  registration_status: e.target.checked,
+                }))
+              }
               disabled={isLoading}
               className="checkbox-input"
             />
@@ -447,7 +472,12 @@ export default function EventForm({
               id="payment_image_required"
               type="checkbox"
               checked={formData.payment_image_required ?? false}
-              onChange={(e) => setFormData((prev) => ({ ...prev, payment_image_required: e.target.checked }))}
+              onChange={(e) =>
+                setFormData((prev) => ({
+                  ...prev,
+                  payment_image_required: e.target.checked,
+                }))
+              }
               disabled={isLoading || !formData.registration_enabled}
               className="checkbox-input"
             />
@@ -472,8 +502,10 @@ export default function EventForm({
               disabled={isLoading || isCompressing}
               className="file-input"
             />
-            <p className="help-text">Upload promotional posters for this event</p>
-            
+            <p className="help-text">
+              Upload promotional posters for this event
+            </p>
+
             {posterImagePreviews.length > 0 && (
               <div className="poster-images-grid">
                 {posterImagePreviews.map((preview, index) => (
@@ -496,10 +528,19 @@ export default function EventForm({
       </div>
 
       <div className="form-actions">
-        <button type="submit" disabled={isLoading || isCompressing} className="btn-submit">
+        <button
+          type="submit"
+          disabled={isLoading || isCompressing}
+          className="btn-submit"
+        >
           {isLoading ? "Saving..." : event ? "Update Event" : "Create Event"}
         </button>
-        <button type="button" onClick={onCancel} disabled={isLoading || isCompressing} className="btn-cancel">
+        <button
+          type="button"
+          onClick={onCancel}
+          disabled={isLoading || isCompressing}
+          className="btn-cancel"
+        >
           Cancel
         </button>
       </div>

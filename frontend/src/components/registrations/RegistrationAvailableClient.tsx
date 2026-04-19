@@ -30,13 +30,16 @@ export default function RegistrationAvailableClient() {
       if (!response.ok) throw new Error("Failed to fetch events");
 
       const result = await response.json();
-      if (!result.success) throw new Error(result.error || "Failed to fetch events");
+      if (!result.success)
+        throw new Error(result.error || "Failed to fetch events");
 
       // Filter only events with open registration status
       const openEvents = (result.data || []).filter(
-        (event: Event) => event.registration_status === true || event.registration_status === undefined
+        (event: Event) =>
+          event.registration_status === true ||
+          event.registration_status === undefined,
       );
-      
+
       setEvents(openEvents);
       setError("");
     } catch (err) {
@@ -81,7 +84,9 @@ export default function RegistrationAvailableClient() {
 
         {events.length === 0 ? (
           <div className="empty-state">
-            <p>No events with open registrations at the moment. Check back soon!</p>
+            <p>
+              No events with open registrations at the moment. Check back soon!
+            </p>
           </div>
         ) : (
           <div className="registrations-grid">
@@ -90,7 +95,9 @@ export default function RegistrationAvailableClient() {
                 {event.image_url && (
                   <div className="registration-image">
                     <img src={event.image_url} alt={event.title} />
-                    <div className="registration-status-badge">✅ Registration Open</div>
+                    <div className="registration-status-badge">
+                      ✅ Registration Open
+                    </div>
                   </div>
                 )}
 
@@ -99,7 +106,8 @@ export default function RegistrationAvailableClient() {
 
                   {event.date && (
                     <p className="registration-date">
-                      📅 {new Date(event.date).toLocaleDateString("en-US", {
+                      📅{" "}
+                      {new Date(event.date).toLocaleDateString("en-US", {
                         weekday: "short",
                         year: "numeric",
                         month: "short",
@@ -113,14 +121,13 @@ export default function RegistrationAvailableClient() {
                   )}
 
                   {event.description && (
-                    <p className="registration-description">{event.description}</p>
+                    <p className="registration-description">
+                      {event.description}
+                    </p>
                   )}
 
                   <div className="registration-actions">
-                    <Link
-                      href={`/events/${event.id}`}
-                      className="btn-register"
-                    >
+                    <Link href={`/events/${event.id}`} className="btn-register">
                       View & Register
                     </Link>
                   </div>
@@ -135,7 +142,12 @@ export default function RegistrationAvailableClient() {
         .registrations-page-container {
           min-height: 100vh;
           padding: 20px;
-          background: linear-gradient(135deg, #f0f4f8 0%, #f5f0e8 50%, #f0f4f8 100%);
+          background: linear-gradient(
+            135deg,
+            #f0f4f8 0%,
+            #f5f0e8 50%,
+            #f0f4f8 100%
+          );
         }
 
         .registrations-wrapper {

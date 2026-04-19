@@ -4,7 +4,7 @@ import { retryWithBackoff } from "../../../lib/api/retry";
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
+  process.env.SUPABASE_SERVICE_ROLE_KEY!,
 );
 
 type EventWritePayload = {
@@ -18,13 +18,8 @@ type EventWritePayload = {
   payment_image_required?: boolean;
 };
 
-type SlugData = {
-  more_description?: string;
-  slug_image_url?: string;
-};
-
 // GET - Fetch all events with related data
-export async function GET(_request: NextRequest) {
+export async function GET() {
   try {
     const result = await retryWithBackoff(async () =>
       supabase
@@ -34,9 +29,9 @@ export async function GET(_request: NextRequest) {
           *,
           event_slug(*),
           posters(*)
-        `
+        `,
         )
-        .order("date", { ascending: false })
+        .order("date", { ascending: false }),
     );
 
     const { data: events, error: eventsError } = result;
@@ -47,7 +42,7 @@ export async function GET(_request: NextRequest) {
     console.error("Error fetching events:", error);
     return NextResponse.json(
       { success: false, error: "Failed to fetch events" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -56,12 +51,24 @@ export async function GET(_request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { title, description, image_url, date, venue, registration_enabled, registration_status, payment_image_required, more_description, slug_image_url, poster_image_urls } = body;
+    const {
+      title,
+      description,
+      image_url,
+      date,
+      venue,
+      registration_enabled,
+      registration_status,
+      payment_image_required,
+      more_description,
+      slug_image_url,
+      poster_image_urls,
+    } = body;
 
     if (!title?.trim()) {
       return NextResponse.json(
         { success: false, error: "Title is required" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -95,8 +102,8 @@ export async function POST(request: NextRequest) {
           *,
           event_slug(*),
           posters(*)
-        `
-        )
+        `,
+        ),
     );
 
     let { data, error } = result;
@@ -124,8 +131,8 @@ export async function POST(request: NextRequest) {
             *,
             event_slug(*),
             posters(*)
-          `
-          )
+          `,
+          ),
       );
 
       data = retryResult.data;
@@ -137,7 +144,7 @@ export async function POST(request: NextRequest) {
     // Create slug if provided
     if (data && data.length > 0 && (more_description || slug_image_url)) {
       const eventId = data[0].id;
-      const slugPayload: any = {
+      const slugPayload: Record<string, unknown> = {
         event_id: eventId,
       };
 
@@ -149,9 +156,7 @@ export async function POST(request: NextRequest) {
       }
 
       const slugResult = await retryWithBackoff(async () =>
-        supabase
-          .from("event_slug")
-          .insert([slugPayload])
+        supabase.from("event_slug").insert([slugPayload]),
       );
 
       if (slugResult.error) {
@@ -163,7 +168,9 @@ export async function POST(request: NextRequest) {
     // Create posters if provided
     if (data && data.length > 0 && poster_image_urls) {
       const eventId = data[0].id;
-      const posterImages = poster_image_urls.split("|").filter((url: string) => url.trim());
+      const posterImages = poster_image_urls
+        .split("|")
+        .filter((url: string) => url.trim());
 
       if (posterImages.length > 0) {
         const posterPayloads = posterImages.map((poster_image_url: string) => ({
@@ -172,13 +179,14 @@ export async function POST(request: NextRequest) {
         }));
 
         const posterResult = await retryWithBackoff(async () =>
-          supabase
-            .from("posters")
-            .insert(posterPayloads)
+          supabase.from("posters").insert(posterPayloads),
         );
 
         if (posterResult.error) {
-          console.warn("Warning: Failed to create event posters:", posterResult.error);
+          console.warn(
+            "Warning: Failed to create event posters:",
+            posterResult.error,
+          );
           // Don't throw, just warn - event was created successfully
         }
       }
@@ -194,10 +202,10 @@ export async function POST(request: NextRequest) {
             *,
             event_slug(*),
             posters(*)
-          `
+          `,
           )
           .eq("id", data[0].id)
-          .single()
+          .single(),
       );
 
       if (refetchResult.data) {
@@ -207,13 +215,13 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(
       { success: true, data: data?.[0] },
-      { status: 201 }
+      { status: 201 },
     );
   } catch (error) {
     console.error("Error creating event:", error);
     return NextResponse.json(
       { success: false, error: "Failed to create event" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

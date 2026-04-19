@@ -3,13 +3,13 @@ import { NextRequest, NextResponse } from "next/server";
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
+  process.env.SUPABASE_SERVICE_ROLE_KEY!,
 );
 
 // GET - Fetch a specific member
 export async function GET(
   request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ id: string }> },
 ) {
   try {
     const { id } = await params;
@@ -25,7 +25,7 @@ export async function GET(
     if (!data) {
       return NextResponse.json(
         { success: false, error: "Member not found" },
-        { status: 404 }
+        { status: 404 },
       );
     }
 
@@ -34,7 +34,7 @@ export async function GET(
     console.error("Error fetching member:", error);
     return NextResponse.json(
       { success: false, error: "Failed to fetch member" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -42,7 +42,7 @@ export async function GET(
 // PUT - Update a member
 export async function PUT(
   request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ id: string }> },
 ) {
   try {
     const { id } = await params;
@@ -52,7 +52,7 @@ export async function PUT(
     if (!name || !domain || !role) {
       return NextResponse.json(
         { success: false, error: "Missing required fields" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -68,7 +68,7 @@ export async function PUT(
     if (!data) {
       return NextResponse.json(
         { success: false, error: "Member not found" },
-        { status: 404 }
+        { status: 404 },
       );
     }
 
@@ -77,7 +77,7 @@ export async function PUT(
     console.error("Error updating member:", error);
     return NextResponse.json(
       { success: false, error: "Failed to update member" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -85,7 +85,7 @@ export async function PUT(
 // DELETE - Delete a member
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ id: string }> },
 ) {
   try {
     const { id } = await params;
@@ -102,7 +102,7 @@ export async function DELETE(
     console.error("Error deleting member:", error);
     return NextResponse.json(
       { success: false, error: "Failed to delete member" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

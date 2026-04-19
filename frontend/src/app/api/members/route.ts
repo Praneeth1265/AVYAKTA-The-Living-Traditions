@@ -4,14 +4,14 @@ import { retryWithBackoff } from "../../../lib/api/retry";
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
+  process.env.SUPABASE_SERVICE_ROLE_KEY!,
 );
 
 // GET - Fetch all members
-export async function GET(request: NextRequest) {
+export async function GET() {
   try {
     const result = await retryWithBackoff(async () =>
-      supabase.from("members").select("*")
+      supabase.from("members").select("*"),
     );
 
     const { data, error } = result;
@@ -22,7 +22,7 @@ export async function GET(request: NextRequest) {
     console.error("Error fetching members:", error);
     return NextResponse.json(
       { success: false, error: "Failed to fetch members" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -36,7 +36,7 @@ export async function POST(request: NextRequest) {
     if (!name || !domain || !role) {
       return NextResponse.json(
         { success: false, error: "Missing required fields" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -49,13 +49,13 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(
       { success: true, data: data?.[0] },
-      { status: 201 }
+      { status: 201 },
     );
   } catch (error) {
     console.error("Error creating member:", error);
     return NextResponse.json(
       { success: false, error: "Failed to create member" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

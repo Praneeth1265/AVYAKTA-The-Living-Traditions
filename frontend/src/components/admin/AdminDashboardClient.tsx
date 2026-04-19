@@ -9,7 +9,9 @@ import EventRegistrationsClient from "./EventRegistrationsClient";
 
 export default function AdminDashboardClient() {
   const router = useRouter();
-  const [activeSection, setActiveSection] = useState<"members" | "events" | "recruitment" | "registrations">("members");
+  const [activeSection, setActiveSection] = useState<
+    "members" | "events" | "recruitment" | "registrations"
+  >("members");
 
   const handleLogout = async () => {
     await fetch("/api/auth/logout", { method: "POST" });
@@ -49,11 +51,7 @@ export default function AdminDashboardClient() {
               </button>
             </nav>
           </div>
-          <button
-            type="button"
-            onClick={handleLogout}
-            className="btn-logout"
-          >
+          <button type="button" onClick={handleLogout} className="btn-logout">
             Logout
           </button>
         </div>

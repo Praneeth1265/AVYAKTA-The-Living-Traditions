@@ -40,7 +40,7 @@ export async function POST(request: NextRequest) {
             second_domain_preference: data.second_domain_preference || null,
           },
         ])
-        .select()
+        .select(),
     );
 
     const { error } = result;

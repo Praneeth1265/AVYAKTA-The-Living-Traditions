@@ -4,14 +4,14 @@ import { retryWithBackoff } from "../../../../lib/api/retry";
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
+  process.env.SUPABASE_SERVICE_ROLE_KEY!,
 );
 
 // GET - Fetch indicator status for all domains
-export async function GET(request: NextRequest) {
+export async function GET() {
   try {
     const result = await retryWithBackoff(async () =>
-      supabase.from("indicator").select("*")
+      supabase.from("indicator").select("*"),
     );
 
     const { data, error } = result;
@@ -22,7 +22,7 @@ export async function GET(request: NextRequest) {
     console.error("Error fetching indicators:", error);
     return NextResponse.json(
       { success: false, error: "Failed to fetch indicators" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -36,7 +36,7 @@ export async function PUT(request: NextRequest) {
     if (indicator === undefined) {
       return NextResponse.json(
         { success: false, error: "Indicator status is required" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -57,15 +57,12 @@ export async function PUT(request: NextRequest) {
             .from("indicator")
             .update({ indicator })
             .eq("domain", domain)
-            .select()
+            .select(),
         );
       } else {
         // Insert new domain indicator
         result = await retryWithBackoff(async () =>
-          supabase
-            .from("indicator")
-            .insert([{ domain, indicator }])
-            .select()
+          supabase.from("indicator").insert([{ domain, indicator }]).select(),
         );
       }
     } else {
@@ -83,7 +80,7 @@ export async function PUT(request: NextRequest) {
             .from("indicator")
             .update({ indicator })
             .eq("id", existing.id)
-            .select()
+            .select(),
         );
       } else {
         // Insert new (global indicator)
@@ -91,7 +88,7 @@ export async function PUT(request: NextRequest) {
           supabase
             .from("indicator")
             .insert([{ domain: "global", indicator }])
-            .select()
+            .select(),
         );
       }
     }
@@ -104,7 +101,7 @@ export async function PUT(request: NextRequest) {
     console.error("Error updating indicator:", error);
     return NextResponse.json(
       { success: false, error: "Failed to update indicator" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

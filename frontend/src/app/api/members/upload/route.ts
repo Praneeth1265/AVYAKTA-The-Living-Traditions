@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
+  process.env.SUPABASE_SERVICE_ROLE_KEY!,
 );
 
 // POST - Upload member photo
@@ -16,14 +16,14 @@ export async function POST(request: NextRequest) {
     if (!file) {
       return NextResponse.json(
         { success: false, error: "No file provided" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
     if (!memberId) {
       return NextResponse.json(
         { success: false, error: "Member ID is required" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -31,7 +31,7 @@ export async function POST(request: NextRequest) {
     if (!file.type.startsWith("image/")) {
       return NextResponse.json(
         { success: false, error: "File must be an image" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -39,7 +39,7 @@ export async function POST(request: NextRequest) {
     if (file.size > 5 * 1024 * 1024) {
       return NextResponse.json(
         { success: false, error: "File size must be less than 5MB" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -49,7 +49,7 @@ export async function POST(request: NextRequest) {
     const folder = "member-photos";
 
     // Upload to Supabase Storage
-    const { data, error: uploadError } = await supabase.storage
+    const { error: uploadError } = await supabase.storage
       .from("members")
       .upload(`${folder}/${filename}`, file, {
         cacheControl: "3600",
@@ -72,16 +72,17 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(
       { success: true, photo_url: publicUrl },
-      { status: 200 }
+      { status: 200 },
     );
   } catch (error) {
     console.error("Error uploading photo:", error);
     return NextResponse.json(
       {
         success: false,
-        error: error instanceof Error ? error.message : "Failed to upload photo",
+        error:
+          error instanceof Error ? error.message : "Failed to upload photo",
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

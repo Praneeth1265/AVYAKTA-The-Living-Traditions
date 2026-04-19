@@ -2,7 +2,7 @@ import { createClient } from "@supabase/supabase-js";
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
 );
 
 interface UploadResult {
@@ -21,12 +21,12 @@ interface UploadResult {
 export async function uploadImageToStorage(
   base64Data: string,
   folderPath: string,
-  fileName: string
+  fileName: string,
 ): Promise<UploadResult> {
   try {
     // Remove data URL prefix if present
     const cleanBase64 = base64Data.replace(/^data:image\/\w+;base64,/, "");
-    
+
     // Convert base64 to blob
     const binaryString = atob(cleanBase64);
     const bytes = new Uint8Array(binaryString.length);
@@ -41,7 +41,7 @@ export async function uploadImageToStorage(
     const filePath = `${folderPath}/${uniqueFileName}`;
 
     // Upload to Supabase Storage
-    const { data, error } = await supabase.storage
+    const { error } = await supabase.storage
       .from("event-images")
       .upload(filePath, blob, {
         cacheControl: "3600",

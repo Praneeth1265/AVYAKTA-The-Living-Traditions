@@ -75,7 +75,9 @@ export default function MembersTable({
                         className="btn-delete"
                         title="Delete member"
                       >
-                        {isDeleting === member.id ? "🗑️ Deleting..." : "🗑️ Delete"}
+                        {isDeleting === member.id
+                          ? "🗑️ Deleting..."
+                          : "🗑️ Delete"}
                       </button>
                     </div>
                   </td>

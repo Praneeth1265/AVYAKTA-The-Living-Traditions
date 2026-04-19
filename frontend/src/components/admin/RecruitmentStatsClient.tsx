@@ -18,7 +18,9 @@ interface DomainIndicator {
 
 export default function RecruitmentStatsClient() {
   const [counters, setCounters] = useState<CounterStat[]>([]);
-  const [domainIndicators, setDomainIndicators] = useState<DomainIndicator[]>([]);
+  const [domainIndicators, setDomainIndicators] = useState<DomainIndicator[]>(
+    [],
+  );
   const [globalIndicator, setGlobalIndicator] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState(false);
   const [togglingGlobal, setTogglingGlobal] = useState(false);
@@ -39,21 +41,25 @@ export default function RecruitmentStatsClient() {
         fetch("/api/recruitment/indicator"),
       ]);
 
-      if (!counterRes.ok || !indicatorRes.ok) throw new Error("Failed to fetch data");
+      if (!counterRes.ok || !indicatorRes.ok)
+        throw new Error("Failed to fetch data");
 
       const counterData = await counterRes.json();
       const indicatorData = await indicatorRes.json();
 
       setCounters(counterData.data || []);
-      
+
       // Handle indicators - the API returns an array of domain indicators
-      const indicatorsArray = Array.isArray(indicatorData.data) ? indicatorData.data : [];
+      const indicatorsArray = Array.isArray(indicatorData.data)
+        ? indicatorData.data
+        : [];
       setDomainIndicators(indicatorsArray);
-      
+
       // Set global indicator (for backward compatibility - use first indicator or false)
-      const globalStatus = indicatorsArray.length > 0 ? indicatorsArray[0].indicator : false;
+      const globalStatus =
+        indicatorsArray.length > 0 ? indicatorsArray[0].indicator : false;
       setGlobalIndicator(globalStatus);
-      
+
       setError("");
     } catch (err) {
       setError("Failed to load recruitment stats");
@@ -90,7 +96,7 @@ export default function RecruitmentStatsClient() {
   const handleFlushAllCounters = async () => {
     if (
       !confirm(
-        "⚠️ WARNING: This will migrate all approved applicants to the members table, clear ALL recruitment data, reset all domain counters, and CLOSE all recruitment domains. This action CANNOT be undone. Continue?"
+        "⚠️ WARNING: This will migrate all approved applicants to the members table, clear ALL recruitment data, reset all domain counters, and CLOSE all recruitment domains. This action CANNOT be undone. Continue?",
       )
     ) {
       return;
@@ -111,7 +117,9 @@ export default function RecruitmentStatsClient() {
       if (!recruitmentResponse.ok) {
         const errorData = await recruitmentResponse.json();
         throw new Error(
-          errorData.details || errorData.error || "Failed to flush recruitment data"
+          errorData.details ||
+            errorData.error ||
+            "Failed to flush recruitment data",
         );
       }
 
@@ -145,7 +153,7 @@ export default function RecruitmentStatsClient() {
 
       // All operations successful
       setSuccess(
-        `✅ Complete flush successful! Added ${recruitmentResult.stats.totalMembersAdded} new members (${recruitmentResult.stats.secondPreferenceMembers} second preference + ${recruitmentResult.stats.firstPreferenceMembers} first preference). All recruitment data, counters cleared, and recruitment domains closed.`
+        `✅ Complete flush successful! Added ${recruitmentResult.stats.totalMembersAdded} new members (${recruitmentResult.stats.secondPreferenceMembers} second preference + ${recruitmentResult.stats.firstPreferenceMembers} first preference). All recruitment data, counters cleared, and recruitment domains closed.`,
       );
 
       // Refresh data to show updated stats
@@ -154,7 +162,8 @@ export default function RecruitmentStatsClient() {
       // Clear success message after 6 seconds
       setTimeout(() => setSuccess(""), 6000);
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : "Unknown error occurred";
+      const errorMessage =
+        err instanceof Error ? err.message : "Unknown error occurred";
       setError(`❌ Flush failed: ${errorMessage}`);
       console.error("Error during flush operations:", err);
     } finally {
@@ -172,7 +181,9 @@ export default function RecruitmentStatsClient() {
           <div className="recruitment-title-section">
             <p className="recruitment-label">Avyakta Admin</p>
             <h1>Recruitment Management</h1>
-            <p>Manage recruitment status and view application stats by domain.</p>
+            <p>
+              Manage recruitment status and view application stats by domain.
+            </p>
           </div>
         </div>
 
@@ -180,12 +191,20 @@ export default function RecruitmentStatsClient() {
           <div className="header-left">
             <h3>📋 Recruitment Stats</h3>
             <div className="status-display">
-              <span className={`indicator-dot ${globalIndicator ? "active" : ""}`}></span>
-              <span className="status-text">Recruitment is {globalIndicator ? "OPEN" : "CLOSED"}</span>
+              <span
+                className={`indicator-dot ${globalIndicator ? "active" : ""}`}
+              ></span>
+              <span className="status-text">
+                Recruitment is {globalIndicator ? "OPEN" : "CLOSED"}
+              </span>
             </div>
           </div>
           <div className="header-actions">
-            <button onClick={fetchData} className="btn-refresh" disabled={isLoading}>
+            <button
+              onClick={fetchData}
+              className="btn-refresh"
+              disabled={isLoading}
+            >
               {isLoading ? "Loading..." : "Refresh"}
             </button>
             <button
@@ -193,9 +212,17 @@ export default function RecruitmentStatsClient() {
               className={`btn-toggle-global ${globalIndicator ? "active" : ""}`}
               disabled={togglingGlobal}
             >
-              {togglingGlobal ? "Updating..." : globalIndicator ? "🔓 Close" : "🔒 Open"}
+              {togglingGlobal
+                ? "Updating..."
+                : globalIndicator
+                  ? "🔓 Close"
+                  : "🔒 Open"}
             </button>
-            <button onClick={handleFlushAllCounters} className="btn-flush-all" disabled={flushingAll}>
+            <button
+              onClick={handleFlushAllCounters}
+              className="btn-flush-all"
+              disabled={flushingAll}
+            >
               {flushingAll ? "Processing..." : "🧹 Flush All"}
             </button>
           </div>
@@ -205,52 +232,70 @@ export default function RecruitmentStatsClient() {
         {success && <div className="alert alert-success">{success}</div>}
 
         <div className="recruitment-grid">
-        {RECRUITMENT_DOMAINS.map((domain) => {
-          const counter = counters.find((c) => c.domain === domain);
-          const domainIndic = domainIndicators.find((d) => d.domain === domain);
-          const isActive = domainIndic?.indicator ?? false;
-          const total = counter ? getTotal(counter) : 0;
+          {RECRUITMENT_DOMAINS.map((domain) => {
+            const counter = counters.find((c) => c.domain === domain);
+            const domainIndic = domainIndicators.find(
+              (d) => d.domain === domain,
+            );
+            const isActive = domainIndic?.indicator ?? false;
+            const total = counter ? getTotal(counter) : 0;
 
-          return (
-            <div key={domain} className={`recruitment-card ${isActive ? "active" : "inactive"}`}>
-              <div className="card-header">
-                <div className="domain-title">
-                  <h4>{domain}</h4>
-                  <span className={`domain-indicator ${isActive ? "active" : ""}`}>
-                    {isActive ? "🟢" : "🔴"}
-                  </span>
+            return (
+              <div
+                key={domain}
+                className={`recruitment-card ${isActive ? "active" : "inactive"}`}
+              >
+                <div className="card-header">
+                  <div className="domain-title">
+                    <h4>{domain}</h4>
+                    <span
+                      className={`domain-indicator ${isActive ? "active" : ""}`}
+                    >
+                      {isActive ? "🟢" : "🔴"}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="stats-section">
+                  <div className="stat-row">
+                    <span className="stat-label">Total:</span>
+                    <span className="stat-value">{total}</span>
+                  </div>
+                  <div className="stat-row">
+                    <span className="stat-label">✅ Approved:</span>
+                    <span className="stat-value approved">
+                      {counter?.approved || 0}
+                    </span>
+                  </div>
+                  <div className="stat-row">
+                    <span className="stat-label">❓ Not Sure:</span>
+                    <span className="stat-value waiting">
+                      {counter?.not_sure || 0}
+                    </span>
+                  </div>
+                  <div className="stat-row">
+                    <span className="stat-label">❌ Rejected:</span>
+                    <span className="stat-value rejected">
+                      {counter?.rejected || 0}
+                    </span>
+                  </div>
                 </div>
               </div>
-
-              <div className="stats-section">
-                <div className="stat-row">
-                  <span className="stat-label">Total:</span>
-                  <span className="stat-value">{total}</span>
-                </div>
-                <div className="stat-row">
-                  <span className="stat-label">✅ Approved:</span>
-                  <span className="stat-value approved">{counter?.approved || 0}</span>
-                </div>
-                <div className="stat-row">
-                  <span className="stat-label">❓ Not Sure:</span>
-                  <span className="stat-value waiting">{counter?.not_sure || 0}</span>
-                </div>
-                <div className="stat-row">
-                  <span className="stat-label">❌ Rejected:</span>
-                  <span className="stat-value rejected">{counter?.rejected || 0}</span>
-                </div>
-              </div>
-            </div>
-          );
-        })}
+            );
+          })}
         </div>
       </div>
 
-        <style jsx>{`
+      <style jsx>{`
         .recruitment-container {
           min-height: 100vh;
           padding: 20px;
-          background: linear-gradient(135deg, #f0f4f8 0%, #f5f0e8 50%, #f0f4f8 100%);
+          background: linear-gradient(
+            135deg,
+            #f0f4f8 0%,
+            #f5f0e8 50%,
+            #f0f4f8 100%
+          );
           display: flex;
           flex-direction: column;
         }
@@ -485,7 +530,8 @@ export default function RecruitmentStatsClient() {
         }
 
         @keyframes pulse-indicator {
-          0%, 100% {
+          0%,
+          100% {
             opacity: 1;
           }
           50% {

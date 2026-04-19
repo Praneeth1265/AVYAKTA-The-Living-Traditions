@@ -25,12 +25,19 @@ export default function MemberForm({
 }: MemberFormProps) {
   const [formData, setFormData] = useState<FormData>(
     member
-      ? { name: member.name, domain: member.domain, role: member.role, photo_url: member.photo_url }
-      : { name: "", domain: "", role: "", photo_url: "" }
+      ? {
+          name: member.name,
+          domain: member.domain,
+          role: member.role,
+          photo_url: member.photo_url,
+        }
+      : { name: "", domain: "", role: "", photo_url: "" },
   );
   const [error, setError] = useState("");
   const [isUploading, setIsUploading] = useState(false);
-  const [photoPreview, setPhotoPreview] = useState<string | null>(member?.photo_url || null);
+  const [photoPreview, setPhotoPreview] = useState<string | null>(
+    member?.photo_url || null,
+  );
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -99,7 +106,11 @@ export default function MemberForm({
     e.preventDefault();
     setError("");
 
-    if (!formData.name.trim() || !formData.domain.trim() || !formData.role.trim()) {
+    if (
+      !formData.name.trim() ||
+      !formData.domain.trim() ||
+      !formData.role.trim()
+    ) {
       setError("All fields are required");
       return;
     }
@@ -175,20 +186,28 @@ export default function MemberForm({
             disabled={isUploading}
             className="file-input"
           />
-          <small className="file-hint">Accepted: JPG, PNG, GIF, WebP (Max 5MB)</small>
+          <small className="file-hint">
+            Accepted: JPG, PNG, GIF, WebP (Max 5MB)
+          </small>
           {photoPreview && (
             <div className="photo-preview">
               <small>Preview:</small>
               <img src={photoPreview} alt="Member preview" />
             </div>
           )}
-          {isUploading && <div className="uploading">⏳ Uploading image...</div>}
+          {isUploading && (
+            <div className="uploading">⏳ Uploading image...</div>
+          )}
         </div>
 
         {error && <div className="form-error">{error}</div>}
 
         <div className="form-actions">
-          <button type="submit" disabled={isLoading || isUploading} className="btn-primary">
+          <button
+            type="submit"
+            disabled={isLoading || isUploading}
+            className="btn-primary"
+          >
             {isLoading ? "Saving..." : member ? "Update Member" : "Add Member"}
           </button>
           <button

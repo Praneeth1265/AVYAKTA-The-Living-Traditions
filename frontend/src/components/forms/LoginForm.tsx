@@ -64,7 +64,10 @@ export default function LoginForm() {
   };
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="w-full space-y-0 flex flex-col">
+    <form
+      onSubmit={handleSubmit(onSubmit)}
+      className="w-full space-y-0 flex flex-col"
+    >
       {error && (
         <div className="mb-4 p-3 bg-red-100 border border-red-400 text-red-900 text-sm font-medium rounded-md animation-in fade-in slide-in-from-top-2">
           {error}
@@ -78,7 +81,10 @@ export default function LoginForm() {
       )}
 
       <div className="mb-5">
-        <label htmlFor="email" className="block mb-2 text-sm font-medium text-gray-700">
+        <label
+          htmlFor="email"
+          className="block mb-2 text-sm font-medium text-gray-700"
+        >
           Email Address
         </label>
         <input
@@ -87,9 +93,7 @@ export default function LoginForm() {
           placeholder="Enter your email"
           {...register("email")}
           className={`w-full px-3.5 py-3 text-sm bg-gray-50 border rounded-lg font-sans focus:outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-600/20 focus:bg-white transition-all ${
-            errors.email
-              ? "border-red-600 bg-red-50"
-              : "border-gray-300"
+            errors.email ? "border-red-600 bg-red-50" : "border-gray-300"
           } disabled:bg-gray-200 disabled:cursor-not-allowed disabled:opacity-60`}
           disabled={isLoading}
         />
@@ -101,7 +105,10 @@ export default function LoginForm() {
       </div>
 
       <div className="mb-2">
-        <label htmlFor="password" className="block mb-2 text-sm font-medium text-gray-700">
+        <label
+          htmlFor="password"
+          className="block mb-2 text-sm font-medium text-gray-700"
+        >
           Password
         </label>
         <input
@@ -110,9 +117,7 @@ export default function LoginForm() {
           placeholder="Enter your password"
           {...register("password")}
           className={`w-full px-3.5 py-3 text-sm bg-gray-50 border rounded-lg font-sans focus:outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-600/20 focus:bg-white transition-all ${
-            errors.password
-              ? "border-red-600 bg-red-50"
-              : "border-gray-300"
+            errors.password ? "border-red-600 bg-red-50" : "border-gray-300"
           } disabled:bg-gray-200 disabled:cursor-not-allowed disabled:opacity-60`}
           disabled={isLoading}
         />

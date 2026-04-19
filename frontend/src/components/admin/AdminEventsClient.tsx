@@ -53,9 +53,12 @@ export default function AdminEventsClient() {
       if (!response.ok) throw new Error("Failed to fetch events");
 
       const result = await response.json();
-      if (!result.success) throw new Error(result.error || "Failed to fetch events");
+      if (!result.success)
+        throw new Error(result.error || "Failed to fetch events");
 
-      const filteredEvents = (result.data || []).filter((e: any) => e?.id);
+      const filteredEvents = (result.data || []).filter(
+        (e: { id?: string }) => e?.id,
+      );
       setEvents(filteredEvents);
       setError("");
     } catch (err) {
@@ -82,7 +85,9 @@ export default function AdminEventsClient() {
 
         const result = await response.json();
         if (!response.ok) {
-          throw new Error(result.error || `HTTP error! status: ${response.status}`);
+          throw new Error(
+            result.error || `HTTP error! status: ${response.status}`,
+          );
         }
         if (!result.success) {
           throw new Error(result.error || "Failed to update event");
@@ -91,7 +96,7 @@ export default function AdminEventsClient() {
         setEvents((prev) =>
           prev
             .map((e) => (e?.id === editingEvent.id ? result.data : e))
-            .filter((e) => e?.id)
+            .filter((e) => e?.id),
         );
         setSelectedEvent(result.data);
         setSuccessMessage("✅ Event updated successfully!");
@@ -112,7 +117,9 @@ export default function AdminEventsClient() {
 
         const result = await response.json();
         if (!response.ok) {
-          throw new Error(result.error || `HTTP error! status: ${response.status}`);
+          throw new Error(
+            result.error || `HTTP error! status: ${response.status}`,
+          );
         }
         if (!result.success) {
           throw new Error(result.error || "Failed to create event");
@@ -188,12 +195,17 @@ export default function AdminEventsClient() {
           <div className="events-admin-title-section">
             <p className="events-admin-label">Avyakta Admin</p>
             <h1>📅 Events Management</h1>
-            <p>Create and manage events with details, images, and registration settings.</p>
+            <p>
+              Create and manage events with details, images, and registration
+              settings.
+            </p>
           </div>
         </div>
 
         {error && <div className="alert alert-error">{error}</div>}
-        {successMessage && <div className="alert alert-success">{successMessage}</div>}
+        {successMessage && (
+          <div className="alert alert-success">{successMessage}</div>
+        )}
 
         <div className="events-admin-layout">
           {/* Left: Form */}
@@ -219,7 +231,9 @@ export default function AdminEventsClient() {
               {isLoading ? (
                 <p className="loading">Loading events...</p>
               ) : events.length === 0 ? (
-                <p className="empty-state">No events created yet. Create one using the form.</p>
+                <p className="empty-state">
+                  No events created yet. Create one using the form.
+                </p>
               ) : (
                 <div className="events-admin-item-list">
                   {events.map((event) => (
@@ -231,10 +245,15 @@ export default function AdminEventsClient() {
                       <div className="events-admin-item-content">
                         <h4>{event.title}</h4>
                         <p className="event-date">
-                          📅 {event.date ? new Date(event.date).toLocaleDateString() : "No date"}
+                          📅{" "}
+                          {event.date
+                            ? new Date(event.date).toLocaleDateString()
+                            : "No date"}
                         </p>
                         <p className="event-desc">
-                          {event.description ? event.description.substring(0, 60) + "..." : "No description"}
+                          {event.description
+                            ? event.description.substring(0, 60) + "..."
+                            : "No description"}
                         </p>
                       </div>
 
@@ -311,51 +330,56 @@ export default function AdminEventsClient() {
                   )}
 
                   {/* Event Details (Slug) */}
-                  {selectedEvent.event_slug && selectedEvent.event_slug.length > 0 && (
-                    <div className="detail-section">
-                      <h3>Event Details</h3>
-                      {selectedEvent.event_slug.map((slug) => (
-                        <div key={slug.id}>
-                          <div className="detail-item">
-                            <label>More Description:</label>
-                            <p>{slug.more_description || "No additional description"}</p>
-                          </div>
-                          {slug.image_url && (
+                  {selectedEvent.event_slug &&
+                    selectedEvent.event_slug.length > 0 && (
+                      <div className="detail-section">
+                        <h3>Event Details</h3>
+                        {selectedEvent.event_slug.map((slug) => (
+                          <div key={slug.id}>
                             <div className="detail-item">
-                              <label>Detail Images:</label>
-                              <div className="image-grid">
-                                {slug.image_url.split("|").map((url, idx) => (
-                                  <img
-                                    key={idx}
-                                    src={url.trim()}
-                                    alt={`Detail ${idx + 1}`}
-                                    className="detail-grid-image"
-                                  />
-                                ))}
-                              </div>
+                              <label>More Description:</label>
+                              <p>
+                                {slug.more_description ||
+                                  "No additional description"}
+                              </p>
                             </div>
-                          )}
-                        </div>
-                      ))}
-                    </div>
-                  )}
-
-                  {/* Posters */}
-                  {selectedEvent.posters && selectedEvent.posters.length > 0 && (
-                    <div className="detail-section">
-                      <h3>Posters ({selectedEvent.posters.length})</h3>
-                      <div className="image-grid">
-                        {selectedEvent.posters.map((poster) => (
-                          <img
-                            key={poster.id}
-                            src={poster.poster_image_url}
-                            alt="Poster"
-                            className="detail-grid-image"
-                          />
+                            {slug.image_url && (
+                              <div className="detail-item">
+                                <label>Detail Images:</label>
+                                <div className="image-grid">
+                                  {slug.image_url.split("|").map((url, idx) => (
+                                    <img
+                                      key={idx}
+                                      src={url.trim()}
+                                      alt={`Detail ${idx + 1}`}
+                                      className="detail-grid-image"
+                                    />
+                                  ))}
+                                </div>
+                              </div>
+                            )}
+                          </div>
                         ))}
                       </div>
-                    </div>
-                  )}
+                    )}
+
+                  {/* Posters */}
+                  {selectedEvent.posters &&
+                    selectedEvent.posters.length > 0 && (
+                      <div className="detail-section">
+                        <h3>Posters ({selectedEvent.posters.length})</h3>
+                        <div className="image-grid">
+                          {selectedEvent.posters.map((poster) => (
+                            <img
+                              key={poster.id}
+                              src={poster.poster_image_url}
+                              alt="Poster"
+                              className="detail-grid-image"
+                            />
+                          ))}
+                        </div>
+                      </div>
+                    )}
 
                   {/* Action Buttons */}
                   <div className="detail-actions">
@@ -370,7 +394,9 @@ export default function AdminEventsClient() {
                       onClick={() => handleDeleteEvent(selectedEvent.id)}
                       disabled={isDeletingId === selectedEvent.id}
                     >
-                      {isDeletingId === selectedEvent.id ? "⏳ Deleting..." : "🗑️ Delete Event"}
+                      {isDeletingId === selectedEvent.id
+                        ? "⏳ Deleting..."
+                        : "🗑️ Delete Event"}
                     </button>
                   </div>
                 </div>
@@ -384,7 +410,12 @@ export default function AdminEventsClient() {
         .events-admin-container {
           min-height: 100vh;
           padding: 20px;
-          background: linear-gradient(135deg, #f0f4f8 0%, #f5f0e8 50%, #f0f4f8 100%);
+          background: linear-gradient(
+            135deg,
+            #f0f4f8 0%,
+            #f5f0e8 50%,
+            #f0f4f8 100%
+          );
         }
 
         .events-admin-wrapper {
