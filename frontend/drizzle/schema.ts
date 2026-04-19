@@ -9,11 +9,13 @@ import {
 
 export const events = pgTable("events", {
   id: uuid("id").primaryKey().defaultRandom(),
-  title: text("title").unique().notNull(),
+  title: text("title").notNull(),
   description: text("description"),
   image_url: text("image_url"),
   date: date("date"),
+  venue: text("venue"),
   registration_enabled: boolean("registration_enabled").default(true),
+  registration_status: boolean("registration_status").default(true),
   payment_image_required: boolean("payment_image_required").default(false),
 });
 

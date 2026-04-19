@@ -12,7 +12,9 @@ type EventWritePayload = {
   description: string | null;
   image_url: string | null;
   date: string | null;
+  venue?: string | null;
   registration_enabled?: boolean;
+  registration_status?: boolean;
   payment_image_required?: boolean;
 };
 
@@ -54,7 +56,7 @@ export async function GET(_request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { title, description, image_url, date, registration_enabled, payment_image_required, more_description, slug_image_url, poster_image_urls } = body;
+    const { title, description, image_url, date, venue, registration_enabled, registration_status, payment_image_required, more_description, slug_image_url, poster_image_urls } = body;
 
     if (!title?.trim()) {
       return NextResponse.json(
@@ -71,8 +73,14 @@ export async function POST(request: NextRequest) {
     };
 
     // Only add optional fields if they're provided
+    if (venue !== undefined) {
+      insertPayload.venue = venue?.trim() || null;
+    }
     if (registration_enabled !== undefined) {
       insertPayload.registration_enabled = registration_enabled;
+    }
+    if (registration_status !== undefined) {
+      insertPayload.registration_status = registration_status;
     }
     if (payment_image_required !== undefined) {
       insertPayload.payment_image_required = payment_image_required;

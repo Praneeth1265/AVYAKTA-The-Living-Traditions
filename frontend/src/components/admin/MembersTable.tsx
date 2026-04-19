@@ -5,6 +5,7 @@ interface Member {
   name: string;
   domain: string;
   role: string;
+  photo_url?: string;
 }
 
 interface MembersTableProps {
@@ -31,6 +32,7 @@ export default function MembersTable({
           <table className="members-table">
             <thead>
               <tr>
+                <th>Photo</th>
                 <th>Name</th>
                 <th>Role</th>
                 <th>Actions</th>
@@ -39,6 +41,20 @@ export default function MembersTable({
             <tbody>
               {members.map((member) => (
                 <tr key={member.id}>
+                  <td className="photo-cell">
+                    {member.photo_url ? (
+                      <img
+                        src={member.photo_url}
+                        alt={member.name}
+                        className="member-photo"
+                        onError={(e) => {
+                          (e.target as HTMLImageElement).style.display = "none";
+                        }}
+                      />
+                    ) : (
+                      <div className="photo-placeholder">📷</div>
+                    )}
+                  </td>
                   <td className="name-cell">{member.name}</td>
                   <td className="role-cell">
                     <span className="role-badge">{member.role}</span>
@@ -116,6 +132,33 @@ export default function MembersTable({
 
         .name-cell {
           font-weight: 500;
+        }
+
+        .photo-cell {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          padding: 8px 12px;
+        }
+
+        .member-photo {
+          width: 40px;
+          height: 40px;
+          border-radius: 50%;
+          object-fit: cover;
+          border: 2px solid #dbeafe;
+        }
+
+        .photo-placeholder {
+          width: 40px;
+          height: 40px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          background-color: #f3f4f6;
+          border-radius: 50%;
+          font-size: 20px;
+          border: 2px solid #e5e7eb;
         }
 
         .role-cell {

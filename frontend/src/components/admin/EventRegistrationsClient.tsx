@@ -8,7 +8,9 @@ interface Event {
   description: string | null;
   image_url: string | null;
   date: string | null;
+  venue?: string | null;
   registration_enabled?: boolean;
+  registration_status?: boolean;
 }
 
 export default function EventRegistrationsClient() {
@@ -45,13 +47,13 @@ export default function EventRegistrationsClient() {
   const handleToggleRegistration = async (event: Event) => {
     try {
       setTogglingId(event.id);
-      const newStatus = !event.registration_enabled;
+      const newStatus = !event.registration_status;
 
       // Immediately update UI
       setEvents((prev) =>
         prev.map((e) =>
           e.id === event.id
-            ? { ...e, registration_enabled: newStatus }
+            ? { ...e, registration_status: newStatus }
             : e
         )
       );
@@ -60,7 +62,7 @@ export default function EventRegistrationsClient() {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          registration_enabled: newStatus,
+          registration_status: newStatus,
         }),
       });
 
@@ -71,7 +73,7 @@ export default function EventRegistrationsClient() {
         setEvents((prev) =>
           prev.map((e) =>
             e.id === event.id
-              ? { ...e, registration_enabled: !newStatus }
+              ? { ...e, registration_status: !newStatus }
               : e
           )
         );
@@ -79,7 +81,7 @@ export default function EventRegistrationsClient() {
       }
 
       setSuccessMessage(
-        `✅ Registration ${newStatus ? "enabled" : "disabled"} for ${event.title}`
+        `✅ Registration ${newStatus ? "opened" : "closed"} for ${event.title}`
       );
       setTimeout(() => setSuccessMessage(""), 3000);
       
@@ -122,33 +124,37 @@ export default function EventRegistrationsClient() {
                   <tr>
                     <th>Event Title</th>
                     <th>Date</th>
-                    <th>Status</th>
+                    <th>Venue</th>
+                    <th>Registration Status</th>
                     <th>Action</th>
                   </tr>
                 </thead>
                 <tbody>
                   {events.map((event) => (
-                    <tr key={event.id} className={event.registration_enabled ? "enabled" : "disabled"}>
+                    <tr key={event.id} className={event.registration_status ? "open" : "closed"}>
                       <td className="event-title">{event.title}</td>
                       <td className="event-date">
                         {event.date ? new Date(event.date).toLocaleDateString() : "No date"}
                       </td>
+                      <td className="event-venue">
+                        {event.venue || "TBA"}
+                      </td>
                       <td className="event-status">
-                        <span className={`status-badge ${event.registration_enabled ? "open" : "closed"}`}>
-                          {event.registration_enabled ? "📝 OPEN" : "🔒 CLOSED"}
+                        <span className={`status-badge ${event.registration_status ? "open" : "closed"}`}>
+                          {event.registration_status ? "✅ OPEN" : "❌ CLOSED"}
                         </span>
                       </td>
                       <td className="event-action">
                         <button
                           onClick={() => handleToggleRegistration(event)}
                           disabled={togglingId === event.id}
-                          className={`btn-toggle ${event.registration_enabled ? "disable" : "enable"}`}
+                          className={`btn-toggle ${event.registration_status ? "close" : "open"}`}
                         >
                           {togglingId === event.id
                             ? "..."
-                            : event.registration_enabled
-                            ? "🔒 Disable"
-                            : "🔓 Enable"}
+                            : event.registration_status
+                            ? "🔒 Close"
+                            : "🔓 Open"}
                         </button>
                       </td>
                     </tr>

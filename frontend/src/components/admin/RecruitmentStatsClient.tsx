@@ -88,28 +88,75 @@ export default function RecruitmentStatsClient() {
   };
 
   const handleFlushAllCounters = async () => {
-    if (!confirm("Are you sure you want to reset counters for ALL domains?")) {
+    if (
+      !confirm(
+        "⚠️ WARNING: This will migrate all approved applicants to the members table, clear ALL recruitment data, reset all domain counters, and CLOSE all recruitment domains. This action CANNOT be undone. Continue?"
+      )
+    ) {
       return;
     }
 
     try {
       setFlushingAll(true);
-      const response = await fetch("/api/recruitment/counter", {
+      setError("");
+      setSuccess("");
+
+      // Step 1: Flush recruitment data first
+      console.log("Step 1: Flushing recruitment data...");
+      const recruitmentResponse = await fetch("/api/recruitment/flush", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+      });
+
+      if (!recruitmentResponse.ok) {
+        const errorData = await recruitmentResponse.json();
+        throw new Error(
+          errorData.details || errorData.error || "Failed to flush recruitment data"
+        );
+      }
+
+      const recruitmentResult = await recruitmentResponse.json();
+
+      // Step 2: Flush counters after recruitment data is cleared
+      console.log("Step 2: Flushing all counters...");
+      const counterResponse = await fetch("/api/recruitment/counter", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ flushAll: true }),
       });
 
-      if (!response.ok) throw new Error("Failed to flush counters");
+      if (!counterResponse.ok) {
+        throw new Error("Failed to flush counters");
+      }
 
-      // Refresh data from server to confirm the flush was successful
-      await fetchData();
+      // Step 3: Close all domain indicators
+      console.log("Step 3: Closing all domain indicators...");
+      for (const domain of RECRUITMENT_DOMAINS) {
+        const indicatorResponse = await fetch("/api/recruitment/indicator", {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ domain, indicator: false }),
+        });
 
-      setSuccess("All domain counters have been reset");
-      setTimeout(() => setSuccess(""), 3000);
+        if (!indicatorResponse.ok) {
+          throw new Error(`Failed to close indicator for domain: ${domain}`);
+        }
+      }
+
+      // All operations successful
+      setSuccess(
+        `✅ Complete flush successful! Added ${recruitmentResult.stats.totalMembersAdded} new members (${recruitmentResult.stats.secondPreferenceMembers} second preference + ${recruitmentResult.stats.firstPreferenceMembers} first preference). All recruitment data, counters cleared, and recruitment domains closed.`
+      );
+
+      // Refresh data to show updated stats
+      setTimeout(() => fetchData(), 1000);
+
+      // Clear success message after 6 seconds
+      setTimeout(() => setSuccess(""), 6000);
     } catch (err) {
-      setError("Failed to reset counters");
-      console.error("Error flushing counters:", err);
+      const errorMessage = err instanceof Error ? err.message : "Unknown error occurred";
+      setError(`❌ Flush failed: ${errorMessage}`);
+      console.error("Error during flush operations:", err);
     } finally {
       setFlushingAll(false);
     }
@@ -149,7 +196,7 @@ export default function RecruitmentStatsClient() {
               {togglingGlobal ? "Updating..." : globalIndicator ? "🔓 Close" : "🔒 Open"}
             </button>
             <button onClick={handleFlushAllCounters} className="btn-flush-all" disabled={flushingAll}>
-              {flushingAll ? "Flushing..." : "🗑️ Flush All"}
+              {flushingAll ? "Processing..." : "🧹 Flush All"}
             </button>
           </div>
         </div>
@@ -340,12 +387,14 @@ export default function RecruitmentStatsClient() {
         }
 
         .btn-flush-all {
-          background-color: #fee2e2;
-          color: #991b1b;
+          background-color: #fef3c7;
+          color: #92400e;
+          border: 2px solid #f59e0b;
         }
 
         .btn-flush-all:hover:not(:disabled) {
-          background-color: #fecaca;
+          background-color: #fde68a;
+          transform: scale(1.05);
         }
 
         .btn-refresh:disabled,

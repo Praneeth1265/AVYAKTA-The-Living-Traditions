@@ -9,7 +9,9 @@ interface Event {
   description: string | null;
   image_url: string | null;
   date: string | null;
+  venue?: string | null;
   registration_enabled?: boolean;
+  registration_status?: boolean;
   payment_image_required?: boolean;
   event_slug?: Array<{
     id: string;
@@ -34,7 +36,9 @@ export interface EventFormData {
   description: string;
   image_url: string;
   date: string;
+  venue?: string;
   registration_enabled?: boolean;
+  registration_status?: boolean;
   payment_image_required?: boolean;
   more_description?: string;
   slug_image_url?: string;
@@ -54,7 +58,9 @@ export default function EventForm({
     description: event?.description || "",
     image_url: event?.image_url || "",
     date: event?.date || "",
+    venue: event?.venue || "",
     registration_enabled: event?.registration_enabled ?? true,
+    registration_status: event?.registration_status ?? true,
     payment_image_required: event?.payment_image_required ?? false,
     more_description: eventSlug?.more_description || "",
     slug_image_url: eventSlug?.image_url || "",
@@ -81,7 +87,9 @@ export default function EventForm({
         description: event?.description || "",
         image_url: event?.image_url || "",
         date: event?.date || "",
+        venue: event?.venue || "",
         registration_enabled: event?.registration_enabled ?? true,
+        registration_status: event?.registration_status ?? true,
         payment_image_required: event?.payment_image_required ?? false,
         more_description: eventSlug?.more_description || "",
         slug_image_url: eventSlug?.image_url || "",
@@ -246,7 +254,9 @@ export default function EventForm({
         description: "",
         image_url: "",
         date: "",
+        venue: "",
         registration_enabled: true,
+        registration_status: true,
         payment_image_required: false,
         more_description: "",
         slug_image_url: "",
@@ -403,17 +413,31 @@ export default function EventForm({
       <div className="form-section">
         <h3>⚙️ Registration Settings</h3>
 
+        <div className="form-group">
+          <label htmlFor="venue">📍 Event Venue/Location</label>
+          <input
+            id="venue"
+            type="text"
+            name="venue"
+            value={formData.venue || ""}
+            onChange={handleInputChange}
+            placeholder="e.g., Main Auditorium, LT-101, Online"
+            disabled={isLoading}
+            maxLength={256}
+          />
+        </div>
+
         <div className="form-group checkbox-group">
-          <label htmlFor="registration_enabled">
+          <label htmlFor="registration_status">
             <input
-              id="registration_enabled"
+              id="registration_status"
               type="checkbox"
-              checked={formData.registration_enabled ?? true}
-              onChange={(e) => setFormData((prev) => ({ ...prev, registration_enabled: e.target.checked }))}
+              checked={formData.registration_status ?? true}
+              onChange={(e) => setFormData((prev) => ({ ...prev, registration_status: e.target.checked }))}
               disabled={isLoading}
               className="checkbox-input"
             />
-            <span>✅ Enable Registration for this Event</span>
+            <span>🔓 Registrations OPEN</span>
           </label>
         </div>
 

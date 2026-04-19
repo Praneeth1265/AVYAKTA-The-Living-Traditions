@@ -47,7 +47,7 @@ export async function PUT(
   try {
     const { id } = await params;
     const body = await request.json();
-    const { name, domain, role } = body;
+    const { name, domain, role, photo_url } = body;
 
     if (!name || !domain || !role) {
       return NextResponse.json(
@@ -58,7 +58,7 @@ export async function PUT(
 
     const { data, error } = await supabase
       .from("members")
-      .update({ name, domain, role })
+      .update({ name, domain, role, photo_url: photo_url || null })
       .eq("id", id)
       .select()
       .single();

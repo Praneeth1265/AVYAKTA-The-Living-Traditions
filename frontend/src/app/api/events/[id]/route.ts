@@ -12,7 +12,9 @@ type EventUpdatePayload = {
   description?: string;
   image_url?: string | null;
   date?: string | null;
+  venue?: string | null;
   registration_enabled?: boolean;
+  registration_status?: boolean;
   payment_image_required?: boolean;
 };
 
@@ -59,7 +61,7 @@ export async function PUT(
   try {
     const { id } = await params;
     const body = await request.json();
-    const { title, description, image_url, date, registration_enabled, payment_image_required, more_description, slug_image_url, poster_image_urls } = body;
+    const { title, description, image_url, date, venue, registration_enabled, registration_status, payment_image_required, more_description, slug_image_url, poster_image_urls } = body;
 
     const updatePayload: EventUpdatePayload = {};
 
@@ -68,7 +70,9 @@ export async function PUT(
     if (description !== undefined) updatePayload.description = description?.trim();
     if (image_url !== undefined) updatePayload.image_url = image_url;
     if (date !== undefined) updatePayload.date = date;
+    if (venue !== undefined) updatePayload.venue = venue?.trim() || null;
     if (registration_enabled !== undefined) updatePayload.registration_enabled = registration_enabled;
+    if (registration_status !== undefined) updatePayload.registration_status = registration_status;
     if (payment_image_required !== undefined) updatePayload.payment_image_required = payment_image_required;
 
     let result = await retryWithBackoff(async () =>

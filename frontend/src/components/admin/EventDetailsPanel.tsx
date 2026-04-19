@@ -24,7 +24,9 @@ interface Event {
   description: string | null;
   image_url: string | null;
   date: string | null;
+  venue?: string | null;
   registration_enabled?: boolean;
+  registration_status?: boolean;
   payment_image_required?: boolean;
   event_slug?: EventSlug[];
   posters?: Poster[];

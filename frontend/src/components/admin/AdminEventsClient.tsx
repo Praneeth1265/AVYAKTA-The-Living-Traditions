@@ -22,7 +22,9 @@ interface Event {
   description: string | null;
   image_url: string | null;
   date: string | null;
+  venue?: string | null;
   registration_enabled?: boolean;
+  registration_status?: boolean;
   payment_image_required?: boolean;
   event_slug?: EventSlug[];
   posters?: Poster[];
@@ -234,11 +236,6 @@ export default function AdminEventsClient() {
                         <p className="event-desc">
                           {event.description ? event.description.substring(0, 60) + "..." : "No description"}
                         </p>
-                        <div className="event-status-badges">
-                          <span className={`status-badge ${event.registration_enabled ? "open" : "closed"}`}>
-                            {event.registration_enabled ? "📝 Registration Open" : "🔒 Registration Closed"}
-                          </span>
-                        </div>
                       </div>
 
                       <div className="events-admin-item-actions">
@@ -359,31 +356,6 @@ export default function AdminEventsClient() {
                       </div>
                     </div>
                   )}
-
-                  {/* Registration Status */}
-                  <div className="detail-section">
-                    <h3>Registration Status</h3>
-                    <div className="detail-item">
-                      <label>Registration:</label>
-                      <p>
-                        <span
-                          className={`status-badge ${
-                            selectedEvent.registration_enabled ? "open" : "closed"
-                          }`}
-                        >
-                          {selectedEvent.registration_enabled
-                            ? "📝 Open for Registration"
-                            : "🔒 Closed for Registration"}
-                        </span>
-                      </p>
-                    </div>
-                    {selectedEvent.payment_image_required && (
-                      <div className="detail-item">
-                        <label>Payment Proof:</label>
-                        <p>💳 Required</p>
-                      </div>
-                    )}
-                  </div>
 
                   {/* Action Buttons */}
                   <div className="detail-actions">
@@ -599,30 +571,6 @@ export default function AdminEventsClient() {
           display: -webkit-box;
           -webkit-line-clamp: 1;
           -webkit-box-orient: vertical;
-        }
-
-        .event-status-badges {
-          display: flex;
-          gap: 6px;
-          flex-wrap: wrap;
-        }
-
-        .status-badge {
-          display: inline-block;
-          padding: 3px 8px;
-          border-radius: 3px;
-          font-size: 11px;
-          font-weight: 600;
-        }
-
-        .status-badge.open {
-          background-color: #dcfce7;
-          color: #166534;
-        }
-
-        .status-badge.closed {
-          background-color: #fee2e2;
-          color: #991b1b;
         }
 
         .events-admin-item-actions {

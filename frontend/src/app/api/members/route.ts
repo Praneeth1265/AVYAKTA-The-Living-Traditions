@@ -31,7 +31,7 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { name, domain, role } = body;
+    const { name, domain, role, photo_url } = body;
 
     if (!name || !domain || !role) {
       return NextResponse.json(
@@ -42,7 +42,7 @@ export async function POST(request: NextRequest) {
 
     const { data, error } = await supabase
       .from("members")
-      .insert([{ name, domain, role }])
+      .insert([{ name, domain, role, photo_url: photo_url || null }])
       .select();
 
     if (error) throw new Error(error.message);

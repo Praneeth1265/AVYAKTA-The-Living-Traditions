@@ -7,6 +7,7 @@ interface FormData {
   name: string;
   domain: string;
   role: string;
+  photo_url?: string;
 }
 
 interface MemberFormProps {
@@ -24,10 +25,12 @@ export default function MemberForm({
 }: MemberFormProps) {
   const [formData, setFormData] = useState<FormData>(
     member
-      ? { name: member.name, domain: member.domain, role: member.role }
-      : { name: "", domain: "", role: "" }
+      ? { name: member.name, domain: member.domain, role: member.role, photo_url: member.photo_url }
+      : { name: "", domain: "", role: "", photo_url: "" }
   );
   const [error, setError] = useState("");
+  const [isUploading, setIsUploading] = useState(false);
+  const [photoPreview, setPhotoPreview] = useState<string | null>(member?.photo_url || null);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -37,6 +40,59 @@ export default function MemberForm({
   const handleSelectChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Validate file type
+    if (!file.type.startsWith("image/")) {
+      setError("Please select a valid image file");
+      return;
+    }
+
+    // Validate file size (max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      setError("Image size must be less than 5MB");
+      return;
+    }
+
+    try {
+      setIsUploading(true);
+      setError("");
+
+      // Show preview while uploading
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setPhotoPreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+
+      // Upload to server
+      const formDataToSend = new FormData();
+      formDataToSend.append("file", file);
+      formDataToSend.append("memberId", member?.id || "new");
+
+      const response = await fetch("/api/members/upload", {
+        method: "POST",
+        body: formDataToSend,
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Failed to upload image");
+      }
+
+      const result = await response.json();
+      setFormData((prev) => ({ ...prev, photo_url: result.photo_url }));
+      setError("");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to upload image");
+      setPhotoPreview(null);
+    } finally {
+      setIsUploading(false);
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -51,7 +107,8 @@ export default function MemberForm({
     try {
       await onSubmit(formData);
       if (!member) {
-        setFormData({ name: "", domain: "", role: "" });
+        setFormData({ name: "", domain: "", role: "", photo_url: "" });
+        setPhotoPreview(null);
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : "An error occurred");
@@ -108,16 +165,36 @@ export default function MemberForm({
           </select>
         </div>
 
+        <div className="form-group">
+          <label htmlFor="photo">Photo (Optional)</label>
+          <input
+            type="file"
+            id="photo"
+            accept="image/*"
+            onChange={handlePhotoUpload}
+            disabled={isUploading}
+            className="file-input"
+          />
+          <small className="file-hint">Accepted: JPG, PNG, GIF, WebP (Max 5MB)</small>
+          {photoPreview && (
+            <div className="photo-preview">
+              <small>Preview:</small>
+              <img src={photoPreview} alt="Member preview" />
+            </div>
+          )}
+          {isUploading && <div className="uploading">⏳ Uploading image...</div>}
+        </div>
+
         {error && <div className="form-error">{error}</div>}
 
         <div className="form-actions">
-          <button type="submit" disabled={isLoading} className="btn-primary">
+          <button type="submit" disabled={isLoading || isUploading} className="btn-primary">
             {isLoading ? "Saving..." : member ? "Update Member" : "Add Member"}
           </button>
           <button
             type="button"
             onClick={onCancel}
-            disabled={isLoading}
+            disabled={isLoading || isUploading}
             className="btn-secondary"
           >
             Cancel
@@ -196,6 +273,69 @@ export default function MemberForm({
           background-color: #fee2e2;
           border-radius: 4px;
           border-left: 3px solid #dc2626;
+        }
+
+        .photo-preview {
+          margin-top: 12px;
+          padding: 12px;
+          background-color: #f9fafb;
+          border-radius: 6px;
+          border: 1px dashed #d1d5db;
+        }
+
+        .photo-preview small {
+          display: block;
+          margin-bottom: 8px;
+          color: #6b7280;
+          font-size: 12px;
+          font-weight: 500;
+        }
+
+        .photo-preview img {
+          max-width: 100%;
+          max-height: 150px;
+          border-radius: 4px;
+          object-fit: cover;
+        }
+
+        .file-input {
+          width: 100%;
+          padding: 10px;
+          border: 2px dashed #d1d5db;
+          border-radius: 6px;
+          font-size: 14px;
+          cursor: pointer;
+          transition: all 0.2s;
+          background-color: #fafafa;
+        }
+
+        .file-input:hover:not(:disabled) {
+          border-color: #3b82f6;
+          background-color: #eff6ff;
+        }
+
+        .file-input:disabled {
+          opacity: 0.6;
+          cursor: not-allowed;
+          background-color: #f3f4f6;
+        }
+
+        .file-hint {
+          display: block;
+          margin-top: 6px;
+          color: #6b7280;
+          font-size: 12px;
+        }
+
+        .uploading {
+          margin-top: 12px;
+          padding: 10px 12px;
+          background-color: #fef3c7;
+          border-radius: 6px;
+          color: #92400e;
+          font-size: 13px;
+          border-left: 3px solid #f59e0b;
+          font-weight: 500;
         }
 
         .form-actions {

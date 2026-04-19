@@ -9,12 +9,14 @@ interface Member {
   name: string;
   domain: string;
   role: string;
+  photo_url?: string;
 }
 
 interface FormData {
   name: string;
   domain: string;
   role: string;
+  photo_url?: string;
 }
 
 export default function AdminMembersClient() {
