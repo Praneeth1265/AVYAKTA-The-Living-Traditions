@@ -134,7 +134,9 @@ export default function EventRegistrationsClient() {
                   {events.map((event) => (
                     <tr
                       key={event.id}
-                      className={event.registration_status ? "open" : "closed"}
+                      className={
+                        event.registration_status ? "enabled" : "disabled"
+                      }
                     >
                       <td className="event-title">{event.title}</td>
                       <td className="event-date">
@@ -154,7 +156,7 @@ export default function EventRegistrationsClient() {
                         <button
                           onClick={() => handleToggleRegistration(event)}
                           disabled={togglingId === event.id}
-                          className={`btn-toggle ${event.registration_status ? "close" : "open"}`}
+                          className={`btn-toggle ${event.registration_status ? "disable" : "enable"}`}
                         >
                           {togglingId === event.id
                             ? "..."

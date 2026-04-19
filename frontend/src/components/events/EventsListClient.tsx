@@ -42,7 +42,9 @@ export default function EventsListClient() {
             : true,
       }));
 
-      console.log("Fetched events with status:", eventsWithDefaults);
+      if (process.env.NODE_ENV === "development") {
+        console.log("Fetched events with status:", eventsWithDefaults);
+      }
       setEvents(eventsWithDefaults);
       setError("");
     } catch (err) {

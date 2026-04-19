@@ -1,11 +1,33 @@
 import { createClient } from "@supabase/supabase-js";
 import { NextRequest, NextResponse } from "next/server";
+import { cookies } from "next/headers";
 import { retryWithBackoff } from "../../../lib/api/retry";
+import {
+  verifySessionId,
+  getSessionCookieName,
+} from "../../../lib/auth/session";
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.SUPABASE_SERVICE_ROLE_KEY!,
 );
+
+// Helper to verify admin authentication
+async function verifyAdminAuth(): Promise<boolean> {
+  try {
+    const cookieStore = await cookies();
+    const token = cookieStore.get(getSessionCookieName())?.value;
+
+    if (!token) {
+      return false;
+    }
+
+    const session = await verifySessionId(token);
+    return session !== null;
+  } catch {
+    return false;
+  }
+}
 
 type EventWritePayload = {
   title: string;
@@ -50,6 +72,18 @@ export async function GET() {
 // POST - Create a new event
 export async function POST(request: NextRequest) {
   try {
+    // Verify admin authentication
+    const isAuthenticated = await verifyAdminAuth();
+    if (!isAuthenticated) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: "Unauthorized: Admin authentication required",
+        },
+        { status: 401 },
+      );
+    }
+
     const body = await request.json();
     const {
       title,

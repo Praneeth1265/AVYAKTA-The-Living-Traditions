@@ -1,5 +1,34 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
+import { cookies } from "next/headers";
 import { getSupabaseAdmin } from "../../../../lib/supabase/server";
+import {
+  verifySessionId,
+  getSessionCookieName,
+} from "../../../../lib/auth/session";
+
+// Development-only logging helper
+const devLog = (...args: unknown[]) => {
+  if (process.env.NODE_ENV === "development") {
+    console.log(...args);
+  }
+};
+
+// Helper to verify admin authentication
+async function verifyAdminAuth(): Promise<boolean> {
+  try {
+    const cookieStore = await cookies();
+    const token = cookieStore.get(getSessionCookieName())?.value;
+
+    if (!token) {
+      return false;
+    }
+
+    const session = await verifySessionId(token);
+    return session !== null;
+  } catch {
+    return false;
+  }
+}
 
 /**
  * Flush endpoint for recruitment data
@@ -13,14 +42,26 @@ import { getSupabaseAdmin } from "../../../../lib/supabase/server";
  * - Input validation: All fields are trimmed and validated before insertion
  * - SQL Injection: Using Supabase parameterized queries prevents injection
  * - Atomicity: Operations are sequential with proper error handling
- * - Authorization: Uses service role key for backend operations
+ * - Authorization: Requires admin authentication before executing destructive operations
  */
-export async function POST() {
+export async function POST(request: NextRequest) {
   try {
+    // Verify admin authentication
+    const isAuthenticated = await verifyAdminAuth();
+    if (!isAuthenticated) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: "Unauthorized: Admin authentication required",
+        },
+        { status: 401 },
+      );
+    }
+
     const supabase = getSupabaseAdmin();
 
     // Step 1: Get all recruitment IDs with approved second preferences
-    console.log(
+    devLog(
       "Step 1: Fetching recruitment IDs with approved second preferences...",
     );
     const { data: secondPrefIds, error: secondPrefIdError } = await supabase
@@ -41,7 +82,7 @@ export async function POST() {
     // Step 2: Get recruitment data for accepted second preferences
     let secondPrefMembers = [];
     if (recruitmentIdsWithSecondPref.length > 0) {
-      console.log(
+      devLog(
         `Fetching ${recruitmentIdsWithSecondPref.length} second preference records...`,
       );
       const { data: secondPrefRecords, error: secondPrefError } = await supabase
@@ -65,7 +106,7 @@ export async function POST() {
         }));
 
       if (secondPrefMembers.length > 0) {
-        console.log(
+        devLog(
           `Inserting ${secondPrefMembers.length} second preference members...`,
         );
         const { error: insertSecondPrefError } = await supabase
@@ -81,7 +122,7 @@ export async function POST() {
     }
 
     // Step 3: Get all recruitment records with approved first preferences
-    console.log("Step 3: Fetching approved first preference records...");
+    devLog("Step 3: Fetching approved first preference records...");
     const { data: firstPrefRecords, error: firstPrefError } = await supabase
       .from("recruitment")
       .select("id, name, first_preference_domain")
@@ -104,7 +145,7 @@ export async function POST() {
 
     // Insert accepted first preferences into members table
     if (firstPrefMembers.length > 0) {
-      console.log(
+      devLog(
         `Inserting ${firstPrefMembers.length} first preference members...`,
       );
       const { error: insertFirstPrefError } = await supabase
@@ -119,7 +160,7 @@ export async function POST() {
     }
 
     // Step 5: Clear the recruitment table
-    console.log("Step 5: Clearing recruitment table...");
+    devLog("Step 5: Clearing recruitment table...");
 
     // Get all IDs first, then delete them (Supabase workaround for delete all)
     const { data: allRecruitmentIds, error: fetchAllIdsError } = await supabase
@@ -147,7 +188,7 @@ export async function POST() {
     }
 
     // Step 6: Clear the second_preference table (cascade handled by FK)
-    console.log("Step 6: Clearing second preference table...");
+    devLog("Step 6: Clearing second preference table...");
 
     const { data: allSecondPrefIds, error: fetchAllSecondPrefIdsError } =
       await supabase.from("second_preference").select("id");
@@ -170,7 +211,7 @@ export async function POST() {
       }
     }
 
-    console.log("✅ Flush operation completed successfully");
+    devLog("✅ Flush operation completed successfully");
 
     return NextResponse.json(
       {

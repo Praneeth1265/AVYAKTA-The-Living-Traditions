@@ -55,9 +55,11 @@ export default function RecruitmentStatsClient() {
         : [];
       setDomainIndicators(indicatorsArray);
 
-      // Set global indicator (for backward compatibility - use first indicator or false)
-      const globalStatus =
-        indicatorsArray.length > 0 ? indicatorsArray[0].indicator : false;
+      // Set global indicator by explicitly finding the "global" domain record
+      const globalRecord = indicatorsArray.find(
+        (ind: DomainIndicator) => ind.domain === "global",
+      );
+      const globalStatus = globalRecord ? globalRecord.indicator : false;
       setGlobalIndicator(globalStatus);
 
       setError("");
@@ -108,7 +110,9 @@ export default function RecruitmentStatsClient() {
       setSuccess("");
 
       // Step 1: Flush recruitment data first
-      console.log("Step 1: Flushing recruitment data...");
+      if (process.env.NODE_ENV === "development") {
+        console.log("Step 1: Flushing recruitment data...");
+      }
       const recruitmentResponse = await fetch("/api/recruitment/flush", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -126,7 +130,9 @@ export default function RecruitmentStatsClient() {
       const recruitmentResult = await recruitmentResponse.json();
 
       // Step 2: Flush counters after recruitment data is cleared
-      console.log("Step 2: Flushing all counters...");
+      if (process.env.NODE_ENV === "development") {
+        console.log("Step 2: Flushing all counters...");
+      }
       const counterResponse = await fetch("/api/recruitment/counter", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
@@ -138,7 +144,9 @@ export default function RecruitmentStatsClient() {
       }
 
       // Step 3: Close all domain indicators
-      console.log("Step 3: Closing all domain indicators...");
+      if (process.env.NODE_ENV === "development") {
+        console.log("Step 3: Closing all domain indicators...");
+      }
       for (const domain of RECRUITMENT_DOMAINS) {
         const indicatorResponse = await fetch("/api/recruitment/indicator", {
           method: "PUT",
