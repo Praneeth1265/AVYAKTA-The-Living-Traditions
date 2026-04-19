@@ -173,4 +173,66 @@ No schema redesign was required for adding event thumbnail/detail image support.
 - Supabase full connectivity is pending final pooler URL and validation.
 - Project can continue in parallel without blocking UI development.
 
+## 13) Latest Updates (Post Initial Handover)
+
+This section captures additional work completed after the initial handover draft.
+
+### 13.1 Supabase Runtime Connection Finalization
+
+- Runtime DATABASE_URL was switched to the Supabase Transaction Pooler format.
+- Verified application is using cloud Supabase DB path for runtime queries.
+- Confirmed event rows can be fetched from Supabase through runtime checks.
+
+### 13.2 Homepage Events Now Supabase-Driven
+
+- Homepage previously showed only hardcoded event cards.
+- Homepage was refactored to load events from DB-backed source (same data path as events listing).
+- Result: homepage events now reflect Supabase data instead of static placeholders.
+
+Files involved:
+
+- frontend/src/app/page.tsx
+- frontend/src/app/HomePageClient.tsx
+- frontend/src/app/api/home-events/route.ts
+
+### 13.3 Gallery Page Full Implementation
+
+- Implemented required layout:
+  - Left: scrollable event list with active bronze marker behavior.
+  - Right: masonry grid.
+  - Lightbox with close and left/right navigation.
+  - Keyboard support for arrow navigation and escape.
+  - Load More pagination behavior.
+- Wired gallery to DB-backed event source with graceful fallback mode.
+
+Files involved:
+
+- frontend/src/app/gallery/page.tsx
+- frontend/src/app/gallery/GalleryPageClient.tsx
+- frontend/src/lib/data/gallery.ts
+
+### 13.4 Members Page Full Implementation and Mapping Upgrade
+
+- Implemented section-based tribute layout and modal details view.
+- Added stagger-in animation and modal fade+scale behavior.
+- Updated members data mapping to prefer explicit DB columns when present:
+  - section
+  - designation
+  - photo_url
+  - bio/description/about/quote
+- Kept safe fallback behavior for incomplete rows.
+
+Files involved:
+
+- frontend/src/app/members/page.tsx
+- frontend/src/app/members/MembersPageClient.tsx
+- frontend/src/lib/data/memberSections.ts
+- frontend/src/lib/data/members.ts
+
+### 13.5 Validation State
+
+- Production build passes after latest changes.
+- Events, homepage events block, gallery, and members pages all render from cloud-connected flow.
+- One known data-level issue remains external to code: missing poster linkage for one event row should be corrected by DB team.
+
 Author- Iqbal Khalid
