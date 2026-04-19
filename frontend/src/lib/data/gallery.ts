@@ -81,14 +81,12 @@ function mapRowsToGalleryEvents(rows: GalleryRow[]): GalleryEvent[] {
   >();
 
   for (const row of rows) {
-    const current =
-      grouped.get(row.id) ??
-      {
-        title: row.title,
-        date: row.date,
-        images: new Set<string>(),
-        thumbnail: null,
-      };
+    const current = grouped.get(row.id) ?? {
+      title: row.title,
+      date: row.date,
+      images: new Set<string>(),
+      thumbnail: null,
+    };
 
     const urls = [
       ...splitUrls(row.poster_image_url),
@@ -101,7 +99,10 @@ function mapRowsToGalleryEvents(rows: GalleryRow[]): GalleryEvent[] {
     }
 
     current.thumbnail =
-      current.thumbnail || row.poster_image_url || row.slug_image_url || row.image_url;
+      current.thumbnail ||
+      row.poster_image_url ||
+      row.slug_image_url ||
+      row.image_url;
 
     grouped.set(row.id, current);
   }
@@ -174,7 +175,10 @@ export async function getGalleryEventsFromDb(): Promise<GalleryEvent[]> {
 
     return mapRowsToGalleryEvents(rows);
   } catch (error) {
-    console.warn("[gallery] Database unavailable, serving fallback gallery.", error);
+    console.warn(
+      "[gallery] Database unavailable, serving fallback gallery.",
+      error,
+    );
     return fallbackGalleryEvents();
   }
 }

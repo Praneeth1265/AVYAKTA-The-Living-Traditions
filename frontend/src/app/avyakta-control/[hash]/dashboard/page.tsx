@@ -136,9 +136,7 @@ export default function DashboardPage() {
             className="w-full rounded-xl border border-[#C9A84C]/40 px-4 py-3"
             placeholder="Thumbnail URL"
             value={form.thumbnailUrl}
-            onChange={(e) =>
-              setForm({ ...form, thumbnailUrl: e.target.value })
-            }
+            onChange={(e) => setForm({ ...form, thumbnailUrl: e.target.value })}
           />
 
           <input

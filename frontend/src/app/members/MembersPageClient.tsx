@@ -8,7 +8,11 @@ type MembersPageClientProps = {
   initialMembers: MemberCard[];
 };
 
-function RangoliCorner({ position }: { position: "top-left" | "top-right" | "bottom-left" | "bottom-right" }) {
+function RangoliCorner({
+  position,
+}: {
+  position: "top-left" | "top-right" | "bottom-left" | "bottom-right";
+}) {
   const baseClass = "pointer-events-none absolute h-14 w-14 text-[#C9A84C]/60";
   const positionClass = {
     "top-left": "left-2 top-2",
@@ -18,7 +22,11 @@ function RangoliCorner({ position }: { position: "top-left" | "top-right" | "bot
   }[position];
 
   return (
-    <svg viewBox="0 0 100 100" className={`${baseClass} ${positionClass}`} aria-hidden>
+    <svg
+      viewBox="0 0 100 100"
+      className={`${baseClass} ${positionClass}`}
+      aria-hidden
+    >
       <path
         d="M50 10 C55 30,70 45,90 50 C70 55,55 70,50 90 C45 70,30 55,10 50 C30 45,45 30,50 10 Z"
         fill="none"
@@ -30,13 +38,17 @@ function RangoliCorner({ position }: { position: "top-left" | "top-right" | "bot
   );
 }
 
-export default function MembersPageClient({ initialMembers }: MembersPageClientProps) {
+export default function MembersPageClient({
+  initialMembers,
+}: MembersPageClientProps) {
   const [selectedMember, setSelectedMember] = useState<MemberCard | null>(null);
 
   const sections = useMemo(() => {
     return memberSectionOrder.map((section) => ({
       ...section,
-      members: initialMembers.filter((member) => member.section === section.key),
+      members: initialMembers.filter(
+        (member) => member.section === section.key,
+      ),
     }));
   }, [initialMembers]);
 
@@ -52,10 +64,15 @@ export default function MembersPageClient({ initialMembers }: MembersPageClientP
           aria-hidden
         />
         <div className="relative mx-auto max-w-6xl">
-          <p className="text-xs uppercase tracking-[0.22em] text-[#C9A84C]">Members</p>
-          <h1 className="mt-3 text-4xl font-semibold md:text-6xl">A Living Tribute to Avyakta</h1>
+          <p className="text-xs uppercase tracking-[0.22em] text-[#C9A84C]">
+            Members
+          </p>
+          <h1 className="mt-3 text-4xl font-semibold md:text-6xl">
+            A Living Tribute to Avyakta
+          </h1>
           <p className="mt-4 max-w-3xl text-sm leading-7 text-[#F5F0E8]/84 md:text-base">
-            Every section below represents people who built, sustained, and carried this collective forward.
+            Every section below represents people who built, sustained, and
+            carried this collective forward.
           </p>
         </div>
       </section>
@@ -65,7 +82,9 @@ export default function MembersPageClient({ initialMembers }: MembersPageClientP
           {sections.map((section) => (
             <section key={section.key}>
               <div className="mb-4 flex items-center gap-3">
-                <h2 className="text-2xl font-semibold text-[#92791B] md:text-3xl">{section.title}</h2>
+                <h2 className="text-2xl font-semibold text-[#92791B] md:text-3xl">
+                  {section.title}
+                </h2>
                 <span className="h-[2px] flex-1 bg-[#C9A84C]/45" />
               </div>
 
@@ -88,10 +107,19 @@ export default function MembersPageClient({ initialMembers }: MembersPageClientP
                     >
                       <div className="overflow-hidden rounded-xl border border-[#C9A84C]/40 bg-white p-2 transition duration-300 group-hover:border-[#92791B] group-hover:shadow-[0_0_0_2px_rgba(146,121,27,0.35)]">
                         <div className="aspect-square overflow-hidden rounded-lg bg-[#E8DDCB]">
-                          <img src={member.photoUrl} alt={member.name} className="h-full w-full object-cover transition duration-300 group-hover:scale-105" loading="lazy" />
+                          <img
+                            src={member.photoUrl}
+                            alt={member.name}
+                            className="h-full w-full object-cover transition duration-300 group-hover:scale-105"
+                            loading="lazy"
+                          />
                         </div>
-                        <p className="mt-3 line-clamp-1 text-sm font-semibold text-[#1C1C1C]">{member.name}</p>
-                        <p className="line-clamp-1 text-xs text-[#737955]">{member.designation}</p>
+                        <p className="mt-3 line-clamp-1 text-sm font-semibold text-[#1C1C1C]">
+                          {member.name}
+                        </p>
+                        <p className="line-clamp-1 text-xs text-[#737955]">
+                          {member.designation}
+                        </p>
                       </div>
                     </motion.button>
                   ))}
@@ -135,14 +163,26 @@ export default function MembersPageClient({ initialMembers }: MembersPageClientP
 
               <div className="relative z-10 grid gap-5 md:grid-cols-[240px_minmax(0,1fr)] md:gap-6">
                 <div className="overflow-hidden rounded-xl border border-[#C9A84C]/50 bg-[#120D0A]">
-                  <img src={selectedMember.photoUrl} alt={selectedMember.name} className="aspect-square h-full w-full object-cover" />
+                  <img
+                    src={selectedMember.photoUrl}
+                    alt={selectedMember.name}
+                    className="aspect-square h-full w-full object-cover"
+                  />
                 </div>
 
                 <div>
-                  <p className="text-xs uppercase tracking-[0.16em] text-[#C9A84C]">{selectedMember.section.replace(/-/g, " ")}</p>
-                  <h3 className="mt-2 text-2xl font-semibold">{selectedMember.name}</h3>
-                  <p className="mt-1 text-sm text-[#F5F0E8]/84">{selectedMember.designation}</p>
-                  <p className="mt-4 text-sm leading-7 text-[#F5F0E8]/90">{selectedMember.bio}</p>
+                  <p className="text-xs uppercase tracking-[0.16em] text-[#C9A84C]">
+                    {selectedMember.section.replace(/-/g, " ")}
+                  </p>
+                  <h3 className="mt-2 text-2xl font-semibold">
+                    {selectedMember.name}
+                  </h3>
+                  <p className="mt-1 text-sm text-[#F5F0E8]/84">
+                    {selectedMember.designation}
+                  </p>
+                  <p className="mt-4 text-sm leading-7 text-[#F5F0E8]/90">
+                    {selectedMember.bio}
+                  </p>
                 </div>
               </div>
             </motion.div>

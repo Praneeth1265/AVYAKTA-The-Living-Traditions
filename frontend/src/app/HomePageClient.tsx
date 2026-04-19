@@ -86,9 +86,7 @@ const galleryStills = [
   "Audience and performance",
 ];
 
-export default function HomePageClient({
-  initialEvents,
-}: HomePageClientProps) {
+export default function HomePageClient({ initialEvents }: HomePageClientProps) {
   const [events] = useState<HomeEventCard[]>(
     initialEvents.length ? initialEvents : fallbackEvents,
   );

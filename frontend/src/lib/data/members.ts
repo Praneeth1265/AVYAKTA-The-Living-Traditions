@@ -2,7 +2,10 @@ import "server-only";
 
 import { sql } from "drizzle-orm";
 import { db } from "@/lib/db";
-import { type MemberCard, type MemberSectionKey } from "@/lib/data/memberSections";
+import {
+  type MemberCard,
+  type MemberSectionKey,
+} from "@/lib/data/memberSections";
 
 function avatarFromName(name: string) {
   const safe = encodeURIComponent(name);
@@ -24,14 +27,20 @@ function sectionFromRole(role: string): MemberSectionKey {
     return "previous-heads";
   }
 
-  if (normalized.includes("alumni") || normalized.includes("former") || normalized.includes("previous")) {
+  if (
+    normalized.includes("alumni") ||
+    normalized.includes("former") ||
+    normalized.includes("previous")
+  ) {
     return "previous-members";
   }
 
   return "current-core-team";
 }
 
-function normalizeSection(value: string | null | undefined): MemberSectionKey | null {
+function normalizeSection(
+  value: string | null | undefined,
+): MemberSectionKey | null {
   if (!value) {
     return null;
   }
@@ -160,7 +169,9 @@ export async function getMembersFromDb(): Promise<MemberCard[]> {
         const designation =
           String(raw.designation ?? "").trim() || role || "Member";
 
-        const explicitSection = normalizeSection(String(raw.section ?? "").trim());
+        const explicitSection = normalizeSection(
+          String(raw.section ?? "").trim(),
+        );
         const section = explicitSection ?? sectionFromRole(designation);
 
         const photoUrl =
@@ -175,7 +186,9 @@ export async function getMembersFromDb(): Promise<MemberCard[]> {
           String(raw.quote ?? "").trim();
 
         const domain = String(raw.domain ?? "").trim();
-        const bio = explicitBio || `${name} contributes to ${domain || "Avyakta"} as ${designation}.`;
+        const bio =
+          explicitBio ||
+          `${name} contributes to ${domain || "Avyakta"} as ${designation}.`;
 
         return {
           id,
@@ -190,7 +203,10 @@ export async function getMembersFromDb(): Promise<MemberCard[]> {
 
     return mapped.length ? mapped : fallbackMembers();
   } catch (error) {
-    console.warn("[members] Database unavailable, serving fallback members.", error);
+    console.warn(
+      "[members] Database unavailable, serving fallback members.",
+      error,
+    );
     return fallbackMembers();
   }
 }

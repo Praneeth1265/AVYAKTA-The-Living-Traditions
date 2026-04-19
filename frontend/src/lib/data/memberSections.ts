@@ -14,7 +14,10 @@ export type MemberCard = {
   bio: string;
 };
 
-export const memberSectionOrder: Array<{ key: MemberSectionKey; title: string }> = [
+export const memberSectionOrder: Array<{
+  key: MemberSectionKey;
+  title: string;
+}> = [
   { key: "founders", title: "Founders" },
   { key: "faculty-advisors", title: "Faculty Advisors" },
   { key: "previous-heads", title: "Previous Heads" },
