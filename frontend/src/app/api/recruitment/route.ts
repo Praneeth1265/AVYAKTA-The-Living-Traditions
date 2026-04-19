@@ -6,9 +6,13 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
 
+    console.log("=== RECRUITMENT FORM SUBMISSION ===");
+    console.log("Received body:", JSON.stringify(body, null, 2));
+
     // Server-side validation
     const validation = recruitmentSchema.safeParse(body);
     if (!validation.success) {
+      console.error("Validation failed:", validation.error.flatten());
       return NextResponse.json(
         { error: "Validation failed", errors: validation.error.flatten() },
         { status: 400 },
@@ -16,28 +20,33 @@ export async function POST(request: NextRequest) {
     }
 
     const data = validation.data;
+    console.log("Validated data:", JSON.stringify(data, null, 2));
+    console.log("First preference domain:", data.first_preference_domain);
+    console.log("Domain length:", data.first_preference_domain.length);
 
     // links already validated by schema (parsed JSON array with size/length limits)
     const supabaseAdmin = getSupabaseAdmin();
-    const { error } = await supabaseAdmin
+    const insertPayload = {
+      name: data.name,
+      email: data.email,
+      phone_no: data.phone_number,
+      first_preference_domain: data.first_preference_domain,
+      srn: data.srn,
+      year: data.year ?? null,
+      branch: data.branch || null,
+      section: data.section || null,
+      links: data.links ?? null,
+      experience: data.experience ?? null,
+      why_you: data.why_you,
+      why_us: data.why_us,
+      second_domain_preference: data.second_domain_preference || null,
+    };
+
+    console.log("Insert payload:", JSON.stringify(insertPayload, null, 2));
+
+    const { error, data: insertedData } = await supabaseAdmin
       .from("recruitment")
-      .insert([
-        {
-          name: data.name,
-          email: data.email,
-          phone_no: data.phone_number,
-          first_preference_domain: data.first_preference_domain,
-          srn: data.srn,
-          year: data.year ?? null,
-          branch: data.branch || null,
-          section: data.section || null,
-          links: data.links ?? null,
-          experience: data.experience ?? null,
-          why_you: data.why_you,
-          why_us: data.why_us,
-          second_domain_preference: data.second_domain_preference || null,
-        },
-      ])
+      .insert([insertPayload])
       .select();
 
     if (error) {
@@ -50,6 +59,11 @@ export async function POST(request: NextRequest) {
         { status: 500 },
       );
     }
+
+    console.log(
+      "Successfully inserted:",
+      JSON.stringify(insertedData, null, 2),
+    );
 
     return NextResponse.json(
       {
