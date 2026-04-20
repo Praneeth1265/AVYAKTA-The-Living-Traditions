@@ -1,5 +1,11 @@
 import type { Metadata } from "next";
-import { Cormorant_Garamond, Inter, Playfair_Display, Geist, Geist_Mono } from "next/font/google";
+import {
+  Cormorant_Garamond,
+  Inter,
+  Playfair_Display,
+  Geist,
+  Geist_Mono,
+} from "next/font/google";
 import "./globals.css";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
