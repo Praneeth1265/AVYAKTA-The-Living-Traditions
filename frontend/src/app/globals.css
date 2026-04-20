@@ -98,6 +98,7 @@
 
 /* =========================
    RESPONSIVE
+========================= */
 @media (max-width: 768px) {
   .section::after {
     inset: -20px -10px;
