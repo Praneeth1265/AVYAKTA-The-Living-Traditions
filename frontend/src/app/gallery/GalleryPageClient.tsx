@@ -100,7 +100,7 @@ export default function GalleryPageClient({
 
   return (
     <main className="min-h-screen bg-[#F5F0E8] text-[#1C1C1C]">
-      <section className="relative overflow-hidden border-b border-[#C9A84C]/40 bg-[#1C1C1C] px-6 py-14 text-[#F5F0E8] md:px-12">
+      <section className="relative overflow-hidden border-b border-[#C9A84C]/40 bg-[#1C1C1C] px-6 pb-14 pt-32 text-[#F5F0E8] md:px-12">
         <div
           className="pointer-events-none absolute inset-0"
           style={{
@@ -110,10 +110,7 @@ export default function GalleryPageClient({
           aria-hidden
         />
         <div className="relative mx-auto max-w-6xl">
-          <p className="text-xs uppercase tracking-[0.22em] text-[#C9A84C]">
-            Gallery
-          </p>
-          <h1 className="mt-3 text-4xl font-semibold md:text-6xl">
+          <h1 className="font-semibold text-4xl md:text-6xl">
             Avyakta Frames Archive
           </h1>
           <p className="mt-4 max-w-3xl text-sm leading-7 text-[#F5F0E8]/84 md:text-base">

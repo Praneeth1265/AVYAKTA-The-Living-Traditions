@@ -1,13 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import {
-  motion,
-  useMotionValue,
-  useScroll,
-  useSpring,
-  useTransform,
-} from "framer-motion";
+import { motion, useScroll, useTransform } from "framer-motion";
 import Link from "next/link";
 
 type HomeEventCard = {
@@ -21,23 +15,23 @@ type HomePageClientProps = {
   initialEvents: HomeEventCard[];
 };
 
-type CursorSplash = {
-  id: number;
-  x: number;
-  y: number;
-  dx: number;
-  dy: number;
-  size: number;
-  life: number;
-  born: number;
-  hue: number;
-};
-
 const domains = [
-  { name: "Performance", detail: "Dance, music, theatre, and stage craft" },
-  { name: "Design", detail: "Posters, identity, and visual storytelling" },
-  { name: "EVM", detail: "Event execution, logistics, and coordination" },
-  { name: "Content", detail: "Script, copy, and digital narratives" },
+  {
+    name: "Event Management",
+    detail: "Thematic ideation, structure, and execution",
+  },
+  {
+    name: "Logistics & Ops",
+    detail: "Venue setup, time management, and execution",
+  },
+  {
+    name: "Media & Visibility",
+    detail: "Photography, reels, and digital narrative",
+  },
+  { name: "Marketing", detail: "Engagement, promotion, and outreach" },
+  { name: "Finance", detail: "Sponsorships, budgets, and partnerships" },
+  { name: "Tech & Systems", detail: "Digital workflows, forms, and archives" },
+  { name: "Design", detail: "Posters, visual identity, and branding" },
 ];
 
 const timeline = [
@@ -91,17 +85,7 @@ export default function HomePageClient({ initialEvents }: HomePageClientProps) {
     initialEvents.length ? initialEvents : fallbackEvents,
   );
   const [showAnnouncement, setShowAnnouncement] = useState(true);
-  const [cursorVisible, setCursorVisible] = useState(false);
-  const [splashes, setSplashes] = useState<CursorSplash[]>([]);
-  const splashId = useRef(0);
-  const lastSpawn = useRef({ x: -1000, y: -1000, time: 0 });
   const { scrollYProgress } = useScroll();
-  const cursorX = useMotionValue(-200);
-  const cursorY = useMotionValue(-200);
-  const leadX = useSpring(cursorX, { stiffness: 210, damping: 32, mass: 0.9 });
-  const leadY = useSpring(cursorY, { stiffness: 210, damping: 32, mass: 0.9 });
-  const trailX = useSpring(cursorX, { stiffness: 120, damping: 30, mass: 1.1 });
-  const trailY = useSpring(cursorY, { stiffness: 120, damping: 30, mass: 1.1 });
 
   const heroY = useTransform(scrollYProgress, [0, 0.35], [0, 120]);
   const heroScale = useTransform(scrollYProgress, [0, 0.35], [1, 0.94]);
@@ -109,89 +93,6 @@ export default function HomePageClient({ initialEvents }: HomePageClientProps) {
   useEffect(() => {
     const timer = setTimeout(() => setShowAnnouncement(false), 8000);
     return () => clearTimeout(timer);
-  }, []);
-
-  useEffect(() => {
-    if (typeof window === "undefined") {
-      return;
-    }
-
-    const canUseFinePointer = window.matchMedia("(pointer: fine)").matches;
-    if (!canUseFinePointer) {
-      return;
-    }
-
-    const spawnSplash = (
-      x: number,
-      y: number,
-      count: number,
-      burst = false,
-    ) => {
-      const now = performance.now();
-      const next = Array.from({ length: count }, () => {
-        const angle = Math.random() * Math.PI * 2;
-        const distance = (burst ? 44 : 22) + Math.random() * (burst ? 46 : 16);
-
-        return {
-          id: splashId.current++,
-          x,
-          y,
-          dx: Math.cos(angle) * distance,
-          dy: Math.sin(angle) * distance,
-          size: (burst ? 9 : 6) + Math.random() * (burst ? 7 : 3),
-          life: (burst ? 1050 : 820) + Math.random() * 260,
-          born: now,
-          hue: 24 + Math.random() * 10,
-        } as CursorSplash;
-      });
-
-      setSplashes((prev) => [...prev, ...next].slice(-180));
-    };
-
-    const handlePointerMove = (event: PointerEvent) => {
-      const x = event.clientX;
-      const y = event.clientY;
-      const now = performance.now();
-      const dx = x - lastSpawn.current.x;
-      const dy = y - lastSpawn.current.y;
-      const distance = Math.hypot(dx, dy);
-
-      cursorX.set(x);
-      cursorY.set(y);
-      setCursorVisible(true);
-
-      if (distance > 34 && now - lastSpawn.current.time > 60) {
-        spawnSplash(x, y, 2, false);
-        lastSpawn.current = { x, y, time: now };
-      }
-    };
-
-    const handlePointerDown = (event: PointerEvent) => {
-      spawnSplash(event.clientX, event.clientY, 8, true);
-    };
-
-    const hideCursor = () => setCursorVisible(false);
-
-    window.addEventListener("pointermove", handlePointerMove);
-    window.addEventListener("pointerdown", handlePointerDown);
-    window.addEventListener("pointerleave", hideCursor);
-    window.addEventListener("blur", hideCursor);
-
-    return () => {
-      window.removeEventListener("pointermove", handlePointerMove);
-      window.removeEventListener("pointerdown", handlePointerDown);
-      window.removeEventListener("pointerleave", hideCursor);
-      window.removeEventListener("blur", hideCursor);
-    };
-  }, [cursorX, cursorY]);
-
-  useEffect(() => {
-    const cleanup = setInterval(() => {
-      const now = performance.now();
-      setSplashes((prev) => prev.filter((item) => now - item.born < item.life));
-    }, 120);
-
-    return () => clearInterval(cleanup);
   }, []);
 
   const fadeUp = {
@@ -230,58 +131,6 @@ export default function HomePageClient({ initialEvents }: HomePageClientProps) {
 
   return (
     <main className="overflow-x-hidden bg-[#F5F0E8] text-[#1C1C1C]">
-      <div
-        aria-hidden
-        className="pointer-events-none fixed inset-0 z-[58] hidden md:block"
-      >
-        {splashes.map((item) => (
-          <motion.span
-            key={item.id}
-            className="absolute rounded-full"
-            style={{
-              left: item.x,
-              top: item.y,
-              width: item.size,
-              height: item.size,
-              background: `radial-gradient(circle, hsla(${item.hue}, 98%, 58%, 0.95) 0%, hsla(${item.hue}, 96%, 52%, 0.68) 45%, hsla(${item.hue}, 95%, 48%, 0) 82%)`,
-            }}
-            initial={{ x: 0, y: 0, scale: 0.65, opacity: 0.95 }}
-            animate={{
-              x: item.dx,
-              y: item.dy,
-              scale: [0.45, 1, 1.1, 0.55],
-              opacity: [0, 0.95, 0.55, 0],
-            }}
-            transition={{
-              duration: (item.life / 1000) * 1.1,
-              ease: [0.22, 1, 0.36, 1],
-            }}
-          />
-        ))}
-      </div>
-
-      <motion.div
-        aria-hidden
-        className="pointer-events-none fixed left-0 top-0 z-[60] hidden h-48 w-48 rounded-full bg-[radial-gradient(circle,rgba(249,115,22,0.5)_0%,rgba(249,115,22,0.22)_35%,rgba(249,115,22,0)_72%)] blur-2xl mix-blend-multiply md:block"
-        style={{ x: leadX, y: leadY, translateX: "-50%", translateY: "-50%" }}
-        animate={{
-          opacity: cursorVisible ? 0.8 : 0,
-          scale: cursorVisible ? 1 : 0.65,
-        }}
-        transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
-      />
-
-      <motion.div
-        aria-hidden
-        className="pointer-events-none fixed left-0 top-0 z-[59] hidden h-72 w-72 rounded-full bg-[radial-gradient(circle,rgba(251,146,60,0.32)_0%,rgba(251,146,60,0.16)_45%,rgba(251,146,60,0)_75%)] blur-3xl md:block"
-        style={{ x: trailX, y: trailY, translateX: "-50%", translateY: "-50%" }}
-        animate={{
-          opacity: cursorVisible ? 0.55 : 0,
-          scale: cursorVisible ? 1 : 0.72,
-        }}
-        transition={{ duration: 0.58, ease: [0.22, 1, 0.36, 1] }}
-      />
-
       <motion.div
         className="fixed left-0 right-0 top-0 z-[80] h-1 origin-left bg-[linear-gradient(90deg,#8B1A1A,#C9A84C,#1B5E3B)]"
         style={{ scaleX: scrollYProgress }}
@@ -289,12 +138,12 @@ export default function HomePageClient({ initialEvents }: HomePageClientProps) {
 
       {/* HERO */}
       <section className="relative flex min-h-[95vh] items-center justify-center overflow-hidden px-6 py-24">
-        <div className="absolute inset-0 bg-[#1A120C]" aria-hidden />
+        <div className="absolute inset-0 bg-[#1C1C1C]" aria-hidden />
         <div
           className="absolute inset-0 opacity-90"
           style={{
             backgroundImage:
-              "radial-gradient(circle at 10% 20%, rgba(201,168,76,0.45) 0, transparent 35%), radial-gradient(circle at 82% 14%, rgba(139,26,26,0.34) 0, transparent 38%), radial-gradient(circle at 76% 82%, rgba(27,94,59,0.3) 0, transparent 44%), linear-gradient(130deg, #1A120C 0%, #3A120F 38%, #17130F 100%)",
+              "radial-gradient(circle at 10% 20%, rgba(201,168,76,0.3) 0, transparent 40%), radial-gradient(circle at 82% 14%, rgba(139,26,26,0.2) 0, transparent 45%), radial-gradient(circle at 76% 82%, rgba(27,94,59,0.15) 0, transparent 50%), linear-gradient(130deg, #1C1C1C 0%, #2A2A2A 38%, #1C1C1C 100%)",
           }}
           aria-hidden
         />
@@ -371,7 +220,7 @@ export default function HomePageClient({ initialEvents }: HomePageClientProps) {
           variants={fadeUp}
           transition={{ duration: 1.1, ease: [0.22, 1, 0.36, 1] }}
           style={{ y: heroY, scale: heroScale }}
-          className="relative mx-auto max-w-4xl rounded-[2rem] border-2 border-[#C9A84C]/55 bg-[#1C1C1C]/65 px-6 py-10 text-center text-white shadow-[0_0_0_8px_rgba(201,168,76,0.18),0_30px_80px_rgba(0,0,0,0.45)] md:px-12 md:py-14"
+          className="relative mx-auto max-w-4xl rounded-[2rem] border-2 border-[#C9A84C]/40 bg-[#1C1C1C]/80 px-6 py-10 text-center text-white shadow-[0_0_0_8px_rgba(201,168,76,0.1),0_30px_80px_rgba(0,0,0,0.6)] backdrop-blur-md md:px-12 md:py-14"
         >
           <p className="mb-4 text-xs uppercase tracking-[0.35em] text-[#C9A84C]">
             The Living Traditions
@@ -408,9 +257,9 @@ export default function HomePageClient({ initialEvents }: HomePageClientProps) {
         <motion.div
           className="flex w-max items-center gap-10 pr-10 text-sm uppercase tracking-[0.2em]"
           animate={{ x: ["0%", "-50%"] }}
-          transition={{ duration: 28, repeat: Infinity, ease: "linear" }}
+          transition={{ duration: 30, repeat: Infinity, ease: "linear" }}
         >
-          {Array.from({ length: 2 }).map((_, i) => (
+          {Array.from({ length: 6 }).map((_, i) => (
             <div key={i} className="flex items-center gap-10">
               <span>Tradition</span>
               <span className="text-[#C9A84C]">•</span>
@@ -421,6 +270,7 @@ export default function HomePageClient({ initialEvents }: HomePageClientProps) {
               <span>Craft</span>
               <span className="text-[#C9A84C]">•</span>
               <span>Expression</span>
+              <span className="text-[#C9A84C]">•</span>
             </div>
           ))}
         </motion.div>
@@ -583,7 +433,7 @@ export default function HomePageClient({ initialEvents }: HomePageClientProps) {
         </motion.div>
       </section>
 
-      {/* IRA */}
+      {/* IRA – commented out, kept out of production for now
       <section className="px-6 py-14 text-center md:px-16">
         <motion.div
           variants={fadeUp}
@@ -607,6 +457,7 @@ export default function HomePageClient({ initialEvents }: HomePageClientProps) {
           </p>
         </motion.div>
       </section>
+      */}
 
       {/* TIMELINE */}
       <section className="px-6 py-24 md:px-16">

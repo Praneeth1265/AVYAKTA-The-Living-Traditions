@@ -15,6 +15,7 @@ export type EventItem = {
   status: EventStatus;
   domain: string;
   poster: string;
+  venue?: string;
   highlights: string[];
   timeline: EventTimelineItem[];
 };

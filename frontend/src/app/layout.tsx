@@ -5,6 +5,7 @@ import {
   Playfair_Display,
   Geist,
   Geist_Mono,
+  Poppins,
 } from "next/font/google";
 import "./globals.css";
 import Navbar from "@/components/layout/Navbar";
@@ -36,10 +37,18 @@ const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
 });
 
+const poppins = Poppins({
+  subsets: ["latin"],
+  weight: ["700", "900"],
+  variable: "--font-poppins",
+});
+
 export const metadata: Metadata = {
   title: "Avyakta",
   description: "Where culture comes alive",
 };
+
+import GlobalCursorFx from "@/components/shared/GlobalCursorFx";
 
 export default function RootLayout({
   children,
@@ -50,9 +59,10 @@ export default function RootLayout({
     <html
       lang="en"
       suppressHydrationWarning
-      className={`${heading.variable} ${bodyFont.variable} ${accent.variable} ${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      className={`${heading.variable} ${bodyFont.variable} ${accent.variable} ${geistSans.variable} ${geistMono.variable} ${poppins.variable} h-full antialiased`}
     >
       <body className="min-h-screen bg-warm text-charcoal font-body flex flex-col">
+        <GlobalCursorFx />
         <Navbar />
         {children}
         <Footer />

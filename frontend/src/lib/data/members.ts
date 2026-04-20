@@ -1,7 +1,6 @@
 import "server-only";
 
-import { sql } from "drizzle-orm";
-import { db } from "@/lib/db";
+import { createClient } from "@/utils/supabase/server";
 import {
   type MemberCard,
   type MemberSectionKey,
@@ -146,18 +145,21 @@ function fallbackMembers(): MemberCard[] {
 
 export async function getMembersFromDb(): Promise<MemberCard[]> {
   try {
-    const rows = await db.execute(
-      sql`select to_jsonb(m) as row from members m order by m.name asc`,
-    );
+    const supabase = await createClient();
+    const { data: rows, error } = await supabase
+      .from("members")
+      .select("*")
+      .order("name", { ascending: true });
 
-    if (!rows.length) {
+    if (error) throw error;
+
+    if (!rows || !rows.length) {
       return fallbackMembers();
     }
 
     const mapped = rows
-      .map((entry) => {
-        const raw = (entry as { row?: Record<string, unknown> }).row ?? {};
-
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      .map((raw: any) => {
         const id = String(raw.id ?? "").trim();
         const name = String(raw.name ?? "").trim();
 

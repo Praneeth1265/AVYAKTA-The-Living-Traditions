@@ -3,8 +3,6 @@
 import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { motion, useScroll, useTransform } from "framer-motion";
-import CursorSplashOverlay from "@/components/shared/CursorSplashOverlay";
-import { useCursorSplash } from "@/hooks/useCursorSplash";
 import type { EventItem, EventStatus } from "@/lib/utils/events";
 
 type EventsPageClientProps = {
@@ -59,7 +57,6 @@ export default function EventsPageClient({
   const { scrollYProgress } = useScroll();
   const heroY = useTransform(scrollYProgress, [0, 0.28], [0, 105]);
   const heroScale = useTransform(scrollYProgress, [0, 0.28], [1, 0.95]);
-  const cursorFx = useCursorSplash();
 
   const visibleEvents = useMemo(() => {
     if (activeFilter === "all") {
@@ -77,14 +74,12 @@ export default function EventsPageClient({
 
   return (
     <main className="min-h-screen overflow-x-hidden bg-[#F5F0E8] text-[#1C1C1C]">
-      <CursorSplashOverlay {...cursorFx} />
-
       <motion.div
         className="fixed left-0 right-0 top-0 z-[80] h-1 origin-left bg-[linear-gradient(90deg,#8B1A1A,#C9A84C,#1B5E3B)]"
         style={{ scaleX: scrollYProgress }}
       />
 
-      <section className="relative overflow-hidden border-b-2 border-[#C9A84C]/40 bg-[#1C1C1C] px-6 py-20 text-[#F5F0E8] md:px-16">
+      <section className="relative overflow-hidden border-b-2 border-[#C9A84C]/40 bg-[#1C1C1C] px-6 pb-20 pt-32 text-[#F5F0E8] md:px-16">
         <div
           className="pointer-events-none absolute inset-0 opacity-55"
           style={{
@@ -122,10 +117,7 @@ export default function EventsPageClient({
           style={{ y: heroY, scale: heroScale }}
           className="relative mx-auto max-w-6xl"
         >
-          <p className="text-xs uppercase tracking-[0.28em] text-[#C9A84C]">
-            Events
-          </p>
-          <h1 className="mt-4 font-serif text-5xl leading-tight md:text-7xl">
+          <h1 className="font-serif text-5xl leading-tight md:text-7xl">
             Avyakta Event Calendar
           </h1>
           <p className="mt-5 max-w-2xl text-sm leading-8 text-[#F5F0E8]/82 md:text-base">

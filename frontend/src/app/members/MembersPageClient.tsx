@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { type MemberCard, memberSectionOrder } from "@/lib/data/memberSections";
 
@@ -42,6 +42,28 @@ export default function MembersPageClient({
   initialMembers,
 }: MembersPageClientProps) {
   const [selectedMember, setSelectedMember] = useState<MemberCard | null>(null);
+  const [activeTab, setActiveTab] = useState(memberSectionOrder[0].key);
+
+  // Lock body scroll when modal is open
+  useEffect(() => {
+    if (selectedMember) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [selectedMember]);
+
+  // Close modal on Escape key
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setSelectedMember(null);
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, []);
 
   const sections = useMemo(() => {
     return memberSectionOrder.map((section) => ({
@@ -52,9 +74,31 @@ export default function MembersPageClient({
     }));
   }, [initialMembers]);
 
+  const staggerContainer = {
+    hidden: { opacity: 0 },
+    show: {
+      opacity: 1,
+      transition: {
+        delayChildren: 0.06,
+        staggerChildren: 0.08,
+      },
+    },
+  };
+
+  const cardItem = {
+    hidden: { opacity: 0, y: 28, scale: 0.96 },
+    show: {
+      opacity: 1,
+      y: 0,
+      scale: 1,
+      transition: { duration: 0.5, ease: [0.22, 1, 0.36, 1] as const },
+    },
+  };
+
   return (
     <main className="min-h-screen bg-[#F5F0E8] text-[#1C1C1C]">
-      <section className="relative overflow-hidden border-b border-[#C9A84C]/40 bg-[#1C1C1C] px-6 py-14 text-[#F5F0E8] md:px-12">
+      {/* Hero Banner */}
+      <section className="relative overflow-hidden border-b border-[#C9A84C]/40 bg-[#1C1C1C] px-6 pb-16 pt-32 text-[#F5F0E8] md:px-12 md:pb-20 md:pt-36">
         <div
           className="pointer-events-none absolute inset-0"
           style={{
@@ -63,7 +107,41 @@ export default function MembersPageClient({
           }}
           aria-hidden
         />
-        <div className="relative mx-auto max-w-6xl">
+        {/* Decorative kolam */}
+        <div className="pointer-events-none absolute right-[-60px] top-[-60px] opacity-[0.08]">
+          <svg width="280" height="280" viewBox="0 0 220 220" aria-hidden>
+            <circle
+              cx="110"
+              cy="110"
+              r="98"
+              stroke="#C9A84C"
+              fill="none"
+              strokeWidth="1"
+            />
+            <circle
+              cx="110"
+              cy="110"
+              r="72"
+              stroke="#C9A84C"
+              fill="none"
+              strokeWidth="0.75"
+            />
+            <circle
+              cx="110"
+              cy="110"
+              r="46"
+              stroke="#C9A84C"
+              fill="none"
+              strokeWidth="0.5"
+            />
+          </svg>
+        </div>
+        <motion.div
+          className="relative mx-auto max-w-6xl"
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
+        >
           <p className="text-xs uppercase tracking-[0.22em] text-[#C9A84C]">
             Members
           </p>
@@ -74,95 +152,147 @@ export default function MembersPageClient({
             Every section below represents people who built, sustained, and
             carried this collective forward.
           </p>
-        </div>
+        </motion.div>
       </section>
 
-      <section className="mx-auto w-full max-w-7xl px-4 py-10 md:px-8 md:py-12">
-        <div className="space-y-10">
+      {/* Member Sections */}
+      <section className="mx-auto w-full max-w-7xl px-4 py-10 md:px-8 md:py-14">
+        {/* Filter Tabs */}
+        <div className="mb-12 flex flex-wrap justify-center gap-3 md:gap-4 relative z-10 w-full max-w-4xl mx-auto">
           {sections.map((section) => (
-            <section key={section.key}>
-              <div className="mb-4 flex items-center gap-3">
-                <h2 className="text-2xl font-semibold text-[#92791B] md:text-3xl">
-                  {section.title}
-                </h2>
-                <span className="h-[2px] flex-1 bg-[#C9A84C]/45" />
-              </div>
-
-              {section.members.length === 0 ? (
-                <div className="rounded-xl border border-[#C9A84C]/40 bg-white p-5 text-sm text-[#737955]">
-                  Entries for this section will be updated soon.
-                </div>
-              ) : (
-                <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-5">
-                  {section.members.map((member, index) => (
-                    <motion.button
-                      key={member.id}
-                      type="button"
-                      onClick={() => setSelectedMember(member)}
-                      initial={{ opacity: 0, y: 20 }}
-                      whileInView={{ opacity: 1, y: 0 }}
-                      viewport={{ once: true, amount: 0.25 }}
-                      transition={{ duration: 0.35, delay: index * 0.05 }}
-                      className="group text-left"
-                    >
-                      <div className="overflow-hidden rounded-xl border border-[#C9A84C]/40 bg-white p-2 transition duration-300 group-hover:border-[#92791B] group-hover:shadow-[0_0_0_2px_rgba(146,121,27,0.35)]">
-                        <div className="aspect-square overflow-hidden rounded-lg bg-[#E8DDCB]">
-                          <img
-                            src={member.photoUrl}
-                            alt={member.name}
-                            className="h-full w-full object-cover transition duration-300 group-hover:scale-105"
-                            loading="lazy"
-                          />
-                        </div>
-                        <p className="mt-3 line-clamp-1 text-sm font-semibold text-[#1C1C1C]">
-                          {member.name}
-                        </p>
-                        <p className="line-clamp-1 text-xs text-[#737955]">
-                          {member.designation}
-                        </p>
-                      </div>
-                    </motion.button>
-                  ))}
-                </div>
-              )}
-            </section>
+            <button
+              key={section.key}
+              onClick={() => setActiveTab(section.key)}
+              className={`rounded-full border px-6 py-2.5 font-sans text-sm font-bold uppercase tracking-wider transition-all duration-300 md:text-xs ${
+                activeTab === section.key
+                  ? "border-[#92791B] bg-gradient-to-r from-[#8B1A1A] to-[#1C1C1C] text-[#F5F0E8] shadow-[0_8px_20px_rgba(139,26,26,0.3)]"
+                  : "border-[#C9A84C]/40 bg-white text-[#737955] hover:border-[#92791B] hover:bg-[#FDFBF7] hover:text-[#1C1C1C] hover:shadow-[0_4px_12px_rgba(146,121,27,0.1)]"
+              }`}
+            >
+              {section.title}
+            </button>
           ))}
         </div>
+
+        <div className="min-h-[500px]">
+          <AnimatePresence mode="wait">
+            {sections
+              .filter((section) => section.key === activeTab)
+              .map((section) => (
+                <motion.div
+                  key={section.key}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, scale: 0.98, filter: "blur(4px)" }}
+                  transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
+                >
+                  <div className="mb-8 flex items-center justify-center gap-4 text-center">
+                    <span className="h-[2px] w-12 bg-gradient-to-r from-transparent to-[#C9A84C]" />
+                    <h2 className="font-serif text-3xl font-bold text-[#8B1A1A] md:text-4xl">
+                      {section.title}
+                    </h2>
+                    <span className="h-[2px] w-12 bg-gradient-to-l from-transparent to-[#C9A84C]" />
+                  </div>
+
+                  {section.members.length === 0 ? (
+                    <div className="rounded-[24px] border border-dashed border-[#C9A84C]/60 bg-white p-12 text-center text-lg italic text-[#737955] shadow-sm">
+                      Detailed entries for this section are currently being
+                      documented.
+                    </div>
+                  ) : (
+                    <motion.div
+                      className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-5 md:gap-6"
+                      variants={staggerContainer}
+                      initial="hidden"
+                      animate="show"
+                    >
+                      {section.members.map((member) => (
+                        <motion.button
+                          key={member.id}
+                          type="button"
+                          onClick={() => setSelectedMember(member)}
+                          variants={cardItem}
+                          whileHover={{ y: -8, scale: 1.02 }}
+                          className="group relative w-full text-left"
+                        >
+                          <div className="relative overflow-hidden rounded-[20px] bg-white p-2.5 border-2 border-[#C9A84C]/20 shadow-[0_4px_12px_rgba(201,168,76,0.08)] transition-all duration-300 group-hover:border-[#92791B] group-hover:shadow-[0_15px_35px_rgba(146,121,27,0.2)]">
+                            <div className="aspect-[4/5] overflow-hidden rounded-xl bg-[#E8DDCB] relative">
+                              <div className="absolute inset-0 bg-gradient-to-t from-[#1C1C1C]/80 via-transparent to-transparent z-10 opacity-60 group-hover:opacity-20 transition-opacity duration-300" />
+                              <img
+                                src={member.photoUrl}
+                                alt={member.name}
+                                className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
+                                loading="lazy"
+                              />
+                            </div>
+                            <div className="pt-4 pb-2 px-1 relative z-20">
+                              <p className="line-clamp-1 font-serif text-lg font-bold text-[#1C1C1C] group-hover:text-[#8B1A1A] transition-colors">
+                                {member.name}
+                              </p>
+                              <p className="mt-1 line-clamp-1 text-[11px] font-bold uppercase tracking-widest text-[#737955]">
+                                {member.designation}
+                              </p>
+                            </div>
+                          </div>
+                        </motion.button>
+                      ))}
+                    </motion.div>
+                  )}
+                </motion.div>
+              ))}
+          </AnimatePresence>
+        </div>
       </section>
 
+      {/* Member Detail Modal */}
       <AnimatePresence>
         {selectedMember && (
           <motion.div
-            className="fixed inset-0 z-[130] flex items-center justify-center bg-black/75 px-4 py-6"
+            className="fixed inset-0 z-[130] flex items-center justify-center bg-black/80 px-4 py-6 backdrop-blur-sm"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
+            transition={{ duration: 0.25 }}
             onClick={() => setSelectedMember(null)}
           >
             <motion.div
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.9 }}
-              transition={{ duration: 0.2, ease: "easeOut" }}
-              onClick={(event) => event.stopPropagation()}
-              className="relative w-full max-w-2xl overflow-hidden rounded-2xl border border-[#C9A84C] bg-[#1C1C1C] p-5 text-[#F5F0E8] md:p-6"
+              transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
+              onClick={(event: React.MouseEvent) => event.stopPropagation()}
+              className="relative w-full max-w-2xl overflow-hidden rounded-2xl border-2 border-[#B8860B] bg-[#1C1C1C] p-6 text-[#F5F0E8] shadow-[0_0_40px_6px_rgba(184,134,11,0.2),0_25px_60px_rgba(0,0,0,0.5)] md:p-8"
             >
+              {/* Rangoli corner ornaments */}
               <RangoliCorner position="top-left" />
               <RangoliCorner position="top-right" />
               <RangoliCorner position="bottom-left" />
               <RangoliCorner position="bottom-right" />
 
+              {/* Close button – circle icon */}
               <button
                 type="button"
                 onClick={() => setSelectedMember(null)}
-                className="absolute right-4 top-4 flex h-9 w-9 items-center justify-center rounded-full border border-[#C9A84C] bg-[#2A2119] text-sm text-[#F5F0E8] transition hover:bg-[#3A2A20]"
+                className="absolute right-4 top-4 z-20 flex h-10 w-10 items-center justify-center rounded-full border-2 border-[#C9A84C]/60 bg-[#2A2119] text-[#C9A84C] transition-all duration-200 hover:border-[#C9A84C] hover:bg-[#C9A84C] hover:text-[#1C1C1C] hover:shadow-[0_0_12px_rgba(201,168,76,0.4)]"
                 aria-label="Close"
               >
-                X
+                <svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 16 16"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2.5"
+                  strokeLinecap="round"
+                >
+                  <line x1="3" y1="3" x2="13" y2="13" />
+                  <line x1="13" y1="3" x2="3" y2="13" />
+                </svg>
               </button>
 
-              <div className="relative z-10 grid gap-5 md:grid-cols-[240px_minmax(0,1fr)] md:gap-6">
-                <div className="overflow-hidden rounded-xl border border-[#C9A84C]/50 bg-[#120D0A]">
+              <div className="relative z-10 grid gap-5 md:grid-cols-[240px_minmax(0,1fr)] md:gap-7">
+                {/* Larger photo */}
+                <div className="overflow-hidden rounded-xl border-2 border-[#C9A84C]/40 bg-[#120D0A]">
                   <img
                     src={selectedMember.photoUrl}
                     alt={selectedMember.name}
@@ -170,17 +300,19 @@ export default function MembersPageClient({
                   />
                 </div>
 
-                <div>
-                  <p className="text-xs uppercase tracking-[0.16em] text-[#C9A84C]">
+                {/* Details */}
+                <div className="flex flex-col justify-center">
+                  <p className="text-[10px] uppercase tracking-[0.2em] text-[#C9A84C]">
                     {selectedMember.section.replace(/-/g, " ")}
                   </p>
-                  <h3 className="mt-2 text-2xl font-semibold">
+                  <h3 className="mt-2 text-2xl font-semibold md:text-3xl">
                     {selectedMember.name}
                   </h3>
-                  <p className="mt-1 text-sm text-[#F5F0E8]/84">
+                  <p className="mt-1 text-sm font-medium text-[#C9A84C]/80">
                     {selectedMember.designation}
                   </p>
-                  <p className="mt-4 text-sm leading-7 text-[#F5F0E8]/90">
+                  <div className="my-4 h-[1px] w-12 bg-[#C9A84C]/40" />
+                  <p className="text-sm leading-7 text-[#F5F0E8]/88">
                     {selectedMember.bio}
                   </p>
                 </div>
