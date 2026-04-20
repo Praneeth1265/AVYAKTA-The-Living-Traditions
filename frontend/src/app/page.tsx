@@ -1,15 +1,17 @@
-export default function Home() {
-  return (
-    <main className="h-screen flex items-center justify-center bg-warm">
-      <div className="text-center">
-        <h1 className="text-5xl font-heading text-bronze">Avyakta</h1>
+import HomePageClient from "./HomePageClient";
+import { getEventsFromDb } from "@/lib/data/events";
 
-        <p className="mt-4 text-olive font-body">
-          Tailwind + Layout Working ✅
-        </p>
+export const dynamic = "force-dynamic";
 
-        <button className="btn-primary mt-6">Test Button</button>
-      </div>
-    </main>
-  );
+export default async function Home() {
+  const dbEvents = await getEventsFromDb();
+  const events = dbEvents
+    .filter((e) => e.status === "upcoming")
+    .map((e) => ({
+      slug: e.slug,
+      name: e.title,
+      date: e.date,
+      type: e.domain || "Event",
+    }));
+  return <HomePageClient initialEvents={events} />;
 }

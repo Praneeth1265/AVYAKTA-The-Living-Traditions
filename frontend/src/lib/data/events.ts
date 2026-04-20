@@ -1,9 +1,8 @@
 import "server-only";
 
-import { asc, eq } from "drizzle-orm";
-import { event_slug, events, posters } from "@drizzle/schema";
-import { db } from "@/lib/db";
+import { createClient } from "@/utils/supabase/server";
 import {
+
   formatEventDate,
   inferEventStatus,
   type EventItem,
@@ -102,6 +101,7 @@ function mapRowToEvent(row: {
   highlights: string | null;
   timeline: string | null;
   date: string | null;
+  venue: string | null;
   image_url: string | null;
   more_description: string | null;
   slug_image_url: string | null;
@@ -135,6 +135,7 @@ function mapRowToEvent(row: {
     status: inferEventStatus(row.date),
     domain: parsed.domain,
     poster: posterImage,
+    venue: row.venue || undefined,
     highlights: parsed.highlights,
     timeline: parsed.timeline,
   };
@@ -142,55 +143,40 @@ function mapRowToEvent(row: {
 
 async function fetchRawEventRows() {
   try {
-    return await db
-      .select({
-        id: events.id,
-        title: events.title,
-        description: events.description,
-        domain: events.domain,
-        highlights: events.highlights,
-        timeline: events.timeline,
-        image_url: events.image_url,
-        date: events.date,
-        more_description: event_slug.more_description,
-        slug_image_url: event_slug.image_url,
-        poster_image_url: posters.poster_image_url,
-      })
-      .from(events)
-      .leftJoin(event_slug, eq(event_slug.event_id, events.id))
-      .leftJoin(posters, eq(posters.event_id, events.id))
-      .orderBy(asc(events.date), asc(events.title));
+    const supabase = await createClient();
+    const { data, error } = await supabase
+      .from('events')
+      .select(`
+        id, title, description, domain, highlights, timeline, image_url, date, venue,
+        event_slug ( more_description, image_url ),
+        posters ( poster_image_url )
+      `)
+      .order('date', { ascending: true })
+      .order('title', { ascending: true });
+
+    if (error) throw error;
+
+    return (data || []).map((row: any) => {
+      const es = Array.isArray(row.event_slug) ? row.event_slug[0] : row.event_slug;
+      const p = Array.isArray(row.posters) ? row.posters[0] : row.posters;
+      
+      return {
+        id: row.id,
+        title: row.title,
+        description: row.description,
+        domain: row.domain,
+        highlights: row.highlights,
+        timeline: row.timeline,
+        image_url: row.image_url,
+        date: row.date,
+        venue: row.venue,
+        more_description: es?.more_description,
+        slug_image_url: es?.image_url,
+        poster_image_url: p?.poster_image_url
+      };
+    });
   } catch (error) {
-    try {
-      const legacyRows = await db
-        .select({
-          id: events.id,
-          title: events.title,
-          description: events.description,
-          image_url: events.image_url,
-          date: events.date,
-          more_description: event_slug.more_description,
-          slug_image_url: event_slug.image_url,
-          poster_image_url: posters.poster_image_url,
-        })
-        .from(events)
-        .leftJoin(event_slug, eq(event_slug.event_id, events.id))
-        .leftJoin(posters, eq(posters.event_id, events.id))
-        .orderBy(asc(events.date), asc(events.title));
-
-      console.warn(
-        "[events] Falling back to legacy events schema. Apply migration 0001_add_events_domain_highlights_timeline.sql.",
-      );
-
-      return legacyRows.map((row) => ({
-        ...row,
-        domain: null,
-        highlights: null,
-        timeline: null,
-      }));
-    } catch {
-      throw error;
-    }
+    throw error;
   }
 }
 

@@ -1,8 +1,6 @@
 import "server-only";
 
-import { asc, eq } from "drizzle-orm";
-import { event_slug, events, posters } from "@drizzle/schema";
-import { db } from "@/lib/db";
+import { createClient } from "@/utils/supabase/server";
 
 export type GalleryImage = {
   id: string;
@@ -37,14 +35,11 @@ function slugify(value: string) {
 }
 
 function splitUrls(input: string | null | undefined): string[] {
-  if (!input) {
-    return [];
-  }
-
+  if (!input) return [];
   return input
     .split(/[\n,|]/)
     .map((item) => item.trim())
-    .filter((item) => /^https?:\/\//i.test(item));
+    .filter((item) => /^https?:\/\//i.test(item) || /^data:image\//i.test(item));
 }
 
 function fallbackEventImages(title: string, count = 8): string[] {
@@ -155,25 +150,38 @@ function fallbackGalleryEvents(): GalleryEvent[] {
 
 export async function getGalleryEventsFromDb(): Promise<GalleryEvent[]> {
   try {
-    const rows = await db
-      .select({
-        id: events.id,
-        title: events.title,
-        date: events.date,
-        image_url: events.image_url,
-        slug_image_url: event_slug.image_url,
-        poster_image_url: posters.poster_image_url,
-      })
-      .from(events)
-      .leftJoin(event_slug, eq(event_slug.event_id, events.id))
-      .leftJoin(posters, eq(posters.event_id, events.id))
-      .orderBy(asc(events.date), asc(events.title));
+    const supabase = await createClient();
+    const { data: rows, error } = await supabase
+      .from('events')
+      .select(`
+        id, title, date, image_url,
+        event_slug ( image_url ),
+        posters ( poster_image_url )
+      `)
+      .order('date', { ascending: true })
+      .order('title', { ascending: true });
 
-    if (!rows.length) {
+    if (error) throw error;
+
+    if (!rows || !rows.length) {
       return fallbackGalleryEvents();
     }
 
-    return mapRowsToGalleryEvents(rows);
+    const mappedRows = rows.map((row: any) => {
+      const es = Array.isArray(row.event_slug) ? row.event_slug[0] : row.event_slug;
+      const p = Array.isArray(row.posters) ? row.posters[0] : row.posters;
+      
+      return {
+        id: row.id,
+        title: row.title,
+        date: row.date,
+        image_url: row.image_url,
+        slug_image_url: es?.image_url,
+        poster_image_url: p?.poster_image_url
+      };
+    });
+
+    return mapRowsToGalleryEvents(mappedRows);
   } catch (error) {
     console.warn(
       "[gallery] Database unavailable, serving fallback gallery.",

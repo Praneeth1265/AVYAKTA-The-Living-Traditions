@@ -8,5 +8,5 @@ declare global {
 
 const client =
   globalThis.__dbClient ??
-  (globalThis.__dbClient = postgres(process.env.DATABASE_URL!));
+  (globalThis.__dbClient = postgres(process.env.DATABASE_URL!, { prepare: false }));
 export const db = drizzle(client, { schema });
