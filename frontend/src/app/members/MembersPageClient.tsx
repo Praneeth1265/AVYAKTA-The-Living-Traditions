@@ -110,9 +110,30 @@ export default function MembersPageClient({
         {/* Decorative kolam */}
         <div className="pointer-events-none absolute right-[-60px] top-[-60px] opacity-[0.08]">
           <svg width="280" height="280" viewBox="0 0 220 220" aria-hidden>
-            <circle cx="110" cy="110" r="98" stroke="#C9A84C" fill="none" strokeWidth="1" />
-            <circle cx="110" cy="110" r="72" stroke="#C9A84C" fill="none" strokeWidth="0.75" />
-            <circle cx="110" cy="110" r="46" stroke="#C9A84C" fill="none" strokeWidth="0.5" />
+            <circle
+              cx="110"
+              cy="110"
+              r="98"
+              stroke="#C9A84C"
+              fill="none"
+              strokeWidth="1"
+            />
+            <circle
+              cx="110"
+              cy="110"
+              r="72"
+              stroke="#C9A84C"
+              fill="none"
+              strokeWidth="0.75"
+            />
+            <circle
+              cx="110"
+              cy="110"
+              r="46"
+              stroke="#C9A84C"
+              fill="none"
+              strokeWidth="0.5"
+            />
           </svg>
         </div>
         <motion.div
@@ -175,7 +196,8 @@ export default function MembersPageClient({
 
                   {section.members.length === 0 ? (
                     <div className="rounded-[24px] border border-dashed border-[#C9A84C]/60 bg-white p-12 text-center text-lg italic text-[#737955] shadow-sm">
-                      Detailed entries for this section are currently being documented.
+                      Detailed entries for this section are currently being
+                      documented.
                     </div>
                   ) : (
                     <motion.div
@@ -193,9 +215,7 @@ export default function MembersPageClient({
                           whileHover={{ y: -8, scale: 1.02 }}
                           className="group relative w-full text-left"
                         >
-                          <div
-                            className="relative overflow-hidden rounded-[20px] bg-white p-2.5 border-2 border-[#C9A84C]/20 shadow-[0_4px_12px_rgba(201,168,76,0.08)] transition-all duration-300 group-hover:border-[#92791B] group-hover:shadow-[0_15px_35px_rgba(146,121,27,0.2)]"
-                          >
+                          <div className="relative overflow-hidden rounded-[20px] bg-white p-2.5 border-2 border-[#C9A84C]/20 shadow-[0_4px_12px_rgba(201,168,76,0.08)] transition-all duration-300 group-hover:border-[#92791B] group-hover:shadow-[0_15px_35px_rgba(146,121,27,0.2)]">
                             <div className="aspect-[4/5] overflow-hidden rounded-xl bg-[#E8DDCB] relative">
                               <div className="absolute inset-0 bg-gradient-to-t from-[#1C1C1C]/80 via-transparent to-transparent z-10 opacity-60 group-hover:opacity-20 transition-opacity duration-300" />
                               <img
@@ -256,7 +276,15 @@ export default function MembersPageClient({
                 className="absolute right-4 top-4 z-20 flex h-10 w-10 items-center justify-center rounded-full border-2 border-[#C9A84C]/60 bg-[#2A2119] text-[#C9A84C] transition-all duration-200 hover:border-[#C9A84C] hover:bg-[#C9A84C] hover:text-[#1C1C1C] hover:shadow-[0_0_12px_rgba(201,168,76,0.4)]"
                 aria-label="Close"
               >
-                <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+                <svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 16 16"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2.5"
+                  strokeLinecap="round"
+                >
                   <line x1="3" y1="3" x2="13" y2="13" />
                   <line x1="13" y1="3" x2="3" y2="13" />
                 </svg>

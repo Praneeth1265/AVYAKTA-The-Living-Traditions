@@ -147,9 +147,9 @@ export async function getMembersFromDb(): Promise<MemberCard[]> {
   try {
     const supabase = await createClient();
     const { data: rows, error } = await supabase
-      .from('members')
-      .select('*')
-      .order('name', { ascending: true });
+      .from("members")
+      .select("*")
+      .order("name", { ascending: true });
 
     if (error) throw error;
 

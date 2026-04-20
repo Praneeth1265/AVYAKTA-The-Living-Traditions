@@ -1,11 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import {
-  motion,
-  useScroll,
-  useTransform,
-} from "framer-motion";
+import { motion, useScroll, useTransform } from "framer-motion";
 import Link from "next/link";
 
 type HomeEventCard = {
@@ -19,11 +15,19 @@ type HomePageClientProps = {
   initialEvents: HomeEventCard[];
 };
 
-
 const domains = [
-  { name: "Event Management", detail: "Thematic ideation, structure, and execution" },
-  { name: "Logistics & Ops", detail: "Venue setup, time management, and execution" },
-  { name: "Media & Visibility", detail: "Photography, reels, and digital narrative" },
+  {
+    name: "Event Management",
+    detail: "Thematic ideation, structure, and execution",
+  },
+  {
+    name: "Logistics & Ops",
+    detail: "Venue setup, time management, and execution",
+  },
+  {
+    name: "Media & Visibility",
+    detail: "Photography, reels, and digital narrative",
+  },
   { name: "Marketing", detail: "Engagement, promotion, and outreach" },
   { name: "Finance", detail: "Sponsorships, budgets, and partnerships" },
   { name: "Tech & Systems", detail: "Digital workflows, forms, and archives" },
@@ -91,7 +95,6 @@ export default function HomePageClient({ initialEvents }: HomePageClientProps) {
     return () => clearTimeout(timer);
   }, []);
 
-
   const fadeUp = {
     hidden: { opacity: 0, y: 34 },
     show: {
@@ -128,7 +131,6 @@ export default function HomePageClient({ initialEvents }: HomePageClientProps) {
 
   return (
     <main className="overflow-x-hidden bg-[#F5F0E8] text-[#1C1C1C]">
-
       <motion.div
         className="fixed left-0 right-0 top-0 z-[80] h-1 origin-left bg-[linear-gradient(90deg,#8B1A1A,#C9A84C,#1B5E3B)]"
         style={{ scaleX: scrollYProgress }}

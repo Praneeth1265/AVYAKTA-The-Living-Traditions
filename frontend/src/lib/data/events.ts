@@ -2,7 +2,6 @@ import "server-only";
 
 import { createClient } from "@/utils/supabase/server";
 import {
-
   formatEventDate,
   inferEventStatus,
   type EventItem,
@@ -145,22 +144,26 @@ async function fetchRawEventRows() {
   try {
     const supabase = await createClient();
     const { data, error } = await supabase
-      .from('events')
-      .select(`
+      .from("events")
+      .select(
+        `
         id, title, description, domain, highlights, timeline, image_url, date, venue,
         event_slug ( more_description, image_url ),
         posters ( poster_image_url )
-      `)
-      .order('date', { ascending: true })
-      .order('title', { ascending: true });
+      `,
+      )
+      .order("date", { ascending: true })
+      .order("title", { ascending: true });
 
     if (error) throw error;
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     return (data || []).map((row: any) => {
-      const es = Array.isArray(row.event_slug) ? row.event_slug[0] : row.event_slug;
+      const es = Array.isArray(row.event_slug)
+        ? row.event_slug[0]
+        : row.event_slug;
       const p = Array.isArray(row.posters) ? row.posters[0] : row.posters;
-      
+
       return {
         id: row.id,
         title: row.title,
@@ -173,7 +176,7 @@ async function fetchRawEventRows() {
         venue: row.venue,
         more_description: es?.more_description,
         slug_image_url: es?.image_url,
-        poster_image_url: p?.poster_image_url
+        poster_image_url: p?.poster_image_url,
       };
     });
   } catch (error) {

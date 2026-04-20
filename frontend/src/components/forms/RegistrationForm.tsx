@@ -138,7 +138,8 @@ export default function RegistrationForm({
                   Your registration has been submitted successfully!
                 </p>
                 <p className="thank-you-subtext">
-                  We look forward to seeing you at the event. Keep an eye on your email for further details.
+                  We look forward to seeing you at the event. Keep an eye on
+                  your email for further details.
                 </p>
                 <button
                   type="button"
@@ -159,7 +160,10 @@ export default function RegistrationForm({
                   <label className="form-label">
                     Select Event <span className="required">*</span>
                   </label>
-                  <select {...register("eventSelector")} className="form-select mt-2">
+                  <select
+                    {...register("eventSelector")}
+                    className="form-select mt-2"
+                  >
                     <option value="">-- Choose Event --</option>
                     {events.map((e) => (
                       <option key={e.id} value={e.id}>
@@ -219,7 +223,9 @@ export default function RegistrationForm({
                   placeholder="Your full name"
                   className="form-input"
                 />
-                {errors.name && <p className="form-error">{errors.name.message}</p>}
+                {errors.name && (
+                  <p className="form-error">{errors.name.message}</p>
+                )}
               </div>
 
               <div className="form-group">
@@ -232,7 +238,9 @@ export default function RegistrationForm({
                   placeholder="your@email.com"
                   className="form-input"
                 />
-                {errors.email && <p className="form-error">{errors.email.message}</p>}
+                {errors.email && (
+                  <p className="form-error">{errors.email.message}</p>
+                )}
               </div>
 
               <div className="form-group">
@@ -247,7 +255,9 @@ export default function RegistrationForm({
                     </option>
                   ))}
                 </select>
-                {errors.branch && <p className="form-error">{errors.branch.message}</p>}
+                {errors.branch && (
+                  <p className="form-error">{errors.branch.message}</p>
+                )}
               </div>
 
               <div className="form-group">
@@ -262,7 +272,9 @@ export default function RegistrationForm({
                   placeholder="Enter year"
                   className="form-input"
                 />
-                {errors.classYear && <p className="form-error">{errors.classYear.message}</p>}
+                {errors.classYear && (
+                  <p className="form-error">{errors.classYear.message}</p>
+                )}
               </div>
 
               <div className="form-group">
@@ -275,7 +287,9 @@ export default function RegistrationForm({
                   placeholder="Your section"
                   className="form-input"
                 />
-                {errors.section && <p className="form-error">{errors.section.message}</p>}
+                {errors.section && (
+                  <p className="form-error">{errors.section.message}</p>
+                )}
               </div>
             </div>
 
@@ -296,7 +310,9 @@ export default function RegistrationForm({
                   maxLength={13}
                   className="form-input uppercase"
                 />
-                {errors.srn && <p className="form-error">{errors.srn.message}</p>}
+                {errors.srn && (
+                  <p className="form-error">{errors.srn.message}</p>
+                )}
               </div>
 
               <div className="form-group">
@@ -309,7 +325,9 @@ export default function RegistrationForm({
                   placeholder="9876543210"
                   className="form-input"
                 />
-                {errors.phone_number && <p className="form-error">{errors.phone_number.message}</p>}
+                {errors.phone_number && (
+                  <p className="form-error">{errors.phone_number.message}</p>
+                )}
               </div>
             </div>
 
@@ -323,7 +341,10 @@ export default function RegistrationForm({
                 // Participant Fields
                 <div className="grid gap-6 md:grid-cols-2">
                   <div className="form-group">
-                    <label className="form-label">Team Name <span className="optional">(If team event)</span></label>
+                    <label className="form-label">
+                      Team Name{" "}
+                      <span className="optional">(If team event)</span>
+                    </label>
                     <input
                       {...register("teamName")}
                       type="text"
@@ -332,7 +353,9 @@ export default function RegistrationForm({
                     />
                   </div>
                   <div className="form-group">
-                    <label className="form-label">Dietary Needs <span className="optional">(Optional)</span></label>
+                    <label className="form-label">
+                      Dietary Needs <span className="optional">(Optional)</span>
+                    </label>
                     <input
                       {...register("dietaryNeeds")}
                       type="text"
@@ -355,7 +378,9 @@ export default function RegistrationForm({
                           type="button"
                           onClick={() => setValue("volunteerDomain", domain)}
                           className={`domain-chip ${
-                            watch("volunteerDomain") === domain ? "selected" : ""
+                            watch("volunteerDomain") === domain
+                              ? "selected"
+                              : ""
                           }`}
                         >
                           {domain}
@@ -363,13 +388,16 @@ export default function RegistrationForm({
                       ))}
                     </div>
                     {errors.volunteerDomain && (
-                      <p className="form-error">{errors.volunteerDomain.message}</p>
+                      <p className="form-error">
+                        {errors.volunteerDomain.message}
+                      </p>
                     )}
                   </div>
-                  
+
                   <div className="form-group">
                     <label className="form-label">
-                      Prior Volunteer Experience <span className="optional">(Optional)</span>
+                      Prior Volunteer Experience{" "}
+                      <span className="optional">(Optional)</span>
                     </label>
                     <textarea
                       {...register("volunteerExperience")}
@@ -382,7 +410,9 @@ export default function RegistrationForm({
 
               {/* Links Section */}
               <div className="links-container mt-4">
-                <div className="links-title">🔗 Supporting Links (Optional)</div>
+                <div className="links-title">
+                  🔗 Supporting Links (Optional)
+                </div>
                 <div>
                   {linkInputs.map((link, index) => (
                     <div key={index} className="link-input-wrapper">
@@ -427,7 +457,11 @@ export default function RegistrationForm({
                   : undefined,
               }}
             >
-              {isSubmitting ? "" : isVolunteer ? "Register as Volunteer" : "Register as Participant"}
+              {isSubmitting
+                ? ""
+                : isVolunteer
+                  ? "Register as Volunteer"
+                  : "Register as Participant"}
             </button>
           </form>
         )}

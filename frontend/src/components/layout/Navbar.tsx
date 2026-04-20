@@ -172,7 +172,9 @@ export default function Navbar() {
         className={[
           "md:hidden overflow-hidden transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)]",
           "border-t border-[#C9A84C]/15 bg-[#1C1C1C]/95 backdrop-blur-xl",
-          mobileOpen ? "max-h-[420px] opacity-100" : "max-h-0 opacity-0 border-t-0",
+          mobileOpen
+            ? "max-h-[420px] opacity-100"
+            : "max-h-0 opacity-0 border-t-0",
         ].join(" ")}
       >
         <ul className="flex flex-col py-4 px-6 gap-1 list-none m-0">

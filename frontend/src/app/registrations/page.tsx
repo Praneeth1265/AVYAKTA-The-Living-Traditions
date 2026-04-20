@@ -8,7 +8,7 @@ export const dynamic = "force-dynamic";
 
 export default async function RegistrationsPage() {
   const allEvents = await getEventsFromDb();
-  
+
   // Filter for events that can be registered for (upcoming primarily)
   const availableEvents = allEvents
     .filter((e) => e.status === "upcoming")
@@ -26,7 +26,8 @@ export default async function RegistrationsPage() {
         <div className="recruitment-header">
           <h1 className="recruitment-title">Event Registration</h1>
           <p className="recruitment-subtitle text-[var(--charcoal-black)]">
-            Join us as a participant or shape the experience as a volunteer. The choice is yours.
+            Join us as a participant or shape the experience as a volunteer. The
+            choice is yours.
           </p>
         </div>
 

@@ -74,7 +74,6 @@ export default function EventsPageClient({
 
   return (
     <main className="min-h-screen overflow-x-hidden bg-[#F5F0E8] text-[#1C1C1C]">
-
       <motion.div
         className="fixed left-0 right-0 top-0 z-[80] h-1 origin-left bg-[linear-gradient(90deg,#8B1A1A,#C9A84C,#1B5E3B)]"
         style={{ scaleX: scrollYProgress }}

@@ -95,7 +95,7 @@ export default function EventDetailClient({ event }: EventDetailClientProps) {
                 {event.domain}
               </span>
             </div>
-            
+
             <motion.div
               whileHover={{ y: -4, scale: 1.01 }}
               className="mt-10 max-w-fit rounded-2xl border-l-4 border-l-[#C9A84C] bg-gradient-to-r from-black/60 to-transparent p-5 backdrop-blur-md"
@@ -184,7 +184,7 @@ export default function EventDetailClient({ event }: EventDetailClientProps) {
                 {event.venue || "Venue will be announced shortly."}
               </p>
             </motion.div>
-            
+
             <motion.div
               whileHover={{ scale: 1.015 }}
               className="flex flex-col gap-2 rounded-xl border border-[#C9A84C]/25 bg-[#F9F5EE] px-5 py-4"
@@ -193,7 +193,8 @@ export default function EventDetailClient({ event }: EventDetailClientProps) {
                 Event Manager
               </p>
               <p className="text-sm text-[#1C1C1C]/80">
-                Please refer to the registration form for any event specific contacts or reach out via our main contact page.
+                Please refer to the registration form for any event specific
+                contacts or reach out via our main contact page.
               </p>
             </motion.div>
           </div>
