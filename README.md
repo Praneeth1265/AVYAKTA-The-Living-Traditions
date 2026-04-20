@@ -2,6 +2,10 @@
 
 A culturally rooted, vibrant website for Avyakta - a cultural multi-domain club that brings together students passionate about performing arts, design, technology, event management, and more.
 
+## Recent Handover Notes
+
+For a detailed record of work completed since yesterday (implementation, DB checks, troubleshooting, seeded data, and pending steps), refer to [READMEBYNAMAN](READMEBYNAMAN).
+
 ---
 
 ## Tech Stack
