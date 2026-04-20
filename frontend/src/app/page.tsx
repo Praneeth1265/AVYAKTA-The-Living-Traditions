@@ -1,17 +1,15 @@
-import HomePageClient from "./HomePageClient";
-import { getEventsFromDb } from "@/lib/data/events";
+export default function Home() {
+  return (
+    <main className="h-screen flex items-center justify-center bg-warm">
+      <div className="text-center">
+        <h1 className="text-5xl font-heading text-bronze">Avyakta</h1>
 
-export const dynamic = "force-dynamic";
+        <p className="mt-4 text-olive font-body">
+          Tailwind + Layout Working ✅
+        </p>
 
-export default async function HomePage() {
-  const eventItems = await getEventsFromDb();
-
-  const initialEvents = eventItems.slice(0, 3).map((item) => ({
-    slug: item.slug,
-    name: item.title,
-    date: item.date,
-    type: item.domain?.trim() || "Cultural showcase",
-  }));
-
-  return <HomePageClient initialEvents={initialEvents} />;
+        <button className="btn-primary mt-6">Test Button</button>
+      </div>
+    </main>
+  );
 }
