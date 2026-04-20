@@ -1,10 +1,9 @@
-import EventsListClient from "@/components/events/EventsListClient";
+import EventsPageClient from "./EventsPageClient";
+import { getEventsFromDb } from "@/lib/data/events";
 
-export const metadata = {
-  title: "Events",
-  description: "Explore and register for upcoming events",
-};
+export const dynamic = "force-dynamic";
 
-export default function EventsPage() {
-  return <EventsListClient />;
+export default async function EventsPage() {
+  const events = await getEventsFromDb();
+  return <EventsPageClient initialEvents={events} />;
 }
