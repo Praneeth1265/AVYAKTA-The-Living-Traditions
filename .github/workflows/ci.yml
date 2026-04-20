@@ -2,40 +2,59 @@ name: CI Pipeline
 
 on:
   pull_request:
-    branches: [main, dev, team/1-core-structure, team/2-recruitment-data, team/3-events-gallery-ux]
+    branches: [main, dev, "team/**"]
+
+env:
+  DATABASE_URL: ${{ secrets.DATABASE_URL }}
+  NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+  NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+  SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
 
 jobs:
-  build:
+  quality:
     runs-on: ubuntu-latest
-
+    strategy:
+      matrix:
+        task: [typecheck, lint, format, test]
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Setup Node
-        uses: actions/setup-node@v4
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: '24'
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
 
       - name: Install dependencies
         run: cd frontend && npm ci
 
-      - name: Type check
-        run: cd frontend && npx tsc --noEmit
+      - name: Run ${{ matrix.task }}
+        run: |
+          cd frontend
+          case ${{ matrix.task }} in
+            typecheck) npx tsc --noEmit ;;
+            lint)      npm run lint ;;
+            format)    npx prettier --check . ;;
+            test)      npm run test || echo "No tests yet" ;;
+          esac
 
-      - name: Run lint
-        run: cd frontend && npm run lint
+  build-and-e2e:
+    needs: quality
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
 
-      - name: Check formatting
-        run: cd frontend && npx prettier --check .
-
-      - name: Run unit tests
-        run: cd frontend && npm run test || echo "No unit tests yet"
+      - name: Install dependencies
+        run: cd frontend && npm ci
 
       - name: Build project
         run: cd frontend && npm run build
 
-      - name: Install Playwright
+      - name: Install Playwright browsers
         run: cd frontend && npx playwright install --with-deps
 
       - name: Start app
