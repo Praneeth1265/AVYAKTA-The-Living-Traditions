@@ -221,6 +221,14 @@ npx prettier --write .
 
 ## Branching Strategy
 
+| Branch | Purpose | Protection | Merge Approvals |
+|--------|---------|------------|------------------|
+| `main` | Production (final release) | Codeowner approval | Codeowner |
+| `dev` | Integration & testing | Protected | Tech leads |
+| `team/1-core-structure` | Team 1 integration | Protected | Min. 2 approvals |
+| `team/2-recruitment-data` | Team 2 integration | Protected | Min. 2 approvals |
+| `team/3-events-gallery-ux` | Team 3 integration | Protected | Min. 2 approvals |
+| `feature/*` | Individual feature work | Not protected | — |
 | Branch | Purpose | Protection |
 |--------|---------|------------|
 | `main` | Production-ready code | Protected |
@@ -232,7 +240,11 @@ npx prettier --write .
 
 ### Workflow
 
-1. Create feature branch from your team branch:
+```
+feature/* → PR → team branch → PR → dev → (tech leads) → main
+```
+
+1. Create a feature branch from your team branch:
    ```bash
    git checkout team/1-core-structure
    git checkout -b feature/navbar
@@ -244,15 +256,19 @@ npx prettier --write .
    git push origin feature/navbar
    ```
 
-3. Create PR → your team branch (e.g., `team/1-core-structure`)
+3. Open PR → your team branch (requires **2 approvals**).
 
-4. After review, create PR → `dev`
+4. Team branch → PR → `dev` (handled by tech leads).
+
+5. `dev` → `main` after integration testing (codeowner approval required).
 
 ### Rules
 
-- No direct push to protected branches
-- All changes via PRs
-- CI checks must pass before merging
+- No direct pushes to protected branches.
+- All changes go through PRs.
+- **Do not** merge directly between team branches — cross-team integration happens only via `dev`.
+- CI checks must pass before any merge.
+- Testing happens at the `dev` integration stage, not in isolation.
 - Strictly don't make changes in CI Pipeline
 - Avoid merging directly between team branches — cross-team integration goes through `dev` only
 
