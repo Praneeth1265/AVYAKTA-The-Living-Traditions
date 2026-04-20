@@ -156,6 +156,7 @@ async function fetchRawEventRows() {
 
     if (error) throw error;
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     return (data || []).map((row: any) => {
       const es = Array.isArray(row.event_slug) ? row.event_slug[0] : row.event_slug;
       const p = Array.isArray(row.posters) ? row.posters[0] : row.posters;

@@ -158,6 +158,7 @@ export async function getMembersFromDb(): Promise<MemberCard[]> {
     }
 
     const mapped = rows
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       .map((raw: any) => {
         const id = String(raw.id ?? "").trim();
         const name = String(raw.name ?? "").trim();

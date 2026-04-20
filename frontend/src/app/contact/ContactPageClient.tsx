@@ -40,10 +40,10 @@ export default function ContactPageClient() {
           </div>
           
           <h1 className="font-serif text-5xl md:text-7xl font-bold text-[#F5F0E8] mb-6 drop-shadow-[0_0_15px_rgba(201,168,76,0.3)]">
-            Let's Connect
+            Let&apos;s Connect
           </h1>
           <p className="text-[#C9A84C]/90 text-lg max-w-xl mx-auto italic font-medium leading-relaxed">
-            Whether you want to perform, collaborate, or simply say hello — we’re always ready to listen. Dive into the world of Avyakta.
+            Whether you want to perform, collaborate, or simply say hello - we’re always ready to listen. Dive into the world of Avyakta.
           </p>
         </motion.div>
 
