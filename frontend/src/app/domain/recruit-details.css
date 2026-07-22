@@ -1,0 +1,127 @@
+.recruit-detail-page {
+  min-height: 100vh;
+  background:
+    radial-gradient(circle at top left, rgba(146, 121, 27, 0.12), transparent 34%),
+    linear-gradient(180deg, #f5f0e8 0%, #fffdf8 100%);
+  color: #1c1c1c;
+}
+
+.recruit-detail-shell {
+  width: min(1040px, calc(100% - 32px));
+  margin: 0 auto;
+  padding: 40px 0 64px;
+}
+
+.recruit-detail-card,
+.recruit-detail-panel {
+  border-radius: 20px;
+  border: 1px solid rgba(201, 168, 76, 0.2);
+  background: rgba(255, 255, 255, 0.92);
+  box-shadow: 0 12px 32px rgba(40, 22, 6, 0.08);
+}
+
+.recruit-detail-card {
+  padding: 24px;
+}
+
+.recruit-detail-title {
+  margin: 0;
+  color: #92791b;
+  font-size: clamp(2rem, 3vw, 3rem);
+  font-weight: 700;
+}
+
+.recruit-detail-subtitle,
+.recruit-detail-meta,
+.recruit-detail-body {
+  color: #5f5f57;
+}
+
+.recruit-detail-grid {
+  display: grid;
+  gap: 18px;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+}
+
+.recruit-detail-panel {
+  padding: 22px;
+}
+
+.recruit-field {
+  display: grid;
+  gap: 6px;
+  margin-bottom: 12px;
+}
+
+.recruit-field label {
+  font-size: 0.84rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #737955;
+}
+
+.recruit-field input,
+.recruit-field select,
+.recruit-field textarea {
+  width: 100%;
+  border-radius: 12px;
+  border: 1px solid rgba(146, 121, 27, 0.24);
+  padding: 12px 14px;
+  background: #fff;
+  color: #1c1c1c;
+}
+
+.recruit-action-row {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-top: 18px;
+}
+
+.recruit-action-button {
+  border: none;
+  border-radius: 999px;
+  padding: 12px 18px;
+  background: #92791b;
+  color: #fff;
+  font-weight: 600;
+}
+
+.recruit-status-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 12px;
+  border-radius: 999px;
+  font-size: 0.84rem;
+  font-weight: 600;
+  background: #f5f0e8;
+  color: #1c1c1c;
+}
+
+.recruit-status-pill.approved {
+  background: #1b5e3b;
+  color: #fff;
+}
+
+.recruit-status-pill.rejected {
+  background: #8b1a1a;
+  color: #fff;
+}
+
+.recruit-status-pill.not_sure {
+  background: #92791b;
+  color: #fff;
+}
+
+@media (max-width: 768px) {
+  .recruit-detail-shell {
+    width: min(100% - 20px, 1040px);
+    padding-top: 24px;
+  }
+
+  .recruit-detail-card,
+  .recruit-detail-panel {
+    padding: 18px;
+  }
+}

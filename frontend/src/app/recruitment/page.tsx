@@ -1,9 +1,17 @@
+import { redirect } from "next/navigation";
 import RecruitmentForm from "@/components/forms/RecruitmentForm";
 import bgImage from "@/components/forms/bg.jpeg";
 import bgFormsImage from "@/components/forms/bg-forms.jpeg";
+import { getRecruitmentStatus } from "@/lib/config/recruitmentStatus";
 import "./recruitment.css";
 
-export default function RecruitmentPage() {
+export default async function RecruitmentPage() {
+  const isOpen = await getRecruitmentStatus();
+
+  if (!isOpen) {
+    redirect("/recruitment-closed");
+  }
+
   return (
     <main
       className="recruitment-page"
