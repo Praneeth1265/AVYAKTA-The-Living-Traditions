@@ -244,7 +244,7 @@ export default function AboutPageClient() {
                 title: "Positive Environment",
                 desc: "Promote cultural sensitivity, strengthen interaction across departments, and build a shared campus culture.",
               },
-            ].map((obj, i) => (
+            ].map((obj) => (
               <motion.div
                 key={obj.id}
                 variants={fadeUp}

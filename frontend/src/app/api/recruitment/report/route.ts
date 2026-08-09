@@ -74,7 +74,8 @@ export async function POST(request: NextRequest) {
             "id, name, email, phone_no, srn, branch, section, year, first_preference_domain, second_domain_preference, experience, why_you, why_us, first_preference_status, interview, created_at",
           )
           .eq("first_preference_domain", domain)
-          .order("created_at", { ascending: false }),
+          .order("created_at", { ascending: false })
+          .returns<RecruitmentReportRow[]>(),
         supabaseAdmin
           .from("counter")
           .select("domain, not_sure, approved, rejected")

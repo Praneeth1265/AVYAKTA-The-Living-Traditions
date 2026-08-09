@@ -22,7 +22,9 @@ export default function RecruitmentStatsClient() {
   const [domainIndicators, setDomainIndicators] = useState<DomainIndicator[]>(
     [],
   );
-  const [selectedDomain, setSelectedDomain] = useState(RECRUITMENT_DOMAINS[0]);
+  const [selectedDomain, setSelectedDomain] = useState<
+    (typeof RECRUITMENT_DOMAINS)[number]
+  >(RECRUITMENT_DOMAINS[0]);
   const [globalIndicator, setGlobalIndicator] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState(false);
   const [togglingGlobal, setTogglingGlobal] = useState(false);
@@ -31,9 +33,11 @@ export default function RecruitmentStatsClient() {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
 
-  // Fetch data on mount
+  // Fetch data on mount only; fetchData is intentionally excluded since it
+  // is redefined every render and this effect must not re-run on refetch.
   useEffect(() => {
     fetchData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const fetchData = async () => {
@@ -296,7 +300,11 @@ export default function RecruitmentStatsClient() {
           <div className="header-actions">
             <select
               value={selectedDomain}
-              onChange={(event) => setSelectedDomain(event.target.value)}
+              onChange={(event) =>
+                setSelectedDomain(
+                  event.target.value as (typeof RECRUITMENT_DOMAINS)[number],
+                )
+              }
               className="min-w-[240px] rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-800 shadow-sm outline-none transition focus:border-amber-500 focus:ring-2 focus:ring-amber-200"
             >
               {RECRUITMENT_DOMAINS.map((domain) => (

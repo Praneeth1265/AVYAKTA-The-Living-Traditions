@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { getSupabaseAdmin } from "../../../../lib/supabase/server";
 import {
@@ -44,7 +44,7 @@ async function verifyAdminAuth(): Promise<boolean> {
  * - Atomicity: Operations are sequential with proper error handling
  * - Authorization: Requires admin authentication before executing destructive operations
  */
-export async function POST(request: NextRequest) {
+export async function POST() {
   try {
     // Verify admin authentication
     const isAuthenticated = await verifyAdminAuth();

@@ -34,9 +34,9 @@ type SecondPreferenceRow = {
 
 type CounterRow = {
   domain: string;
-  not_sure: number | null;
-  approved: number | null;
-  rejected: number | null;
+  not_sure: number;
+  approved: number;
+  rejected: number;
 };
 
 type IndicatorRow = {
