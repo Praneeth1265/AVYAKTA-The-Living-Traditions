@@ -67,7 +67,9 @@ export async function POST(request: NextRequest) {
       domain,
     });
 
-    const redirectTo = domain ? `/domain/${formatDomainToUrl(domain)}` : "/dashboard";
+    const redirectTo = domain
+      ? `/domain/${formatDomainToUrl(domain)}`
+      : "/dashboard";
 
     const response = NextResponse.json(
       { message: "Login successful", redirectTo },

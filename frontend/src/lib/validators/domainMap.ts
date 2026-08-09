@@ -28,21 +28,32 @@ export const VALID_DOMAIN_NAMES = DOMAIN_MAP.map((record) => record.name);
 export const VALID_DOMAIN_SLUGS = DOMAIN_MAP.map((record) => record.slug);
 
 export function getDomainNameFromSlug(slug: string): string | null {
-  return DOMAIN_MAP.find((record) => record.slug === slug.toLowerCase())?.name ?? null;
+  return (
+    DOMAIN_MAP.find((record) => record.slug === slug.toLowerCase())?.name ??
+    null
+  );
 }
 
 export function getDomainSlugFromName(domainName: string): string | null {
-  return DOMAIN_MAP.find(
-    (record) => record.name.toLowerCase() === domainName.toLowerCase(),
-  )?.slug ?? null;
+  return (
+    DOMAIN_MAP.find(
+      (record) => record.name.toLowerCase() === domainName.toLowerCase(),
+    )?.slug ?? null
+  );
 }
 
 export function getDomainRecordFromSlug(slug: string): DomainRecord | null {
-  return DOMAIN_MAP.find((record) => record.slug === slug.toLowerCase()) ?? null;
+  return (
+    DOMAIN_MAP.find((record) => record.slug === slug.toLowerCase()) ?? null
+  );
 }
 
-export function getDomainRecordFromName(domainName: string): DomainRecord | null {
-  return DOMAIN_MAP.find(
-    (record) => record.name.toLowerCase() === domainName.toLowerCase(),
-  ) ?? null;
+export function getDomainRecordFromName(
+  domainName: string,
+): DomainRecord | null {
+  return (
+    DOMAIN_MAP.find(
+      (record) => record.name.toLowerCase() === domainName.toLowerCase(),
+    ) ?? null
+  );
 }

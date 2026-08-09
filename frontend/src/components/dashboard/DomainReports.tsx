@@ -65,7 +65,11 @@ export default function DomainReports({ domain }: DomainReportsProps) {
 
         setReportData(await response.json());
       } catch (loadError) {
-        setError(loadError instanceof Error ? loadError.message : "Failed to fetch report data");
+        setError(
+          loadError instanceof Error
+            ? loadError.message
+            : "Failed to fetch report data",
+        );
       } finally {
         setLoading(false);
       }
@@ -104,7 +108,9 @@ export default function DomainReports({ domain }: DomainReportsProps) {
     ]);
 
     return [header, ...rows]
-      .map((row) => row.map((cell) => `"${String(cell).replace(/"/g, '""')}"`).join(","))
+      .map((row) =>
+        row.map((cell) => `"${String(cell).replace(/"/g, '""')}"`).join(","),
+      )
       .join("\n");
   }, [reportData]);
 
@@ -140,7 +146,9 @@ export default function DomainReports({ domain }: DomainReportsProps) {
         </button>
       </div>
 
-      {loading && <p className="mt-6 text-sm text-gray-500">Loading report...</p>}
+      {loading && (
+        <p className="mt-6 text-sm text-gray-500">Loading report...</p>
+      )}
 
       {error && !loading && (
         <p className="mt-6 rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-700">
@@ -153,19 +161,27 @@ export default function DomainReports({ domain }: DomainReportsProps) {
           <div className="grid gap-3 md:grid-cols-4">
             <div className="rounded-xl bg-gray-50 p-4">
               <div className="text-sm text-gray-500">Total</div>
-              <div className="text-2xl font-bold text-gray-900">{reportData.total_count}</div>
+              <div className="text-2xl font-bold text-gray-900">
+                {reportData.total_count}
+              </div>
             </div>
             <div className="rounded-xl bg-amber-50 p-4">
               <div className="text-sm text-amber-700">Pending</div>
-              <div className="text-2xl font-bold text-amber-800">{reportData.stats?.not_sure ?? 0}</div>
+              <div className="text-2xl font-bold text-amber-800">
+                {reportData.stats?.not_sure ?? 0}
+              </div>
             </div>
             <div className="rounded-xl bg-green-50 p-4">
               <div className="text-sm text-green-700">Approved</div>
-              <div className="text-2xl font-bold text-green-800">{reportData.stats?.approved ?? 0}</div>
+              <div className="text-2xl font-bold text-green-800">
+                {reportData.stats?.approved ?? 0}
+              </div>
             </div>
             <div className="rounded-xl bg-red-50 p-4">
               <div className="text-sm text-red-700">Rejected</div>
-              <div className="text-2xl font-bold text-red-800">{reportData.stats?.rejected ?? 0}</div>
+              <div className="text-2xl font-bold text-red-800">
+                {reportData.stats?.rejected ?? 0}
+              </div>
             </div>
           </div>
 
@@ -184,10 +200,16 @@ export default function DomainReports({ domain }: DomainReportsProps) {
                 {reportData.recruits.map((recruit) => (
                   <tr key={recruit.id} className="border-t border-gray-100">
                     <td className="px-4 py-3">{recruit.name}</td>
-                    <td className="px-4 py-3 font-mono text-xs">{recruit.srn}</td>
+                    <td className="px-4 py-3 font-mono text-xs">
+                      {recruit.srn}
+                    </td>
                     <td className="px-4 py-3">{recruit.email}</td>
-                    <td className="px-4 py-3">{normalizeStatus(recruit.first_preference_status)}</td>
-                    <td className="px-4 py-3">{recruit.interview ? "Yes" : "No"}</td>
+                    <td className="px-4 py-3">
+                      {normalizeStatus(recruit.first_preference_status)}
+                    </td>
+                    <td className="px-4 py-3">
+                      {recruit.interview ? "Yes" : "No"}
+                    </td>
                   </tr>
                 ))}
               </tbody>

@@ -39,7 +39,9 @@ export default function AdminDashboardLayout() {
         const indicatorJson = await indicatorResponse.json();
 
         setCounters(Array.isArray(counterJson.data) ? counterJson.data : []);
-        setIndicators(Array.isArray(indicatorJson.data) ? indicatorJson.data : []);
+        setIndicators(
+          Array.isArray(indicatorJson.data) ? indicatorJson.data : [],
+        );
       } catch (error) {
         console.error("Error loading recruitment dashboard:", error);
       } finally {
@@ -54,7 +56,9 @@ export default function AdminDashboardLayout() {
     <main className="min-h-screen bg-gray-50 p-6 md:p-8">
       <div className="mx-auto max-w-6xl space-y-6">
         <section className="rounded-2xl bg-white p-6 shadow-sm border border-gray-100">
-          <h1 className="text-3xl font-bold text-gray-900">Recruitment Control</h1>
+          <h1 className="text-3xl font-bold text-gray-900">
+            Recruitment Control
+          </h1>
           <p className="mt-2 text-gray-600">
             Domain recruitment counters and indicators.
           </p>
@@ -70,7 +74,9 @@ export default function AdminDashboardLayout() {
           <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
             {RECRUITMENT_DOMAINS.map((domain) => {
               const counter = counters.find((entry) => entry.domain === domain);
-              const indicator = indicators.find((entry) => entry.domain === domain);
+              const indicator = indicators.find(
+                (entry) => entry.domain === domain,
+              );
 
               return (
                 <article
@@ -79,9 +85,16 @@ export default function AdminDashboardLayout() {
                 >
                   <div className="mb-4 flex items-start justify-between gap-4">
                     <div>
-                      <h2 className="text-lg font-semibold text-gray-900">{domain}</h2>
+                      <h2 className="text-lg font-semibold text-gray-900">
+                        {domain}
+                      </h2>
                       <p className="text-sm text-gray-500">
-                        {counter ? counter.not_sure + counter.approved + counter.rejected : 0} applications
+                        {counter
+                          ? counter.not_sure +
+                            counter.approved +
+                            counter.rejected
+                          : 0}{" "}
+                        applications
                       </p>
                     </div>
                     <IndicatorBuzzer

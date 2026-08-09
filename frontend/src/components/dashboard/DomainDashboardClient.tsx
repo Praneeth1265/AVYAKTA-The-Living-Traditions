@@ -85,12 +85,18 @@ type DomainDashboardClientProps = {
   domain: string;
 };
 
-export default function DomainDashboardClient({ domain }: DomainDashboardClientProps) {
+export default function DomainDashboardClient({
+  domain,
+}: DomainDashboardClientProps) {
   const router = useRouter();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [firstPreferenceRecruits, setFirstPreferenceRecruits] = useState<RecruitRow[]>([]);
-  const [secondPreferenceRecruits, setSecondPreferenceRecruits] = useState<RecruitRow[]>([]);
+  const [firstPreferenceRecruits, setFirstPreferenceRecruits] = useState<
+    RecruitRow[]
+  >([]);
+  const [secondPreferenceRecruits, setSecondPreferenceRecruits] = useState<
+    RecruitRow[]
+  >([]);
   const [counter, setCounter] = useState<CounterRow | null>(null);
   const [indicator, setIndicator] = useState<IndicatorRow | null>(null);
 
@@ -112,7 +118,11 @@ export default function DomainDashboardClient({ domain }: DomainDashboardClientP
         setCounter(payload.counter ?? null);
         setIndicator(payload.indicator ?? null);
       } catch (loadError) {
-        setError(loadError instanceof Error ? loadError.message : "Failed to load domain data");
+        setError(
+          loadError instanceof Error
+            ? loadError.message
+            : "Failed to load domain data",
+        );
       } finally {
         setLoading(false);
       }
@@ -134,7 +144,11 @@ export default function DomainDashboardClient({ domain }: DomainDashboardClientP
     doc.setFontSize(10);
     doc.text(`Generated: ${new Date().toLocaleString()}`, marginX, y);
 
-    const toRow = (recruit: RecruitRow, preference: "First" | "Second", status: string) => [
+    const toRow = (
+      recruit: RecruitRow,
+      preference: "First" | "Second",
+      status: string,
+    ) => [
       recruit.name || "N/A",
       recruit.srn || "N/A",
       recruit.email || "N/A",
@@ -148,16 +162,36 @@ export default function DomainDashboardClient({ domain }: DomainDashboardClientP
 
     const rows = [
       ...firstPreferenceRecruits.map((recruit) =>
-        toRow(recruit, "First", normalizeStatus(recruit.first_preference_status)),
+        toRow(
+          recruit,
+          "First",
+          normalizeStatus(recruit.first_preference_status),
+        ),
       ),
       ...secondPreferenceRecruits.map((recruit) =>
-        toRow(recruit, "Second", normalizeStatus(recruit.second_preference_status)),
+        toRow(
+          recruit,
+          "Second",
+          normalizeStatus(recruit.second_preference_status),
+        ),
       ),
     ];
 
     autoTable(doc, {
       startY: y + 6,
-      head: [["Name", "SRN", "Email", "Phone", "Branch", "Section", "Year", "Preference", "Status"]],
+      head: [
+        [
+          "Name",
+          "SRN",
+          "Email",
+          "Phone",
+          "Branch",
+          "Section",
+          "Year",
+          "Preference",
+          "Status",
+        ],
+      ],
       body: rows,
       styles: { fontSize: 8 },
       headStyles: { fillColor: [146, 121, 27] },
@@ -177,15 +211,21 @@ export default function DomainDashboardClient({ domain }: DomainDashboardClientP
         <section className="rounded-2xl bg-white p-6 shadow-sm border border-gray-100">
           <div className="flex flex-wrap items-center justify-between gap-4">
             <div>
-              <h1 className="text-3xl font-bold text-gray-900">{domain} Dashboard</h1>
-              <p className="mt-2 text-gray-600">Recruitment summary for this domain.</p>
+              <h1 className="text-3xl font-bold text-gray-900">
+                {domain} Dashboard
+              </h1>
+              <p className="mt-2 text-gray-600">
+                Recruitment summary for this domain.
+              </p>
             </div>
             <div className="flex items-center gap-3">
               <button
                 type="button"
                 onClick={handleDownloadPdf}
                 disabled={
-                  loading || (firstPreferenceRecruits.length === 0 && secondPreferenceRecruits.length === 0)
+                  loading ||
+                  (firstPreferenceRecruits.length === 0 &&
+                    secondPreferenceRecruits.length === 0)
                 }
                 className="rounded-lg bg-amber-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-amber-700 disabled:cursor-not-allowed disabled:bg-gray-300"
               >
@@ -219,15 +259,21 @@ export default function DomainDashboardClient({ domain }: DomainDashboardClientP
             <section className="grid gap-4 md:grid-cols-3">
               <div className="rounded-2xl bg-white p-5 shadow-sm border border-gray-100">
                 <div className="text-sm text-gray-500">Pending</div>
-                <div className="mt-1 text-3xl font-bold text-amber-700">{counter?.not_sure ?? 0}</div>
+                <div className="mt-1 text-3xl font-bold text-amber-700">
+                  {counter?.not_sure ?? 0}
+                </div>
               </div>
               <div className="rounded-2xl bg-white p-5 shadow-sm border border-gray-100">
                 <div className="text-sm text-gray-500">Approved</div>
-                <div className="mt-1 text-3xl font-bold text-green-700">{counter?.approved ?? 0}</div>
+                <div className="mt-1 text-3xl font-bold text-green-700">
+                  {counter?.approved ?? 0}
+                </div>
               </div>
               <div className="rounded-2xl bg-white p-5 shadow-sm border border-gray-100">
                 <div className="text-sm text-gray-500">Rejected</div>
-                <div className="mt-1 text-3xl font-bold text-red-700">{counter?.rejected ?? 0}</div>
+                <div className="mt-1 text-3xl font-bold text-red-700">
+                  {counter?.rejected ?? 0}
+                </div>
               </div>
             </section>
 
@@ -235,10 +281,12 @@ export default function DomainDashboardClient({ domain }: DomainDashboardClientP
               <section className="rounded-2xl bg-white p-5 shadow-sm border border-gray-100">
                 <div className="flex items-center justify-between gap-4">
                   <div>
-                    <h2 className="text-lg font-semibold text-gray-900">Recruitment Status</h2>
+                    <h2 className="text-lg font-semibold text-gray-900">
+                      Recruitment Status
+                    </h2>
                     <p className="text-sm text-gray-500">
-                      Only the admin dashboard can open recruitment. You can close it from here
-                      once it&apos;s open.
+                      Only the admin dashboard can open recruitment. You can
+                      close it from here once it&apos;s open.
                     </p>
                   </div>
                   <IndicatorBuzzer
@@ -247,7 +295,9 @@ export default function DomainDashboardClient({ domain }: DomainDashboardClientP
                     mode="domain"
                     direction="close"
                     onUpdated={(nextStatus) =>
-                      setIndicator((prev) => (prev ? { ...prev, indicator: nextStatus } : prev))
+                      setIndicator((prev) =>
+                        prev ? { ...prev, indicator: nextStatus } : prev,
+                      )
                     }
                   />
                 </div>
@@ -271,10 +321,17 @@ export default function DomainDashboardClient({ domain }: DomainDashboardClientP
                     </thead>
                     <tbody>
                       {firstPreferenceRecruits.map((recruit) => (
-                        <tr key={recruit.id} className="border-t border-gray-100">
+                        <tr
+                          key={recruit.id}
+                          className="border-t border-gray-100"
+                        >
                           <td className="py-3 pr-4">{recruit.name}</td>
-                          <td className="py-3 pr-4 font-mono text-xs">{recruit.srn}</td>
-                          <td className="py-3">{normalizeStatus(recruit.first_preference_status)}</td>
+                          <td className="py-3 pr-4 font-mono text-xs">
+                            {recruit.srn}
+                          </td>
+                          <td className="py-3">
+                            {normalizeStatus(recruit.first_preference_status)}
+                          </td>
                           <td className="py-3">
                             <RecruitAction
                               status={recruit.first_preference_status}
@@ -305,10 +362,17 @@ export default function DomainDashboardClient({ domain }: DomainDashboardClientP
                     </thead>
                     <tbody>
                       {secondPreferenceRecruits.map((recruit) => (
-                        <tr key={recruit.id} className="border-t border-gray-100">
+                        <tr
+                          key={recruit.id}
+                          className="border-t border-gray-100"
+                        >
                           <td className="py-3 pr-4">{recruit.name}</td>
-                          <td className="py-3 pr-4 font-mono text-xs">{recruit.srn}</td>
-                          <td className="py-3">{normalizeStatus(recruit.second_preference_status)}</td>
+                          <td className="py-3 pr-4 font-mono text-xs">
+                            {recruit.srn}
+                          </td>
+                          <td className="py-3">
+                            {normalizeStatus(recruit.second_preference_status)}
+                          </td>
                           <td className="py-3">
                             <RecruitAction
                               status={recruit.second_preference_status}
@@ -320,7 +384,10 @@ export default function DomainDashboardClient({ domain }: DomainDashboardClientP
                       ))}
                       {secondPreferenceRecruits.length === 0 && (
                         <tr>
-                          <td className="py-4 text-sm text-gray-500" colSpan={4}>
+                          <td
+                            className="py-4 text-sm text-gray-500"
+                            colSpan={4}
+                          >
                             No second-preference applicants yet.
                           </td>
                         </tr>

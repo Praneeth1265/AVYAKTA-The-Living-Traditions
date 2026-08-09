@@ -75,10 +75,11 @@ export async function GET(
       );
     }
 
-    const { data: secondPreferenceLinkRows, error: secondPrefLinkError } = await supabaseAdmin
-      .from("recruitment")
-      .select("id")
-      .eq("second_domain_preference", displayDomain);
+    const { data: secondPreferenceLinkRows, error: secondPrefLinkError } =
+      await supabaseAdmin
+        .from("recruitment")
+        .select("id")
+        .eq("second_domain_preference", displayDomain);
 
     if (secondPrefLinkError) {
       return NextResponse.json(
@@ -95,16 +96,17 @@ export async function GET(
     })[] = [];
 
     if (recruitIds.length > 0) {
-      const [{ data: recruitRows }, { data: secondPrefRows }] = await Promise.all([
-        supabaseAdmin
-          .from("recruitment")
-          .select(RECRUIT_COLUMNS)
-          .in("id", recruitIds),
-        supabaseAdmin
-          .from("second_preference")
-          .select("id, recruitment_id, interview, second_preference_status")
-          .in("recruitment_id", recruitIds),
-      ]);
+      const [{ data: recruitRows }, { data: secondPrefRows }] =
+        await Promise.all([
+          supabaseAdmin
+            .from("recruitment")
+            .select(RECRUIT_COLUMNS)
+            .in("id", recruitIds),
+          supabaseAdmin
+            .from("second_preference")
+            .select("id, recruitment_id, interview, second_preference_status")
+            .in("recruitment_id", recruitIds),
+        ]);
 
       secondPreferenceData = (recruitRows ?? []).map((row) => {
         const secondPref = (secondPrefRows ?? []).find(
@@ -157,11 +159,12 @@ export async function GET(
       }
     }
 
-    const { data: existingIndicator, error: indicatorError } = await supabaseAdmin
-      .from("indicator")
-      .select("id, domain, indicator")
-      .eq("domain", displayDomain)
-      .maybeSingle();
+    const { data: existingIndicator, error: indicatorError } =
+      await supabaseAdmin
+        .from("indicator")
+        .select("id, domain, indicator")
+        .eq("domain", displayDomain)
+        .maybeSingle();
 
     let indicator: IndicatorRow | null = null;
 

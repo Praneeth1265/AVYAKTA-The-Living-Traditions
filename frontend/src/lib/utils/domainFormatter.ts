@@ -1,4 +1,7 @@
-import { getDomainNameFromSlug, getDomainSlugFromName } from "@/lib/validators/domainMap";
+import {
+  getDomainNameFromSlug,
+  getDomainSlugFromName,
+} from "@/lib/validators/domainMap";
 
 const LOWERCASE_WORDS = new Set(["and", "or", "the", "of"]);
 

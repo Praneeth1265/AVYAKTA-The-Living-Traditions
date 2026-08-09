@@ -10,7 +10,9 @@ export default function RecruitmentClosedPage() {
     >
       <div className="recruitment-inner">
         <div className="recruitment-header">
-          <h1 className="recruitment-title">We&apos;re Not Recruiting Right Now</h1>
+          <h1 className="recruitment-title">
+            We&apos;re Not Recruiting Right Now
+          </h1>
           <p className="recruitment-subtitle">
             Recruitment is currently closed. Follow our socials or check back
             later to know when applications open again.

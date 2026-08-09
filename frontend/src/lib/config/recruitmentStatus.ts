@@ -1,7 +1,10 @@
 import { promises as fs } from "fs";
 import path from "path";
 
-const CONFIG_PATH = path.join(process.cwd(), "src/config/recruitment-status.json");
+const CONFIG_PATH = path.join(
+  process.cwd(),
+  "src/config/recruitment-status.json",
+);
 
 type RecruitmentStatusConfig = {
   isOpen: boolean;
@@ -21,5 +24,9 @@ export async function getRecruitmentStatus(): Promise<boolean> {
 
 export async function setRecruitmentStatus(isOpen: boolean): Promise<void> {
   const config: RecruitmentStatusConfig = { isOpen };
-  await fs.writeFile(CONFIG_PATH, JSON.stringify(config, null, 2) + "\n", "utf-8");
+  await fs.writeFile(
+    CONFIG_PATH,
+    JSON.stringify(config, null, 2) + "\n",
+    "utf-8",
+  );
 }

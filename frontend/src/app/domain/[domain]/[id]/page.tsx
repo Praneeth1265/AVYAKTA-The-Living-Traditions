@@ -42,7 +42,9 @@ const parseLinks = (links: string | null): string[] => {
 
   try {
     const parsed = JSON.parse(links);
-    return Array.isArray(parsed) ? parsed.filter((link) => typeof link === "string") : [];
+    return Array.isArray(parsed)
+      ? parsed.filter((link) => typeof link === "string")
+      : [];
   } catch {
     return [];
   }
@@ -57,7 +59,8 @@ export default function RecruitDetailPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [recruit, setRecruit] = useState<RecruitRow | null>(null);
-  const [secondPreference, setSecondPreference] = useState<SecondPreferenceRow | null>(null);
+  const [secondPreference, setSecondPreference] =
+    useState<SecondPreferenceRow | null>(null);
   const [firstStatus, setFirstStatus] = useState("pending");
   const [firstPersistedStatus, setFirstPersistedStatus] = useState("pending");
   const [firstInterview, setFirstInterview] = useState(false);
@@ -85,7 +88,9 @@ export default function RecruitDetailPage() {
         setRecruit(payload.recruit ?? null);
         setSecondPreference(payload.secondPreference ?? null);
 
-        const recruitStatus = normalizeStatus(payload.recruit?.first_preference_status);
+        const recruitStatus = normalizeStatus(
+          payload.recruit?.first_preference_status,
+        );
         setFirstStatus(recruitStatus);
         setFirstPersistedStatus(recruitStatus);
         setFirstInterview(Boolean(payload.recruit?.interview));
@@ -97,7 +102,11 @@ export default function RecruitDetailPage() {
         setSecondPersistedStatus(secondPreferenceStatus);
         setSecondInterview(Boolean(payload.secondPreference?.interview));
       } catch (loadError) {
-        setError(loadError instanceof Error ? loadError.message : "Failed to load recruit details");
+        setError(
+          loadError instanceof Error
+            ? loadError.message
+            : "Failed to load recruit details",
+        );
       } finally {
         setLoading(false);
       }
@@ -106,12 +115,23 @@ export default function RecruitDetailPage() {
     loadRecruit();
   }, [domain, recruitId]);
 
-  const selectStatus = (nextStatus: "approved" | "rejected", isSecondPreferenceTarget: boolean) => {
-    if (!isSecondPreferenceTarget && (firstPersistedStatus === "approved" || firstPersistedStatus === "rejected")) {
+  const selectStatus = (
+    nextStatus: "approved" | "rejected",
+    isSecondPreferenceTarget: boolean,
+  ) => {
+    if (
+      !isSecondPreferenceTarget &&
+      (firstPersistedStatus === "approved" ||
+        firstPersistedStatus === "rejected")
+    ) {
       return;
     }
 
-    if (isSecondPreferenceTarget && (secondPersistedStatus === "approved" || secondPersistedStatus === "rejected")) {
+    if (
+      isSecondPreferenceTarget &&
+      (secondPersistedStatus === "approved" ||
+        secondPersistedStatus === "rejected")
+    ) {
       return;
     }
 
@@ -128,7 +148,8 @@ export default function RecruitDetailPage() {
     }
 
     const canEditFirstPreference =
-      firstPersistedStatus !== "approved" && firstPersistedStatus !== "rejected";
+      firstPersistedStatus !== "approved" &&
+      firstPersistedStatus !== "rejected";
     const canEditSecondPreference =
       firstStatus === "rejected" &&
       secondPersistedStatus !== "approved" &&
@@ -141,13 +162,13 @@ export default function RecruitDetailPage() {
 
       if (canEditFirstPreference) {
         const response = await fetch(`/api/domain/${domain}/${recruitId}`, {
-            method: "PUT",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              interview: firstInterview,
-              status: firstStatus,
-              isSecondPreference: false,
-            }),
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            interview: firstInterview,
+            status: firstStatus,
+            isSecondPreference: false,
+          }),
         });
 
         responses.push(response);
@@ -155,16 +176,17 @@ export default function RecruitDetailPage() {
 
       if (
         canEditSecondPreference &&
-        (secondPreference || recruit?.second_domain_preference === formatDomainFromUrl(domain))
+        (secondPreference ||
+          recruit?.second_domain_preference === formatDomainFromUrl(domain))
       ) {
         const response = await fetch(`/api/domain/${domain}/${recruitId}`, {
-            method: "PUT",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              interview: secondInterview,
-              status: secondStatus,
-              isSecondPreference: true,
-            }),
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            interview: secondInterview,
+            status: secondStatus,
+            isSecondPreference: true,
+          }),
         });
 
         responses.push(response);
@@ -176,7 +198,11 @@ export default function RecruitDetailPage() {
 
       router.push(`/domain/${domain}`);
     } catch (saveError) {
-      setError(saveError instanceof Error ? saveError.message : "Failed to update recruit");
+      setError(
+        saveError instanceof Error
+          ? saveError.message
+          : "Failed to update recruit",
+      );
     } finally {
       setSaving(false);
     }
@@ -237,20 +263,31 @@ export default function RecruitDetailPage() {
             <h2 className="text-xl font-semibold text-gray-900">Profile</h2>
             <div className="text-sm text-gray-600">SRN: {recruit.srn}</div>
             <div className="text-sm text-gray-600">Email: {recruit.email}</div>
-            <div className="text-sm text-gray-600">Phone: {recruit.phone_no}</div>
-            <div className="text-sm text-gray-600">Branch: {recruit.branch}</div>
-            <div className="text-sm text-gray-600">Section: {recruit.section}</div>
+            <div className="text-sm text-gray-600">
+              Phone: {recruit.phone_no}
+            </div>
+            <div className="text-sm text-gray-600">
+              Branch: {recruit.branch}
+            </div>
+            <div className="text-sm text-gray-600">
+              Section: {recruit.section}
+            </div>
             <div className="text-sm text-gray-600">Year: {recruit.year}</div>
           </article>
 
           <article className="rounded-2xl bg-white p-6 shadow-sm border border-gray-100 space-y-4">
-            <h2 className="text-xl font-semibold text-gray-900">First Preference</h2>
+            <h2 className="text-xl font-semibold text-gray-900">
+              First Preference
+            </h2>
             <label className="flex items-center gap-2 text-sm font-medium text-gray-700">
               <input
                 type="checkbox"
                 checked={firstInterview}
                 onChange={(event) => setFirstInterview(event.target.checked)}
-                disabled={firstPersistedStatus === "approved" || firstPersistedStatus === "rejected"}
+                disabled={
+                  firstPersistedStatus === "approved" ||
+                  firstPersistedStatus === "rejected"
+                }
               />
               Interview completed
             </label>
@@ -259,7 +296,11 @@ export default function RecruitDetailPage() {
               <button
                 type="button"
                 onClick={() => selectStatus("approved", false)}
-                disabled={saving || firstPersistedStatus === "approved" || firstPersistedStatus === "rejected"}
+                disabled={
+                  saving ||
+                  firstPersistedStatus === "approved" ||
+                  firstPersistedStatus === "rejected"
+                }
                 className={`rounded-full px-4 py-2 text-sm font-semibold text-white transition disabled:cursor-not-allowed disabled:bg-gray-300 ${firstStatus === "approved" ? "bg-green-800" : "bg-green-600 hover:bg-green-700"}`}
               >
                 Accept
@@ -267,48 +308,68 @@ export default function RecruitDetailPage() {
               <button
                 type="button"
                 onClick={() => selectStatus("rejected", false)}
-                disabled={saving || firstPersistedStatus === "approved" || firstPersistedStatus === "rejected"}
+                disabled={
+                  saving ||
+                  firstPersistedStatus === "approved" ||
+                  firstPersistedStatus === "rejected"
+                }
                 className={`rounded-full px-4 py-2 text-sm font-semibold text-white transition disabled:cursor-not-allowed disabled:bg-gray-300 ${firstStatus === "rejected" ? "bg-red-800" : "bg-red-600 hover:bg-red-700"}`}
               >
                 Reject
               </button>
             </div>
 
-            {firstStatus === "rejected" && (secondPreference || recruit?.second_domain_preference === formatDomainFromUrl(domain)) && (
-              <>
-                <h3 className="pt-2 text-lg font-semibold text-gray-900">
-                  Second Preference
-                </h3>
-                <label className="flex items-center gap-2 text-sm font-medium text-gray-700">
-                  <input
-                    type="checkbox"
-                    checked={secondInterview}
-                    onChange={(event) => setSecondInterview(event.target.checked)}
-                    disabled={secondPersistedStatus === "approved" || secondPersistedStatus === "rejected"}
-                  />
-                  Interview completed
-                </label>
+            {firstStatus === "rejected" &&
+              (secondPreference ||
+                recruit?.second_domain_preference ===
+                  formatDomainFromUrl(domain)) && (
+                <>
+                  <h3 className="pt-2 text-lg font-semibold text-gray-900">
+                    Second Preference
+                  </h3>
+                  <label className="flex items-center gap-2 text-sm font-medium text-gray-700">
+                    <input
+                      type="checkbox"
+                      checked={secondInterview}
+                      onChange={(event) =>
+                        setSecondInterview(event.target.checked)
+                      }
+                      disabled={
+                        secondPersistedStatus === "approved" ||
+                        secondPersistedStatus === "rejected"
+                      }
+                    />
+                    Interview completed
+                  </label>
 
-                <div className="flex flex-wrap gap-3 pt-2">
-                  <button
-                    type="button"
-                    onClick={() => selectStatus("approved", true)}
-                    disabled={saving || secondPersistedStatus === "approved" || secondPersistedStatus === "rejected"}
-                    className={`rounded-full px-4 py-2 text-sm font-semibold text-white transition disabled:cursor-not-allowed disabled:bg-gray-300 ${secondStatus === "approved" ? "bg-green-800" : "bg-green-600 hover:bg-green-700"}`}
-                  >
-                    Accept
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => selectStatus("rejected", true)}
-                    disabled={saving || secondPersistedStatus === "approved" || secondPersistedStatus === "rejected"}
-                    className={`rounded-full px-4 py-2 text-sm font-semibold text-white transition disabled:cursor-not-allowed disabled:bg-gray-300 ${secondStatus === "rejected" ? "bg-red-800" : "bg-red-600 hover:bg-red-700"}`}
-                  >
-                    Reject
-                  </button>
-                </div>
-              </>
-            )}
+                  <div className="flex flex-wrap gap-3 pt-2">
+                    <button
+                      type="button"
+                      onClick={() => selectStatus("approved", true)}
+                      disabled={
+                        saving ||
+                        secondPersistedStatus === "approved" ||
+                        secondPersistedStatus === "rejected"
+                      }
+                      className={`rounded-full px-4 py-2 text-sm font-semibold text-white transition disabled:cursor-not-allowed disabled:bg-gray-300 ${secondStatus === "approved" ? "bg-green-800" : "bg-green-600 hover:bg-green-700"}`}
+                    >
+                      Accept
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => selectStatus("rejected", true)}
+                      disabled={
+                        saving ||
+                        secondPersistedStatus === "approved" ||
+                        secondPersistedStatus === "rejected"
+                      }
+                      className={`rounded-full px-4 py-2 text-sm font-semibold text-white transition disabled:cursor-not-allowed disabled:bg-gray-300 ${secondStatus === "rejected" ? "bg-red-800" : "bg-red-600 hover:bg-red-700"}`}
+                    >
+                      Reject
+                    </button>
+                  </div>
+                </>
+              )}
 
             <button
               type="button"
@@ -325,14 +386,18 @@ export default function RecruitDetailPage() {
           <h2 className="text-xl font-semibold text-gray-900">Application</h2>
 
           <div>
-            <h3 className="text-sm font-semibold text-gray-900">Why do you want to join?</h3>
+            <h3 className="text-sm font-semibold text-gray-900">
+              Why do you want to join?
+            </h3>
             <p className="mt-1 whitespace-pre-wrap text-sm leading-6 text-gray-700">
               {recruit.why_you}
             </p>
           </div>
 
           <div>
-            <h3 className="text-sm font-semibold text-gray-900">Why Avyakta?</h3>
+            <h3 className="text-sm font-semibold text-gray-900">
+              Why Avyakta?
+            </h3>
             <p className="mt-1 whitespace-pre-wrap text-sm leading-6 text-gray-700">
               {recruit.why_us}
             </p>

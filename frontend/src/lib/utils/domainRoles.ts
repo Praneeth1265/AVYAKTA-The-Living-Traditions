@@ -14,16 +14,21 @@ export function getDomainSlugsForEmail(email: string): string[] {
 
   return VALID_DOMAIN_SLUGS.filter((slug) =>
     (DOMAIN_HEAD_EMAILS[slug] ?? []).some(
-      (candidateEmail) => candidateEmail.trim().toLowerCase() === normalizedEmail,
+      (candidateEmail) =>
+        candidateEmail.trim().toLowerCase() === normalizedEmail,
     ),
   );
 }
 
-export function getDomainSlugFromDisplayName(domainName: string): string | null {
+export function getDomainSlugFromDisplayName(
+  domainName: string,
+): string | null {
   return getDomainSlugFromName(domainName);
 }
 
-export function getDomainDisplayNameFromSlug(domainSlug: string): string | null {
+export function getDomainDisplayNameFromSlug(
+  domainSlug: string,
+): string | null {
   return getDomainRecordFromSlug(domainSlug)?.name ?? null;
 }
 

@@ -1,4 +1,7 @@
-import { VALID_DOMAIN_NAMES, VALID_DOMAIN_SLUGS } from "@/lib/validators/domainMap";
+import {
+  VALID_DOMAIN_NAMES,
+  VALID_DOMAIN_SLUGS,
+} from "@/lib/validators/domainMap";
 
 export function getValidUrlDomains(): string[] {
   return [...VALID_DOMAIN_SLUGS];

@@ -1,8 +1,16 @@
 .domain-dashboard-container {
   min-height: 100vh;
   background:
-    radial-gradient(circle at top left, rgba(201, 168, 76, 0.16), transparent 32%),
-    radial-gradient(circle at top right, rgba(115, 121, 85, 0.14), transparent 30%),
+    radial-gradient(
+      circle at top left,
+      rgba(201, 168, 76, 0.16),
+      transparent 32%
+    ),
+    radial-gradient(
+      circle at top right,
+      rgba(115, 121, 85, 0.14),
+      transparent 30%
+    ),
     linear-gradient(180deg, #f5f0e8 0%, #fffaf2 100%);
   color: #1c1c1c;
 }
@@ -36,7 +44,12 @@
 .rangoli-divider {
   height: 1px;
   margin: 24px 0 32px;
-  background: linear-gradient(90deg, transparent, rgba(146, 121, 27, 0.7), transparent);
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(146, 121, 27, 0.7),
+    transparent
+  );
 }
 
 .download-button-container,
@@ -47,7 +60,10 @@
 .download-pdf-button,
 .action-button,
 .indicator-button {
-  transition: transform 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease,
+    background-color 0.2s ease;
 }
 
 .download-pdf-button:hover,

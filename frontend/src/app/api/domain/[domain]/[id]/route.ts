@@ -71,21 +71,28 @@ const applyCounterTransition = async (
     .maybeSingle();
 
   if (counterFetchError) {
-    throw new Error(`Failed to load counter for ${domain}: ${counterFetchError.message}`);
+    throw new Error(
+      `Failed to load counter for ${domain}: ${counterFetchError.message}`,
+    );
   }
 
   if (!currentCounter) {
     const { error: insertError } = await supabaseAdmin
       .from("counter")
-      .insert([
-        { domain, not_sure: 0, approved: 0, rejected: 0 },
-      ]);
+      .insert([{ domain, not_sure: 0, approved: 0, rejected: 0 }]);
 
     if (insertError) {
-      throw new Error(`Failed to initialize counter for ${domain}: ${insertError.message}`);
+      throw new Error(
+        `Failed to initialize counter for ${domain}: ${insertError.message}`,
+      );
     }
 
-    return applyCounterTransition(supabaseAdmin, domain, previousStatus, nextStatus);
+    return applyCounterTransition(
+      supabaseAdmin,
+      domain,
+      previousStatus,
+      nextStatus,
+    );
   }
 
   const nextCounter = {
@@ -116,7 +123,9 @@ const applyCounterTransition = async (
     .eq("domain", domain);
 
   if (counterUpdateError) {
-    throw new Error(`Failed to update counter for ${domain}: ${counterUpdateError.message}`);
+    throw new Error(
+      `Failed to update counter for ${domain}: ${counterUpdateError.message}`,
+    );
   }
 };
 
@@ -132,7 +141,10 @@ export async function GET(
     }
 
     if (!id) {
-      return NextResponse.json({ error: "Invalid recruit ID" }, { status: 400 });
+      return NextResponse.json(
+        { error: "Invalid recruit ID" },
+        { status: 400 },
+      );
     }
 
     const displayDomain = formatDomainFromUrl(domain);
@@ -149,7 +161,8 @@ export async function GET(
     }
 
     const isFirstPreference = recruit.first_preference_domain === displayDomain;
-    const isSecondPreference = recruit.second_domain_preference === displayDomain;
+    const isSecondPreference =
+      recruit.second_domain_preference === displayDomain;
 
     if (!isFirstPreference && !isSecondPreference) {
       return NextResponse.json(
@@ -195,13 +208,17 @@ export async function PUT(
     }
 
     if (!id) {
-      return NextResponse.json({ error: "Invalid recruit ID" }, { status: 400 });
+      return NextResponse.json(
+        { error: "Invalid recruit ID" },
+        { status: 400 },
+      );
     }
 
     const body = await request.json();
     const supabaseAdmin = getSupabaseAdmin();
     const isSecondPreference = Boolean(body.isSecondPreference);
-    const interview = typeof body.interview === "boolean" ? body.interview : undefined;
+    const interview =
+      typeof body.interview === "boolean" ? body.interview : undefined;
     const status = normalizeStatus(
       typeof body.status === "string" ? body.status : undefined,
     );
@@ -218,17 +235,21 @@ export async function PUT(
 
     if (isSecondPreference && recruit.first_preference_status !== "rejected") {
       return NextResponse.json(
-        { error: "Second preference can only be updated after first preference rejection" },
+        {
+          error:
+            "Second preference can only be updated after first preference rejection",
+        },
         { status: 409 },
       );
     }
 
     if (isSecondPreference) {
-      const { data: existingSecondPreference, error: fetchError } = await supabaseAdmin
-        .from("second_preference")
-        .select("id, second_preference_status")
-        .eq("recruitment_id", id)
-        .maybeSingle();
+      const { data: existingSecondPreference, error: fetchError } =
+        await supabaseAdmin
+          .from("second_preference")
+          .select("id, second_preference_status")
+          .eq("recruitment_id", id)
+          .maybeSingle();
 
       if (fetchError) {
         return NextResponse.json(
@@ -240,7 +261,10 @@ export async function PUT(
       const currentSecondStatus = normalizeStatus(
         existingSecondPreference?.second_preference_status,
       );
-      if (currentSecondStatus === "approved" || currentSecondStatus === "rejected") {
+      if (
+        currentSecondStatus === "approved" ||
+        currentSecondStatus === "rejected"
+      ) {
         return NextResponse.json(
           { error: "Second preference is already finalized" },
           { status: 409 },
@@ -285,7 +309,10 @@ export async function PUT(
           recruit.first_preference_status,
           null,
         );
-        const nextCounterStatus = getCounterStatus(recruit.first_preference_status, status);
+        const nextCounterStatus = getCounterStatus(
+          recruit.first_preference_status,
+          status,
+        );
 
         const { error: insertError } = await supabaseAdmin
           .from("second_preference")
@@ -314,7 +341,9 @@ export async function PUT(
         }
       }
     } else {
-      const currentFirstStatus = normalizeStatus(recruit.first_preference_status);
+      const currentFirstStatus = normalizeStatus(
+        recruit.first_preference_status,
+      );
       if (isFinalStatus(currentFirstStatus)) {
         return NextResponse.json(
           { error: "First preference is already finalized" },
@@ -370,7 +399,9 @@ export async function PUT(
               { status: 500 },
             );
           }
-        } else if (!isFinalStatus(existingSecondPreference.second_preference_status)) {
+        } else if (
+          !isFinalStatus(existingSecondPreference.second_preference_status)
+        ) {
           const { error: updateSecondPreferenceError } = await supabaseAdmin
             .from("second_preference")
             .update({
@@ -388,7 +419,10 @@ export async function PUT(
       }
     }
 
-    return NextResponse.json({ message: "Recruit updated successfully" }, { status: 200 });
+    return NextResponse.json(
+      { message: "Recruit updated successfully" },
+      { status: 200 },
+    );
   } catch (error) {
     console.error("Error in update recruit endpoint:", error);
     return NextResponse.json(

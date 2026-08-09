@@ -6,7 +6,9 @@ type RecruitmentCtaToggleProps = {
   variant?: "card" | "compact";
 };
 
-export default function RecruitmentCtaToggle({ variant = "card" }: RecruitmentCtaToggleProps) {
+export default function RecruitmentCtaToggle({
+  variant = "card",
+}: RecruitmentCtaToggleProps) {
   const [isOpen, setIsOpen] = useState<boolean | null>(null);
   const [isSaving, setIsSaving] = useState(false);
 
@@ -77,11 +79,14 @@ export default function RecruitmentCtaToggle({ variant = "card" }: RecruitmentCt
     <section className="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm">
       <div className="flex items-center justify-between gap-4">
         <div>
-          <h2 className="text-lg font-semibold text-gray-900">Recruitment Buttons (Site-wide)</h2>
+          <h2 className="text-lg font-semibold text-gray-900">
+            Recruitment Buttons (Site-wide)
+          </h2>
           <p className="mt-1 text-sm text-gray-500">
-            Controls the &quot;Join Us&quot; / &quot;Apply Now&quot; buttons on the home page and
-            footer. When off, visitors clicking them see a &quot;We&apos;re not recruiting
-            right now&quot; page instead of the application form.
+            Controls the &quot;Join Us&quot; / &quot;Apply Now&quot; buttons on
+            the home page and footer. When off, visitors clicking them see a
+            &quot;We&apos;re not recruiting right now&quot; page instead of the
+            application form.
           </p>
         </div>
 
@@ -90,7 +95,9 @@ export default function RecruitmentCtaToggle({ variant = "card" }: RecruitmentCt
           onClick={handleToggle}
           disabled={isOpen === null || isSaving}
           className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-full text-lg font-bold text-white transition ${
-            isOpen ? "bg-green-500 hover:bg-green-600" : "bg-red-500 hover:bg-red-600"
+            isOpen
+              ? "bg-green-500 hover:bg-green-600"
+              : "bg-red-500 hover:bg-red-600"
           } ${isOpen === null || isSaving ? "cursor-not-allowed opacity-75" : ""}`}
           aria-label="Toggle site-wide recruitment buttons"
         >

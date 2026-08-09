@@ -123,7 +123,11 @@ export default function RecruitmentStatsClient() {
             )
           : [
               ...currentIndicators,
-              { id: selectedDomain, domain: selectedDomain, indicator: nextStatus },
+              {
+                id: selectedDomain,
+                domain: selectedDomain,
+                indicator: nextStatus,
+              },
             ],
       );
 
@@ -285,7 +289,8 @@ export default function RecruitmentStatsClient() {
           <div className="header-left">
             <h3>🎯 Domain Control</h3>
             <p className="text-sm text-gray-600">
-              Pick a domain and open or close recruitment for that specific team.
+              Pick a domain and open or close recruitment for that specific
+              team.
             </p>
           </div>
           <div className="header-actions">
@@ -321,12 +326,18 @@ export default function RecruitmentStatsClient() {
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div>
               <p className="text-sm text-gray-500">Selected domain</p>
-              <p className="text-lg font-semibold text-gray-900">{selectedDomain}</p>
+              <p className="text-lg font-semibold text-gray-900">
+                {selectedDomain}
+              </p>
             </div>
             <div className="flex items-center gap-2 rounded-full bg-gray-100 px-3 py-1.5 text-sm font-semibold text-gray-700">
-              <span className={`indicator-dot ${domainIndicators.find((entry) => entry.domain === selectedDomain)?.indicator ? "active" : ""}`}></span>
+              <span
+                className={`indicator-dot ${domainIndicators.find((entry) => entry.domain === selectedDomain)?.indicator ? "active" : ""}`}
+              ></span>
               <span>
-                {domainIndicators.find((entry) => entry.domain === selectedDomain)?.indicator
+                {domainIndicators.find(
+                  (entry) => entry.domain === selectedDomain,
+                )?.indicator
                   ? "Open"
                   : "Closed"}
               </span>

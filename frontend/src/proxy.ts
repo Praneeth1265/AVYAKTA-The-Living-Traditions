@@ -14,7 +14,9 @@ async function verifySessionToken(token: string): Promise<SessionClaims> {
     if (!secret) return null;
 
     const secretBytes = new TextEncoder().encode(secret);
-    const { payload } = await jwtVerify(token, secretBytes, { algorithms: ["HS256"] });
+    const { payload } = await jwtVerify(token, secretBytes, {
+      algorithms: ["HS256"],
+    });
     const domain = typeof payload.domain === "string" ? payload.domain : null;
     return { domain };
   } catch {
@@ -42,13 +44,17 @@ export async function proxy(request: NextRequest) {
       const ownSlug = formatDomainToUrl(session.domain);
 
       if (ADMIN_ONLY_ROUTES.some((route) => pathname.startsWith(route))) {
-        return NextResponse.redirect(new URL(`/domain/${ownSlug}`, request.url));
+        return NextResponse.redirect(
+          new URL(`/domain/${ownSlug}`, request.url),
+        );
       }
 
       if (pathname.startsWith("/domain")) {
         const requestedSlug = pathname.split("/")[2] ?? "";
         if (requestedSlug && requestedSlug !== ownSlug) {
-          return NextResponse.redirect(new URL(`/domain/${ownSlug}`, request.url));
+          return NextResponse.redirect(
+            new URL(`/domain/${ownSlug}`, request.url),
+          );
         }
       }
     }

@@ -4,7 +4,10 @@ import {
   verifySessionId,
   getSessionCookieName,
 } from "../../../lib/auth/session";
-import { getRecruitmentStatus, setRecruitmentStatus } from "../../../lib/config/recruitmentStatus";
+import {
+  getRecruitmentStatus,
+  setRecruitmentStatus,
+} from "../../../lib/config/recruitmentStatus";
 
 async function verifyAdminAuth(): Promise<boolean> {
   try {
@@ -35,7 +38,10 @@ export async function PATCH(request: NextRequest) {
 
   const body = await request.json();
   if (typeof body.isOpen !== "boolean") {
-    return NextResponse.json({ error: "isOpen (boolean) is required" }, { status: 400 });
+    return NextResponse.json(
+      { error: "isOpen (boolean) is required" },
+      { status: 400 },
+    );
   }
 
   await setRecruitmentStatus(body.isOpen);

@@ -17,23 +17,32 @@ const normalizeStatus = (status: string | null | undefined) =>
 // submissions, only on status transitions).
 export async function GET() {
   try {
-    const [{ data: recruits, error: recruitsError }, { data: secondPrefRows, error: secondPrefError }] =
-      await Promise.all([
-        retryWithBackoff(async () =>
-          supabase
-            .from("recruitment")
-            .select("id, first_preference_domain, first_preference_status, second_domain_preference"),
-        ),
-        retryWithBackoff(async () =>
-          supabase.from("second_preference").select("recruitment_id, second_preference_status"),
-        ),
-      ]);
+    const [
+      { data: recruits, error: recruitsError },
+      { data: secondPrefRows, error: secondPrefError },
+    ] = await Promise.all([
+      retryWithBackoff(async () =>
+        supabase
+          .from("recruitment")
+          .select(
+            "id, first_preference_domain, first_preference_status, second_domain_preference",
+          ),
+      ),
+      retryWithBackoff(async () =>
+        supabase
+          .from("second_preference")
+          .select("recruitment_id, second_preference_status"),
+      ),
+    ]);
 
     if (recruitsError) throw new Error(recruitsError.message);
     if (secondPrefError) throw new Error(secondPrefError.message);
 
     const secondPrefByRecruitId = new Map(
-      (secondPrefRows ?? []).map((row) => [row.recruitment_id, row.second_preference_status]),
+      (secondPrefRows ?? []).map((row) => [
+        row.recruitment_id,
+        row.second_preference_status,
+      ]),
     );
 
     const data = RECRUITMENT_DOMAINS.map((domain) => {
