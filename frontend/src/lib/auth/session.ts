@@ -7,6 +7,7 @@ const SESSION_TTL = "7d";
 export type SessionPayload = JWTPayload & {
   sub: string;
   email: string;
+  domain: string | null;
 };
 
 export function getSessionCookieName() {
@@ -28,10 +29,11 @@ function getSessionSecret(): Uint8Array {
 export async function createSessionToken(params: {
   userId: string;
   email: string;
+  domain?: string | null;
 }): Promise<string> {
   const secret = getSessionSecret();
 
-  return new SignJWT({ email: params.email })
+  return new SignJWT({ email: params.email, domain: params.domain ?? null })
     .setProtectedHeader({ alg: SESSION_ALGORITHM })
     .setSubject(params.userId)
     .setIssuedAt()

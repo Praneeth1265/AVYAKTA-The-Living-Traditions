@@ -69,7 +69,7 @@ export const recruitment = pgTable("recruitment", {
   phone_no: text("phone_no").notNull(),
   email: text("email").notNull(),
   interview: boolean("interview").default(false),
-  first_preference_status: text("first_preference_status").default("not_sure"),
+  first_preference_status: text("first_preference_status").default("pending"),
   second_domain_preference: text("second_domain_preference"),
 });
 
@@ -94,6 +94,7 @@ export const login_credentials = pgTable("login_credentials", {
   id: uuid("id").primaryKey().defaultRandom(),
   email: text("email").unique().notNull(),
   password_hash: text("password_hash").notNull(),
+  domain: text("domain"), // null = full admin; otherwise the domain this login manages
 });
 
 export const second_preference = pgTable("second_preference", {
@@ -104,9 +105,7 @@ export const second_preference = pgTable("second_preference", {
       onDelete: "cascade",
     }),
   interview: boolean("interview").default(false),
-  second_preference_status: text("second_preference_status").default(
-    "not_sure",
-  ),
+  second_preference_status: text("second_preference_status").default("pending"),
 });
 
 export const counter = pgTable("counter", {

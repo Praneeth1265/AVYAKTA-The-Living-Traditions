@@ -1,23 +1,76 @@
 import { createClient } from "@supabase/supabase-js";
 import { NextRequest, NextResponse } from "next/server";
 import { retryWithBackoff } from "../../../../lib/api/retry";
+import { RECRUITMENT_DOMAINS } from "../../../../lib/validators/recruitment";
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.SUPABASE_SERVICE_ROLE_KEY!,
 );
 
-// GET - Fetch counter stats for all domains
+const normalizeStatus = (status: string | null | undefined) =>
+  status === "not_sure" || !status ? "pending" : status;
+
+// GET - Compute live counter stats for all domains directly from recruitment
+// data, so this always matches what each domain dashboard shows (the
+// persisted `counter` table drifts because it's never updated on new
+// submissions, only on status transitions).
 export async function GET() {
   try {
-    const result = await retryWithBackoff(async () =>
-      supabase.from("counter").select("*"),
+    const [
+      { data: recruits, error: recruitsError },
+      { data: secondPrefRows, error: secondPrefError },
+    ] = await Promise.all([
+      retryWithBackoff(async () =>
+        supabase
+          .from("recruitment")
+          .select(
+            "id, first_preference_domain, first_preference_status, second_domain_preference",
+          ),
+      ),
+      retryWithBackoff(async () =>
+        supabase
+          .from("second_preference")
+          .select("recruitment_id, second_preference_status"),
+      ),
+    ]);
+
+    if (recruitsError) throw new Error(recruitsError.message);
+    if (secondPrefError) throw new Error(secondPrefError.message);
+
+    const secondPrefByRecruitId = new Map(
+      (secondPrefRows ?? []).map((row) => [
+        row.recruitment_id,
+        row.second_preference_status,
+      ]),
     );
 
-    const { data, error } = result;
-    if (error) throw new Error(error.message);
+    const data = RECRUITMENT_DOMAINS.map((domain) => {
+      const counter = { domain, not_sure: 0, approved: 0, rejected: 0 };
 
-    return NextResponse.json({ success: true, data: data || [] });
+      for (const recruit of recruits ?? []) {
+        if (recruit.first_preference_domain === domain) {
+          const status = normalizeStatus(recruit.first_preference_status);
+          if (status === "approved") counter.approved += 1;
+          else if (status === "rejected") counter.rejected += 1;
+          else counter.not_sure += 1;
+        }
+
+        if (
+          recruit.second_domain_preference === domain &&
+          recruit.first_preference_status === "rejected"
+        ) {
+          const status = normalizeStatus(secondPrefByRecruitId.get(recruit.id));
+          if (status === "approved") counter.approved += 1;
+          else if (status === "rejected") counter.rejected += 1;
+          else counter.not_sure += 1;
+        }
+      }
+
+      return counter;
+    });
+
+    return NextResponse.json({ success: true, data });
   } catch (error) {
     console.error("Error fetching counter stats:", error);
     return NextResponse.json(

@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npx tsc *)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\\\\n\" http://localhost:3000/ --max-time 3)",
+      "Bash(curl -s -D - -o /dev/null http://localhost:3000/dashboard -b /tmp/tech_cookies2.txt)"
+    ]
+  }
+}

@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from "next/server";
-import { cookies } from "next/headers";
 import bcryptjs from "bcryptjs";
 import { getSupabaseAdmin } from "../../../../lib/supabase/server";
 import {
@@ -7,6 +6,8 @@ import {
   getSessionCookieName,
 } from "../../../../lib/auth/session";
 import { loginSchema } from "../../../../lib/validators/auth";
+import { formatDomainToUrl } from "@/lib/utils/domainFormatter";
+import { isValidDomainName } from "@/lib/utils/domainValidator";
 
 export async function POST(request: NextRequest) {
   try {
@@ -29,7 +30,7 @@ export async function POST(request: NextRequest) {
     // Get user from login_credentials table by email
     const { data: users, error: userError } = await supabaseAdmin
       .from("login_credentials")
-      .select("id, email, password_hash")
+      .select("id, email, password_hash, domain")
       .eq("email", email)
       .maybeSingle();
 
@@ -54,15 +55,29 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    const domain =
+      typeof users.domain === "string" && isValidDomainName(users.domain)
+        ? users.domain
+        : null;
+
     // Create session token
     const token = await createSessionToken({
       userId: users.id,
       email: users.email,
+      domain,
     });
 
-    // Set secure cookie
-    const cookieStore = await cookies();
-    cookieStore.set(getSessionCookieName(), token, {
+    const redirectTo = domain
+      ? `/domain/${formatDomainToUrl(domain)}`
+      : "/dashboard";
+
+    const response = NextResponse.json(
+      { message: "Login successful", redirectTo },
+      { status: 200 },
+    );
+
+    // Set secure cookie on the outgoing response so the browser persists it.
+    response.cookies.set(getSessionCookieName(), token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: "lax",
@@ -70,7 +85,7 @@ export async function POST(request: NextRequest) {
       path: "/",
     });
 
-    return NextResponse.json({ message: "Login successful" }, { status: 200 });
+    return response;
   } catch (error) {
     console.error("Login error:", error);
     return NextResponse.json(

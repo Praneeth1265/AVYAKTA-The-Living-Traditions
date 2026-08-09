@@ -37,8 +37,8 @@ export default function LoginForm() {
       // Handle success response (200 OK)
       if (response.ok) {
         setSuccessMessage("Login successful! Redirecting...");
-        // Always redirect to dashboard after successful login
-        router.push("/dashboard");
+        const result = (await response.json()) as { redirectTo?: string };
+        router.push(result.redirectTo || "/dashboard");
         return;
       }
 

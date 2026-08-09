@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { RECRUITMENT_DOMAINS } from "../../lib/validators/recruitment";
+import RecruitmentCtaToggle from "../dashboard/RecruitmentCtaToggle";
 
 interface CounterStat {
   domain: string;
@@ -21,16 +22,22 @@ export default function RecruitmentStatsClient() {
   const [domainIndicators, setDomainIndicators] = useState<DomainIndicator[]>(
     [],
   );
+  const [selectedDomain, setSelectedDomain] = useState<
+    (typeof RECRUITMENT_DOMAINS)[number]
+  >(RECRUITMENT_DOMAINS[0]);
   const [globalIndicator, setGlobalIndicator] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState(false);
   const [togglingGlobal, setTogglingGlobal] = useState(false);
+  const [togglingDomain, setTogglingDomain] = useState(false);
   const [flushingAll, setFlushingAll] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
 
-  // Fetch data on mount
+  // Fetch data on mount only; fetchData is intentionally excluded since it
+  // is redefined every render and this effect must not re-run on refetch.
   useEffect(() => {
     fetchData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const fetchData = async () => {
@@ -54,6 +61,10 @@ export default function RecruitmentStatsClient() {
         ? indicatorData.data
         : [];
       setDomainIndicators(indicatorsArray);
+
+      if (!selectedDomain && RECRUITMENT_DOMAINS.length > 0) {
+        setSelectedDomain(RECRUITMENT_DOMAINS[0]);
+      }
 
       // Set global indicator by explicitly finding the "global" domain record
       const globalRecord = indicatorsArray.find(
@@ -92,6 +103,47 @@ export default function RecruitmentStatsClient() {
       console.error("Error toggling indicator:", err);
     } finally {
       setTogglingGlobal(false);
+    }
+  };
+
+  const handleToggleSelectedDomainIndicator = async (nextStatus: boolean) => {
+    try {
+      setTogglingDomain(true);
+
+      const response = await fetch("/api/recruitment/indicator", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ domain: selectedDomain, indicator: nextStatus }),
+      });
+
+      if (!response.ok) throw new Error("Failed to update domain indicator");
+
+      setDomainIndicators((currentIndicators) =>
+        currentIndicators.some((entry) => entry.domain === selectedDomain)
+          ? currentIndicators.map((entry) =>
+              entry.domain === selectedDomain
+                ? { ...entry, indicator: nextStatus }
+                : entry,
+            )
+          : [
+              ...currentIndicators,
+              {
+                id: selectedDomain,
+                domain: selectedDomain,
+                indicator: nextStatus,
+              },
+            ],
+      );
+
+      setSuccess(
+        `Recruitment for ${selectedDomain} ${nextStatus ? "enabled" : "disabled"}`,
+      );
+      setTimeout(() => setSuccess(""), 3000);
+    } catch (err) {
+      setError("Failed to update selected domain");
+      console.error("Error toggling selected domain indicator:", err);
+    } finally {
+      setTogglingDomain(false);
     }
   };
 
@@ -208,6 +260,7 @@ export default function RecruitmentStatsClient() {
             </div>
           </div>
           <div className="header-actions">
+            <RecruitmentCtaToggle variant="compact" />
             <button
               onClick={fetchData}
               className="btn-refresh"
@@ -233,6 +286,70 @@ export default function RecruitmentStatsClient() {
             >
               {flushingAll ? "Processing..." : "🧹 Flush All"}
             </button>
+          </div>
+        </div>
+
+        <div className="stats-header">
+          <div className="header-left">
+            <h3>🎯 Domain Control</h3>
+            <p className="text-sm text-gray-600">
+              Pick a domain and open or close recruitment for that specific
+              team.
+            </p>
+          </div>
+          <div className="header-actions">
+            <select
+              value={selectedDomain}
+              onChange={(event) =>
+                setSelectedDomain(
+                  event.target.value as (typeof RECRUITMENT_DOMAINS)[number],
+                )
+              }
+              className="min-w-[240px] rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-800 shadow-sm outline-none transition focus:border-amber-500 focus:ring-2 focus:ring-amber-200"
+            >
+              {RECRUITMENT_DOMAINS.map((domain) => (
+                <option key={domain} value={domain}>
+                  {domain}
+                </option>
+              ))}
+            </select>
+            <button
+              onClick={() => handleToggleSelectedDomainIndicator(true)}
+              className="btn-toggle-global"
+              disabled={togglingDomain}
+            >
+              {togglingDomain ? "Updating..." : "🔓 Open Selected"}
+            </button>
+            <button
+              onClick={() => handleToggleSelectedDomainIndicator(false)}
+              className="btn-flush-all"
+              disabled={togglingDomain}
+            >
+              {togglingDomain ? "Updating..." : "🔒 Close Selected"}
+            </button>
+          </div>
+        </div>
+
+        <div className="rounded-2xl border border-gray-200 bg-white p-4 shadow-sm">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <p className="text-sm text-gray-500">Selected domain</p>
+              <p className="text-lg font-semibold text-gray-900">
+                {selectedDomain}
+              </p>
+            </div>
+            <div className="flex items-center gap-2 rounded-full bg-gray-100 px-3 py-1.5 text-sm font-semibold text-gray-700">
+              <span
+                className={`indicator-dot ${domainIndicators.find((entry) => entry.domain === selectedDomain)?.indicator ? "active" : ""}`}
+              ></span>
+              <span>
+                {domainIndicators.find(
+                  (entry) => entry.domain === selectedDomain,
+                )?.indicator
+                  ? "Open"
+                  : "Closed"}
+              </span>
+            </div>
           </div>
         </div>
 
@@ -276,7 +393,7 @@ export default function RecruitmentStatsClient() {
                     </span>
                   </div>
                   <div className="stat-row">
-                    <span className="stat-label">❓ Not Sure:</span>
+                    <span className="stat-label">⏳ Pending:</span>
                     <span className="stat-value waiting">
                       {counter?.not_sure || 0}
                     </span>

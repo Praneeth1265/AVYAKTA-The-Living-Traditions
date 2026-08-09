@@ -1,0 +1,249 @@
+.domain-dashboard-container {
+  min-height: 100vh;
+  background:
+    radial-gradient(
+      circle at top left,
+      rgba(201, 168, 76, 0.16),
+      transparent 32%
+    ),
+    radial-gradient(
+      circle at top right,
+      rgba(115, 121, 85, 0.14),
+      transparent 30%
+    ),
+    linear-gradient(180deg, #f5f0e8 0%, #fffaf2 100%);
+  color: #1c1c1c;
+}
+
+.domain-dashboard-inner {
+  width: min(1180px, calc(100% - 32px));
+  margin: 0 auto;
+  padding: 40px 0 64px;
+}
+
+.domain-header {
+  margin-bottom: 24px;
+}
+
+.domain-title {
+  margin: 0;
+  font-size: clamp(2rem, 4vw, 3.5rem);
+  line-height: 1.05;
+  font-weight: 700;
+  color: #92791b;
+}
+
+.domain-subtitle,
+.domain-section-subtitle,
+.no-recruits-message,
+.loading-text,
+.error-message {
+  color: #5f5f57;
+}
+
+.rangoli-divider {
+  height: 1px;
+  margin: 24px 0 32px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(146, 121, 27, 0.7),
+    transparent
+  );
+}
+
+.download-button-container,
+.indicator-container {
+  flex-shrink: 0;
+}
+
+.download-pdf-button,
+.action-button,
+.indicator-button {
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease,
+    background-color 0.2s ease;
+}
+
+.download-pdf-button:hover,
+.action-button:hover,
+.indicator-button:hover {
+  transform: translateY(-1px);
+}
+
+.counter-grid {
+  display: grid;
+  gap: 16px;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  margin: 28px 0;
+}
+
+.counter-card,
+.domain-section,
+.error-box,
+.loading-container {
+  border-radius: 20px;
+  border: 1px solid rgba(201, 168, 76, 0.22);
+  background: rgba(255, 255, 255, 0.88);
+  box-shadow: 0 12px 32px rgba(40, 22, 6, 0.08);
+}
+
+.counter-card {
+  padding: 20px;
+}
+
+.counter-number {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #92791b;
+}
+
+.counter-label,
+.domain-section-title {
+  font-weight: 600;
+  color: #1c1c1c;
+}
+
+.domain-section {
+  padding: 24px;
+  margin-top: 24px;
+}
+
+.domain-section-title {
+  margin: 0 0 16px;
+  font-size: 1.4rem;
+}
+
+.recruits-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.recruits-table th,
+.recruits-table td {
+  padding: 14px 12px;
+  border-bottom: 1px solid rgba(201, 168, 76, 0.15);
+  text-align: left;
+}
+
+.recruits-table th {
+  color: #737955;
+  font-size: 0.82rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.status-badge,
+.interview-status,
+.action-button,
+.indicator-button,
+.download-pdf-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  border-radius: 999px;
+  font-weight: 600;
+}
+
+.status-badge,
+.interview-status {
+  padding: 8px 12px;
+  font-size: 0.84rem;
+  background: #f5f0e8;
+  color: #1c1c1c;
+}
+
+.status-badge.approved,
+.interview-done,
+.indicator-button-green {
+  background: #1b5e3b;
+  color: #fff;
+}
+
+.status-badge.rejected {
+  background: #8b1a1a;
+  color: #fff;
+}
+
+.status-badge.not_sure,
+.status-badge.pending,
+.interview-pending,
+.indicator-button-red {
+  background: #92791b;
+  color: #fff;
+}
+
+.action-button,
+.download-pdf-button {
+  padding: 12px 18px;
+  background: #92791b;
+  color: #fff;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.action-button:disabled,
+.download-pdf-button:disabled,
+.indicator-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.65;
+}
+
+.indicator-button {
+  width: 58px;
+  height: 58px;
+  font-size: 1.1rem;
+}
+
+.loading-container,
+.domain-error-container {
+  min-height: 55vh;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+}
+
+.loading-spinner {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  border: 4px solid rgba(146, 121, 27, 0.2);
+  border-top-color: #92791b;
+  animation: domain-spin 0.9s linear infinite;
+}
+
+@keyframes domain-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.loading-text,
+.error-title,
+.error-message {
+  margin-top: 14px;
+  text-align: center;
+}
+
+.error-title {
+  color: #8b1a1a;
+  font-size: 1.8rem;
+}
+
+@media (max-width: 768px) {
+  .domain-dashboard-inner {
+    width: min(100% - 20px, 1180px);
+    padding-top: 24px;
+  }
+
+  .domain-section {
+    padding: 18px;
+  }
+
+  .recruits-table th,
+  .recruits-table td {
+    padding: 10px 8px;
+  }
+}
